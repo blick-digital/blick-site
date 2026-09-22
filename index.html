@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BLICK — Digital Atelier</title>
+  <meta name="description" content="BLICK — digital-ателье: графический дизайн, сайты, мобильные приложения и AI-видео для бизнеса.">
+  <meta name="theme-color" content="#0A0A0B">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Плавающая кнопка меню (появляется после первого экрана и всегда на мобильных) -->
+  <button class="menu-fab" type="button" aria-expanded="false" aria-controls="overlay-menu">
+    <span class="menu-fab__dot"></span><span class="menu-fab__label">меню</span>
+  </button>
+
+  <nav class="overlay" id="overlay-menu" aria-label="Меню">
+    <div class="overlay__inner">
+      <span class="mono overlay__tag">[ навигация ]</span>
+      <ul class="overlay__list">
+        <li><a href="#top"><span class="mono">01</span>Главная</a></li>
+        <li><a href="#services"><span class="mono">02</span>Услуги</a></li>
+        <li><a href="#works"><span class="mono">03</span>Работы</a></li>
+        <li><a href="works.html"><span class="mono">04</span>Все работы</a></li>
+        <li><a href="#contact"><span class="mono">05</span>Контакты</a></li>
+      </ul>
+      <div class="overlay__foot mono">
+        <a href="mailto:hello@blick.studio">hello@blick.studio</a>
+        <a href="https://t.me/" target="_blank" rel="noopener">Telegram ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ 01 · HERO ============ -->
+  <header class="hero" id="top">
+    <div class="hero__visual" aria-hidden="true">
+      <canvas class="hero__canvas"></canvas>
+      <!-- Видео: положите файл в assets/video/hero.mp4 — оно заменит canvas-анимацию -->
+      <video class="hero__video" muted loop playsinline preload="auto" data-src="assets/video/hero.mp4"></video>
+      <div class="hero__vignette"></div>
+    </div>
+
+    <div class="hero__top">
+      <div class="hero__brand">
+        <a href="#top" class="logo">(BLICK)</a>
+        <span class="mono tag">[ v.01b ]</span>
+      </div>
+
+      <!-- Бегущая строка: тот же шрифт и уровень, что у логотипа слева -->
+      <div class="hero__marquee" aria-hidden="true">
+        <div class="hero__marquee__track">
+          <span>Графический дизайн</span><i>✦</i><span>Веб-сайты</span><i>✦</i><span>Мобильные приложения</span><i>✦</i><span>AI-видео</span><i>✦</i><span>Моушн</span><i>✦</i>
+          <span>Графический дизайн</span><i>✦</i><span>Веб-сайты</span><i>✦</i><span>Мобильные приложения</span><i>✦</i><span>AI-видео</span><i>✦</i><span>Моушн</span><i>✦</i>
+        </div>
+      </div>
+
+      <nav class="hero__nav" aria-label="Основное меню">
+        <a href="#top" class="navlink">главная <span class="arr">↗</span></a>
+        <a href="#services" class="navlink">услуги <span class="arr">↗</span></a>
+        <a href="#works" class="navlink">работы <span class="arr">↗</span></a>
+        <a href="#contact" class="navlink">контакты <span class="arr">↗</span></a>
+      </nav>
+    </div>
+
+    <div class="hero__bottom">
+      <h1 class="hero__title">
+        <span class="line hero__line--name"><span class="hero__name">BLICK</span></span>
+        <span class="line hero__sub hero__sub--1"><span>DIGITAL ATELIER</span></span>
+        <span class="line hero__sub hero__sub--2"><span>визуальное производство</span></span>
+        <span class="line hero__sub hero__sub--3"><span>для бизнеса</span></span>
+      </h1>
+
+      <a href="#services" class="hero__scroll" aria-label="Листать вниз">
+        <svg width="16" height="22" viewBox="0 0 16 22" fill="none"><path d="M8 1v19M1 13l7 7 7-7" stroke="currentColor" stroke-width="1.4"/></svg>
+      </a>
+
+      <div class="hero__aside">
+        <div class="hero__aside-head">
+          <span class="mono hero__mark">( B )</span>
+          <span class="mono tag">[ 001 / 004 ]</span>
+        </div>
+        <p class="hero__lead">
+          Мы собираем айдентику, сайты, приложения и AI-видео в одну визуальную систему, которая работает на ваш бизнес — от первой идеи до запуска.
+        </p>
+        <a href="#contact" class="pill">Обсудить проект</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ 02 · УСЛУГИ ============ -->
+    <section class="section services" id="services">
+      <div class="section__head">
+        <span class="mono tag">[ 002 / 004 ]</span>
+        <span class="mono tag">( услуги )</span>
+      </div>
+
+      <p class="manifest" data-reveal>
+        Мы — небольшая студия, где дизайнеры, разработчики и&nbsp;моушн-художники работают в&nbsp;одной комнате. Поэтому вы&nbsp;получаете <span class="accent">современный дизайн, стильную упаковку и&nbsp;цельный образ бренда</span> — от&nbsp;логотипа до&nbsp;видео.
+      </p>
+
+      <ul class="svc">
+        <li class="svc__item" data-reveal>
+          <span class="mono svc__num">/01</span>
+          <h3 class="svc__title">Графический дизайн</h3>
+          <span class="svc__tags mono">логотип · айдентика · упаковка</span>
+          <span class="svc__arr">↗</span>
+          <div class="svc__body"><p>Создаём фирменный стиль, который узнают с первого взгляда: логотип, шрифтовая пара, цвет, паттерны, гайдлайн и носители — от визитки до вывески.</p></div>
+        </li>
+        <li class="svc__item" data-reveal>
+          <span class="mono svc__num">/02</span>
+          <h3 class="svc__title">Веб-сайты</h3>
+          <span class="svc__tags mono">лендинги · корпоративные · e-commerce</span>
+          <span class="svc__arr">↗</span>
+          <div class="svc__body"><p>Проектируем и разрабатываем быстрые сайты с живой анимацией и удобной админкой. Думаем о конверсии, SEO и том, как сайт выглядит на телефоне.</p></div>
+        </li>
+        <li class="svc__item" data-reveal>
+          <span class="mono svc__num">/03</span>
+          <h3 class="svc__title">Мобильные приложения</h3>
+          <span class="svc__tags mono">UX · UI · дизайн-системы</span>
+          <span class="svc__arr">↗</span>
+          <div class="svc__body"><p>От исследования пользователей до кликабельного прототипа и дизайн-системы, по которой ваша команда разработки соберёт продукт без догадок.</p></div>
+        </li>
+        <li class="svc__item" data-reveal>
+          <span class="mono svc__num">/04</span>
+          <h3 class="svc__title">Видео и AI-контент</h3>
+          <span class="svc__tags mono">ролики · 3D · генеративная графика</span>
+          <span class="svc__arr">↗</span>
+          <div class="svc__body"><p>Рекламные ролики, продуктовые 3D-рендеры и контент для соцсетей с помощью нейросетей — в разы быстрее классического продакшна, без потери качества.</p></div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============ 03 · РАБОТЫ ============ -->
+    <section class="section works" id="works">
+      <div class="section__head">
+        <span class="mono tag">[ 003 / 004 ]</span>
+        <span class="mono tag">( работы )</span>
+      </div>
+
+      <div class="works__intro">
+        <h2 class="display" data-reveal>РАБОТЫ</h2>
+        <p class="works__note" data-reveal>Пять проектов, которые хорошо показывают, как мы думаем. Наведите на карточку, чтобы рассмотреть поближе.</p>
+      </div>
+
+      <div class="works__row" data-featured></div>
+
+      <div class="works__more">
+        <a href="works.html" class="pill pill--big">Все работы <span class="arr">↗</span></a>
+      </div>
+    </section>
+
+    <!-- ============ 04 · ПРОЦЕСС ============ -->
+    <section class="section process" id="process">
+      <div class="section__head">
+        <span class="mono tag">[ 004 / 004 ]</span>
+        <span class="mono tag">( как мы работаем )</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat" data-reveal><span class="stat__num" data-count="120">0</span><span class="stat__plus">+</span><span class="mono stat__label">проектов запущено</span></div>
+        <div class="stat" data-reveal><span class="stat__num" data-count="7">0</span><span class="mono stat__label">лет на рынке</span></div>
+        <div class="stat" data-reveal><span class="stat__prefix">от</span><span class="stat__num" data-count="14">0</span><span class="mono stat__label">дней на реализацию проекта</span></div>
+        <div class="stat" data-reveal><span class="stat__num" data-count="4">0</span><span class="stat__plus">x</span><span class="mono stat__label">быстрее с AI-пайплайном</span></div>
+      </div>
+
+      <ol class="steps">
+        <li class="step" data-reveal>
+          <span class="mono step__num">01</span>
+          <h3>Бриф</h3>
+          <p>Созвон, погружение в бизнес и цели. Фиксируем задачу, сроки и бюджет — без сюрпризов.</p>
+        </li>
+        <li class="step" data-reveal>
+          <span class="mono step__num">02</span>
+          <h3>Концепция</h3>
+          <p>Показываем 2–3 направления с мудбордами и первыми макетами, выбираем одно вместе.</p>
+        </li>
+        <li class="step" data-reveal>
+          <span class="mono step__num">03</span>
+          <h3>Производство</h3>
+          <p>Дизайн, разработка, съёмка и AI-генерация. Каждую неделю — демо промежуточного результата.</p>
+        </li>
+        <li class="step" data-reveal>
+          <span class="mono step__num">04</span>
+          <h3>Запуск</h3>
+          <p>Передаём исходники и гайдлайны, публикуем, сопровождаем и помогаем расти дальше.</p>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <!-- ============ ФУТЕР / КОНТАКТЫ ============ -->
+  <footer class="footer" id="contact">
+    <div class="footer__cta">
+      <span class="mono tag">( контакты )</span>
+      <h2 class="footer__title" data-reveal>Давайте создадим<br><em>креативное</em> вместе</h2>
+    </div>
+
+    <div class="footer__grid">
+      <form class="form" novalidate>
+        <fieldset class="chips">
+          <legend class="mono form__label">Что нужно сделать?</legend>
+          <label class="chip"><input type="checkbox" name="type" value="design"><span>Дизайн</span></label>
+          <label class="chip"><input type="checkbox" name="type" value="web"><span>Сайт</span></label>
+          <label class="chip"><input type="checkbox" name="type" value="app"><span>Приложение</span></label>
+          <label class="chip"><input type="checkbox" name="type" value="video"><span>Видео / AI</span></label>
+          <label class="chip"><input type="checkbox" name="type" value="other"><span>Пока не знаю</span></label>
+        </fieldset>
+
+        <div class="form__row">
+          <label class="field">
+            <span class="mono form__label">Имя</span>
+            <input type="text" name="name" autocomplete="name" placeholder="Как к вам обращаться" required>
+          </label>
+          <label class="field">
+            <span class="mono form__label">Контакт</span>
+            <input type="text" name="contact" autocomplete="email" placeholder="Email или @telegram" required>
+          </label>
+        </div>
+        <label class="field">
+          <span class="mono form__label">Задача</span>
+          <textarea name="message" rows="3" placeholder="Пара слов о проекте, сроках и бюджете"></textarea>
+        </label>
+
+        <div class="form__foot">
+          <button type="submit" class="pill pill--accent">Отправить заявку <span class="arr">→</span></button>
+          <p class="mono form__status" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+
+      <div class="contacts">
+        <div class="contacts__block">
+          <span class="mono form__label">Почта</span>
+          <a href="mailto:hello@blick.studio" class="contacts__big">hello@blick.studio</a>
+        </div>
+        <div class="contacts__block">
+          <span class="mono form__label">Телефон</span>
+          <a href="tel:+70000000000" class="contacts__big">+7 (000) 000-00-00</a>
+        </div>
+        <div class="contacts__block">
+          <span class="mono form__label">Соцсети</span>
+          <ul class="socials">
+            <li><a href="https://t.me/" target="_blank" rel="noopener" class="navlink">Telegram <span class="arr">↗</span></a></li>
+            <li><a href="https://www.behance.net/" target="_blank" rel="noopener" class="navlink">Behance <span class="arr">↗</span></a></li>
+            <li><a href="https://dribbble.com/" target="_blank" rel="noopener" class="navlink">Dribbble <span class="arr">↗</span></a></li>
+            <li><a href="https://www.instagram.com/" target="_blank" rel="noopener" class="navlink">Instagram <span class="arr">↗</span></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom mono">
+      <span>© 2026 BLICK · Digital Atelier</span>
+      <span>Москва · работаем по всему миру</span>
+      <a href="#top" class="navlink">наверх <span class="arr">↑</span></a>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

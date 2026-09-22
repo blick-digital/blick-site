@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Все работы — BLICK</title>
+  <meta name="description" content="Портфолио BLICK: айдентика, сайты, мобильные приложения и AI-видео.">
+  <meta name="theme-color" content="#0A0A0B">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <button class="menu-fab" type="button" aria-expanded="false" aria-controls="overlay-menu">
+    <span class="menu-fab__dot"></span><span class="menu-fab__label">меню</span>
+  </button>
+
+  <nav class="overlay" id="overlay-menu" aria-label="Меню">
+    <div class="overlay__inner">
+      <span class="mono overlay__tag">[ навигация ]</span>
+      <ul class="overlay__list">
+        <li><a href="index.html"><span class="mono">01</span>Главная</a></li>
+        <li><a href="index.html#services"><span class="mono">02</span>Услуги</a></li>
+        <li><a href="index.html#works"><span class="mono">03</span>Работы</a></li>
+        <li><a href="works.html"><span class="mono">04</span>Все работы</a></li>
+        <li><a href="#contact"><span class="mono">05</span>Контакты</a></li>
+      </ul>
+      <div class="overlay__foot mono">
+        <a href="mailto:hello@blick.studio">hello@blick.studio</a>
+        <a href="https://t.me/" target="_blank" rel="noopener">Telegram ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="page-head" id="top">
+    <div class="hero__brand">
+      <a href="index.html" class="logo">(BLICK)</a>
+      <span class="mono tag">[ v.01b ]</span>
+    </div>
+    <nav class="hero__nav" aria-label="Основное меню">
+      <a href="index.html" class="navlink">главная <span class="arr">↗</span></a>
+      <a href="index.html#services" class="navlink">услуги <span class="arr">↗</span></a>
+      <a href="works.html" class="navlink" aria-current="page">работы <span class="arr">↗</span></a>
+      <a href="#contact" class="navlink">контакты <span class="arr">↗</span></a>
+    </nav>
+  </header>
+
+  <main class="allworks">
+    <a href="index.html" class="back mono">← на главную</a>
+    <div class="allworks__head">
+      <div class="allworks__title">
+        <h1 class="display">ВСЕ РАБОТЫ</h1>
+        <span class="mono tag" data-count-all>[ 00 ]</span>
+      </div>
+      <div class="filters" data-filters role="group" aria-label="Фильтр по направлению"></div>
+    </div>
+
+    <div class="grid" data-grid></div>
+  </main>
+
+  <footer class="footer" id="contact">
+    <div class="footer__cta">
+      <span class="mono tag">( контакты )</span>
+      <h2 class="footer__title" data-reveal>Понравилось?<br><em>Обсудим</em> ваш проект</h2>
+    </div>
+
+    <div class="footer__grid">
+      <div class="contacts">
+        <div class="contacts__block">
+          <span class="mono form__label">Почта</span>
+          <a href="mailto:hello@blick.studio" class="contacts__big">hello@blick.studio</a>
+        </div>
+        <div class="contacts__block">
+          <span class="mono form__label">Телефон</span>
+          <a href="tel:+70000000000" class="contacts__big">+7 (000) 000-00-00</a>
+        </div>
+      </div>
+      <div class="contacts">
+        <div class="contacts__block">
+          <span class="mono form__label">Соцсети</span>
+          <ul class="socials">
+            <li><a href="https://t.me/" target="_blank" rel="noopener" class="navlink">Telegram <span class="arr">↗</span></a></li>
+            <li><a href="https://www.behance.net/" target="_blank" rel="noopener" class="navlink">Behance <span class="arr">↗</span></a></li>
+            <li><a href="https://dribbble.com/" target="_blank" rel="noopener" class="navlink">Dribbble <span class="arr">↗</span></a></li>
+            <li><a href="https://www.instagram.com/" target="_blank" rel="noopener" class="navlink">Instagram <span class="arr">↗</span></a></li>
+          </ul>
+        </div>
+        <a href="index.html#contact" class="pill pill--accent" style="align-self:flex-start">Оставить заявку <span class="arr">↗</span></a>
+      </div>
+    </div>
+
+    <div class="footer__bottom mono">
+      <span>© 2026 BLICK · Digital Atelier</span>
+      <span>Москва · работаем по всему миру</span>
+      <a href="#top" class="navlink">наверх <span class="arr">↑</span></a>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
