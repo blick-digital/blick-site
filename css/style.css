@@ -368,11 +368,12 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
    ========================================================= */
 .manifest {
   font-family: var(--font-display); font-weight: 400;
-  font-size: clamp(28px, 4.2vw, 64px);
-  line-height: 1.08; letter-spacing: -.015em;
+  font-size: clamp(18px, 2.2vw, 30px);
+  line-height: 1.35; letter-spacing: 0;
   text-transform: uppercase;
+  text-align: justify;
   margin-bottom: clamp(60px, 9vw, 140px);
-  max-width: 1200px;
+  max-width: 600px;
 }
 
 .svc { border-top: 1px solid var(--line); }
