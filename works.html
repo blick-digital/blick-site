@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+  <script>
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    if (!location.hash) window.scrollTo(0, 0);
+    addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Все работы — BLICK</title>

@@ -152,13 +152,32 @@ button, input, textarea { font: inherit; color: inherit; }
 /* =========================================================
    HERO
    ========================================================= */
-.hero {
+/* Обёртка-«рельса»: задаёт запас прокрутки для эффекта закреплённого видео.
+   Высота = сколько скролла займёт перемотка + затухание текста, до блока «услуги». */
+.hero-scrub {
   position: relative;
+  height: 300vh;
+}
+.hero {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
   height: 100vh; height: 100svh;
   min-height: 620px;
   padding: var(--pad);
   display: flex; flex-direction: column; justify-content: space-between;
   overflow: hidden;
+  z-index: 5;
+}
+/* Пока JS не подхватил управление (или скрипты отключены) — hero ведёт себя как обычный блок,
+   без запаса прокрутки, чтобы не было пустого пространства */
+.hero-scrub:not(.js-scrub) { height: auto; }
+.hero-scrub:not(.js-scrub) .hero { position: relative; }
+
+@media (prefers-reduced-motion: reduce), (max-width: 860px) {
+  /* На мобильных и при reduced-motion — без закрепления, просто обычный экран нужной высоты */
+  .hero-scrub { height: auto; }
+  .hero { position: relative; }
 }
 .hero__visual { position: absolute; inset: 0; z-index: 0; }
 .hero__canvas, .hero__video {
@@ -168,6 +187,9 @@ button, input, textarea { font: inherit; color: inherit; }
 }
 .hero__video { opacity: 0; transition: opacity 1.2s var(--ease); }
 .hero.has-video .hero__video { opacity: 1; }
+/* Анимация-заглушка скрыта по умолчанию — видна только если видео не подгрузилось вовремя */
+.hero__canvas { opacity: 0; transition: opacity .6s var(--ease); }
+.hero.canvas-fallback .hero__canvas { opacity: 1; }
 .hero.has-video .hero__canvas { opacity: 0; }
 .hero__vignette {
   position: absolute; inset: 0;
@@ -245,6 +267,42 @@ button, input, textarea { font: inherit; color: inherit; }
 .hero__mark { font-size: 26px; letter-spacing: .1em; margin-left: -.14em; }
 .hero__lead { font-size: 13px; line-height: 1.6; color: var(--muted); }
 .hero__aside .pill { align-self: flex-start; min-width: 200px; }
+
+/* Заголовок + текст на всю ширину — проявляются после первого экрана,
+   слово за словом вместе со скроллом */
+.hero__reveal {
+  position: absolute; left: var(--pad); right: var(--pad); bottom: var(--pad);
+  z-index: 3;
+  pointer-events: none;
+}
+.hero__reveal-title {
+  display: flex; flex-direction: column; gap: 2px;
+  margin: 0 0 22px;
+  font-family: var(--font-display); font-weight: 400;
+  text-transform: uppercase;
+  font-size: clamp(26px, 3.6vw, 54px);
+  line-height: 1.08; letter-spacing: -.01em;
+  color: var(--text);
+}
+.hero__reveal-line--1 { padding-left: 1.5em; }
+.hero__reveal-line--2 { padding-left: 0; }
+.hero__reveal-line--3 { padding-left: 4.4em; }
+.hero__reveal-body {
+  display: flex; flex-direction: column; gap: 6px;
+  margin: 0;
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(26px, 2.8vw, 37px);
+  line-height: 1.2; letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.hero__reveal-body-line { display: block; width: 100%; }
+.hero__reveal-body-line--1 { text-align: justify; text-align-last: justify; }
+.hero__reveal-body-line--2 { text-align: justify; text-align-last: justify; }
+/* Слово-за-словом: просто из прозрачного в 100% непрозрачности, без блюра и сдвига */
+.hero__reveal .word { display: inline-block; opacity: 0; }
+/* Без JS (или на мобильных/reduced-motion, где закрепления нет) — слой не нужен, остаётся заголовок */
+.hero-scrub:not(.js-scrub) .hero__reveal { display: none; }
 
 /* Интро-анимация героя */
 .hero .line > span, .hero__aside > *, .hero__top > * , .hero__scroll {
@@ -872,8 +930,29 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   .footer__bottom { flex-direction: column; align-items: flex-start; }
 }
 
+/* =========================================================
+   Свечение у курсора — тёплый акцентный блик, включается
+   после первого экрана (когда hero уходит из вида)
+   ========================================================= */
+.cursor-glow {
+  position: fixed; top: 0; left: 0;
+  width: 260px; height: 260px;
+  margin: -130px 0 0 -130px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 181, 71, .38) 0%, rgba(255, 122, 26, .16) 42%, transparent 72%);
+  filter: blur(18px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0;
+  transition: opacity .5s var(--ease);
+  will-change: transform;
+}
+.cursor-glow.is-active { opacity: 1; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
   html { scroll-behavior: auto; }
   [data-reveal] { opacity: 1; transform: none; }
+  .cursor-glow { display: none; }
 }

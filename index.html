@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+  <script>
+    // Максимально рано отключаем восстановление скролла браузером и сбрасываем позицию —
+    // иначе при обновлении страницы на долю секунды виден старый кадр/состояние баннера
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    if (!location.hash) window.scrollTo(0, 0);
+    // Если страница восстановлена из кэша браузера (bfcache) — там застыло старое состояние
+    // видео и текста, поэтому просто перезапускаем инициализацию с нуля
+    addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BLICK — Digital Atelier</title>
@@ -37,13 +46,16 @@
   </nav>
 
   <!-- ============ 01 · HERO ============ -->
-  <header class="hero" id="top">
-    <div class="hero__visual" aria-hidden="true">
-      <canvas class="hero__canvas"></canvas>
-      <!-- Видео: положите файл в assets/video/hero.mp4 — оно заменит canvas-анимацию -->
-      <video class="hero__video" muted loop playsinline preload="auto" data-src="assets/video/hero.mp4"></video>
-      <div class="hero__vignette"></div>
-    </div>
+  <!-- Обёртка задаёт запас прокрутки: пока идёт скролл внутри неё, hero закреплён (pinned),
+       а видео перематывается вперёд/назад строго по позиции скролла — до начала блока «услуги». -->
+  <div class="hero-scrub" id="top">
+    <header class="hero">
+      <div class="hero__visual" aria-hidden="true">
+        <canvas class="hero__canvas"></canvas>
+        <!-- Видео: assets/video/hero.mp4. Перематывается скроллом, не проигрывается само. -->
+        <video class="hero__video" muted playsinline preload="auto" data-src="assets/video/hero.mp4"></video>
+        <div class="hero__vignette"></div>
+      </div>
 
     <div class="hero__top">
       <div class="hero__brand">
@@ -90,7 +102,21 @@
         <a href="#contact" class="pill">Обсудить проект</a>
       </div>
     </div>
-  </header>
+
+    <!-- Проявляется на всю ширину после того, как первый экран погаснет — слово за словом, вместе со скроллом -->
+    <div class="hero__reveal" aria-hidden="true">
+      <p class="hero__reveal-title">
+        <span class="hero__reveal-line hero__reveal-line--1">Мы — небольшая студия,</span>
+        <span class="hero__reveal-line hero__reveal-line--2">с большими</span>
+        <span class="hero__reveal-line hero__reveal-line--3">возможностями</span>
+      </p>
+      <p class="hero__reveal-body">
+        <span class="hero__reveal-body-line hero__reveal-body-line--1">Вы получаете современный дизайн,</span>
+        <span class="hero__reveal-body-line hero__reveal-body-line--2">стильную упаковку и цельный образ бренда — от логотипа до web-сайта.</span>
+      </p>
+    </div>
+    </header>
+  </div>
 
   <main>
     <!-- ============ 02 · УСЛУГИ ============ -->
@@ -100,34 +126,37 @@
         <span class="mono tag">( услуги )</span>
       </div>
 
-      <p class="manifest" data-reveal>
-        Мы — небольшая студия, где дизайнеры, разработчики и&nbsp;моушн-художники работают в&nbsp;одной комнате. Поэтому вы&nbsp;получаете <span class="accent">современный дизайн, стильную упаковку и&nbsp;цельный образ бренда</span> — от&nbsp;логотипа до&nbsp;видео.
-      </p>
-
       <ul class="svc">
         <li class="svc__item" data-reveal>
           <span class="mono svc__num">/01</span>
           <h3 class="svc__title">Графический дизайн</h3>
-          <span class="svc__tags mono">логотип · айдентика · упаковка</span>
+          <span class="svc__tags mono">логотип · айдентика · гайдлайн</span>
           <span class="svc__arr">↗</span>
           <div class="svc__body"><p>Создаём фирменный стиль, который узнают с первого взгляда: логотип, шрифтовая пара, цвет, паттерны, гайдлайн и носители — от визитки до вывески.</p></div>
         </li>
         <li class="svc__item" data-reveal>
           <span class="mono svc__num">/02</span>
+          <h3 class="svc__title">Дизайн упаковки</h3>
+          <span class="svc__tags mono">коробки · этикетки · POS-материалы</span>
+          <span class="svc__arr">↗</span>
+          <div class="svc__body"><p>Разрабатываем упаковку, которая продаёт с полки: от концепции и 3D-визуализации до препресс-файлов — с учётом материалов, печати и техпроцесса.</p></div>
+        </li>
+        <li class="svc__item" data-reveal>
+          <span class="mono svc__num">/03</span>
           <h3 class="svc__title">Веб-сайты</h3>
           <span class="svc__tags mono">лендинги · корпоративные · e-commerce</span>
           <span class="svc__arr">↗</span>
           <div class="svc__body"><p>Проектируем и разрабатываем быстрые сайты с живой анимацией и удобной админкой. Думаем о конверсии, SEO и том, как сайт выглядит на телефоне.</p></div>
         </li>
         <li class="svc__item" data-reveal>
-          <span class="mono svc__num">/03</span>
+          <span class="mono svc__num">/04</span>
           <h3 class="svc__title">Мобильные приложения</h3>
           <span class="svc__tags mono">UX · UI · дизайн-системы</span>
           <span class="svc__arr">↗</span>
           <div class="svc__body"><p>От исследования пользователей до кликабельного прототипа и дизайн-системы, по которой ваша команда разработки соберёт продукт без догадок.</p></div>
         </li>
         <li class="svc__item" data-reveal>
-          <span class="mono svc__num">/04</span>
+          <span class="mono svc__num">/05</span>
           <h3 class="svc__title">Видео и AI-контент</h3>
           <span class="svc__tags mono">ролики · 3D · генеративная графика</span>
           <span class="svc__arr">↗</span>
@@ -260,6 +289,9 @@
       <a href="#top" class="navlink">наверх <span class="arr">↑</span></a>
     </div>
   </footer>
+
+  <!-- Тёплое свечение у курсора — включается после первого экрана -->
+  <div class="cursor-glow" aria-hidden="true"></div>
 
   <script src="js/data.js"></script>
   <script src="js/main.js"></script>

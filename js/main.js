@@ -177,19 +177,195 @@ if (!location.hash) window.scrollTo(0, 0);
   }
 
   /* ---------- Hero: видео или canvas-анимация ---------- */
+  const heroScrub = $(".hero-scrub");
   const hero = $(".hero");
   const video = $(".hero__video");
+  const scrubEnabled = heroScrub && !reduced && matchMedia("(min-width: 861px)").matches;
+
+  // Анимация-заглушка (амбер-нити) включается, только если видео не успело подгрузиться —
+  // чтобы при обычной загрузке не мелькал "старый баннер" перед видео
+  const canvas = $(".hero__canvas");
+  let fallbackShown = false, fallbackTimer;
+  const showFallback = () => {
+    if (fallbackShown) return;
+    fallbackShown = true;
+    clearTimeout(fallbackTimer);
+    hero.classList.add("canvas-fallback");
+    if (canvas) fibers(canvas, hero);
+  };
+
   if (video) {
-    video.addEventListener("loadeddata", () => {
-      hero.classList.add("has-video");
-      video.play().catch(() => {});
-    }, { once: true });
-    video.addEventListener("error", () => video.remove(), { once: true });
+    fallbackTimer = setTimeout(showFallback, 1400);
+    if (scrubEnabled) {
+      // Перемотка управляется скроллом — видео не проигрывается само
+      video.addEventListener("loadeddata", () => { clearTimeout(fallbackTimer); hero.classList.add("has-video"); }, { once: true });
+    } else {
+      // Мобильные / reduced-motion — обычное фоновое видео, проигрывается само
+      video.loop = true;
+      video.addEventListener("loadeddata", () => {
+        clearTimeout(fallbackTimer);
+        hero.classList.add("has-video");
+        video.play().catch(() => {});
+      }, { once: true });
+    }
+    video.addEventListener("error", () => { video.remove(); showFallback(); }, { once: true });
     video.src = video.dataset.src;
+  } else {
+    showFallback();
   }
 
-  const canvas = $(".hero__canvas");
-  if (canvas) fibers(canvas, hero);
+  /* ---------- Закреплённый hero: скролл перематывает видео вперёд/назад, текст затухает ---------- */
+  if (scrubEnabled) heroPinScrub(heroScrub, hero, video);
+
+  // Оборачивает каждое слово внутри элемента в <span class="word">, не трогая теги внутри (например .accent)
+  function wrapWords(root) {
+    function walk(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (!node.textContent.trim()) return;
+        const frag = document.createDocumentFragment();
+        node.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          const span = document.createElement("span");
+          span.className = "word";
+          span.textContent = part;
+          frag.appendChild(span);
+        });
+        node.replaceWith(frag);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        [...node.childNodes].forEach(walk);
+      }
+    }
+    [...root.childNodes].forEach(walk);
+    return [...root.querySelectorAll(".word")];
+  }
+
+  function heroPinScrub(wrap, hero, video) {
+    wrap.classList.add("js-scrub");
+    const fadeEls = [...$$(".hero__top > *", hero), ...$$(".hero__bottom > *", hero)];
+    const reveal = $(".hero__reveal", hero);
+    const words = reveal ? wrapWords(reveal) : [];
+    let scrolling = false; // пока false — не мешаем вступительной анимации на загрузке
+    const clamp01 = (n) => Math.min(1, Math.max(0, n));
+
+    // Слово-за-словом проявляется в этом диапазоне, дальше держится на 100% и просто
+    // уезжает вместе с видео, когда закрепление отпускает в конце
+    const REVEAL_START = 0.36, REVEAL_END = 0.92;
+
+    let duration = 0;
+    let ticking = false;
+    video.addEventListener("loadedmetadata", () => { duration = video.duration || 0; });
+
+    // Правый край слова "ДИЗАЙН," выравнивается по правому краю слова "СТУДИЯ," —
+    // шрифты и размер разные, поэтому считаем сдвиг по фактическим границам слов
+    function alignBodyLine1() {
+      const studioLine1 = $(".hero__reveal-line--1", reveal); // "Мы — небольшая студия,"
+      const studioLine2 = $(".hero__reveal-line--2", reveal); // "С большими"
+      const designLine = $(".hero__reveal-body-line--1", reveal); // "Вы получаете современный дизайн,"
+      if (!studioLine1 || !studioLine2 || !designLine) return;
+      const rightWords = $$(".word", studioLine1);
+      const leftWords = $$(".word", studioLine2);
+      if (!rightWords.length || !leftWords.length) return;
+
+      // Сначала левый край в обычном потоке (растянутый на всю ширину flex-родителем — это нормально,
+      // ширина блока не влияет на положение его левого края)
+      designLine.style.marginLeft = "0px";
+      designLine.style.width = "";
+      const naturalLeft = designLine.getBoundingClientRect().left;
+
+      // Затем — сколько места строке нужно по-настоящему в одну линию. Внутри flex-колонки
+      // просто "width:auto" не сработает (элемент растянут stretch), поэтому на миг вынимаем
+      // его из потока, чтобы измерить честную ширину текста
+      const prevPos = designLine.style.position, prevVis = designLine.style.visibility;
+      designLine.style.position = "absolute";
+      designLine.style.visibility = "hidden";
+      designLine.style.width = "auto";
+      designLine.style.whiteSpace = "nowrap";
+      const naturalWidth = designLine.getBoundingClientRect().width;
+      designLine.style.position = prevPos;
+      designLine.style.visibility = prevVis;
+      designLine.style.whiteSpace = "";
+
+      const targetLeft = leftWords[0].getBoundingClientRect().left; // левый край буквы "С"
+      const targetRight = rightWords[rightWords.length - 1].getBoundingClientRect().right; // правый край "студия,"
+      const targetWidth = targetRight - targetLeft;
+
+      // "Вы" встаёт вровень с "С" слева, "дизайн," — вровень со "студия," справа;
+      // слова внутри растягиваются, чтобы заполнить именно этот промежуток.
+      // Если строке физически не хватает места (узкий экран) — не сжимаем её до переноса.
+      designLine.style.marginLeft = (targetLeft - naturalLeft).toFixed(1) + "px";
+      designLine.style.width = Math.max(targetWidth, naturalWidth).toFixed(1) + "px";
+    }
+    if (reveal && words.length) {
+      alignBodyLine1();
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignBodyLine1);
+      let art;
+      addEventListener("resize", () => { clearTimeout(art); art = setTimeout(alignBodyLine1, 150); });
+    }
+
+    function update() {
+      ticking = false;
+      const wrapTop = wrap.offsetTop;
+      const range = Math.max(1, wrap.offsetHeight - innerHeight);
+      const y = scrollY;
+
+      let progress;
+      if (y <= wrapTop) {
+        hero.style.position = "absolute";
+        hero.style.top = "0px";
+        progress = 0;
+      } else if (y >= wrapTop + range) {
+        hero.style.position = "absolute";
+        hero.style.top = range + "px";
+        progress = 1;
+      } else {
+        hero.style.position = "fixed";
+        hero.style.top = "0px";
+        progress = (y - wrapTop) / range;
+      }
+
+      if (duration) video.currentTime = progress * duration;
+
+      if (scrolling) {
+        // Текст и меню первого экрана затухают за первые 35% прокрутки
+        const fade = Math.min(1, progress / 0.35);
+        fadeEls.forEach((el) => {
+          el.style.opacity = String(1 - fade);
+          el.style.transform = `translateY(${(-14 * fade).toFixed(1)}px)`;
+          el.style.pointerEvents = fade > 0.6 ? "none" : "";
+        });
+
+        // Заголовок и текст проявляются следом — слово за словом вместе со скроллом:
+        // просто из прозрачного в 100% непрозрачности, без блюра и сдвига
+        if (reveal && words.length) {
+          const r = clamp01((progress - REVEAL_START) / (REVEAL_END - REVEAL_START));
+          const n = words.length;
+          // Окно проявления одного слова — соседние слова слегка перекрываются, не мигают по одному;
+          // старт слов растянут так, что последнее слово всегда доходит до 100% ровно при r = 1
+          const fadeSpan = Math.min(0.5, 3 / n);
+          const startSpan = 1 - fadeSpan;
+          words.forEach((w, i) => {
+            const wordStart = n > 1 ? (i / (n - 1)) * startSpan : 0;
+            const t = clamp01((r - wordStart) / fadeSpan);
+            w.style.opacity = String(t);
+          });
+        }
+      }
+    }
+
+    addEventListener("scroll", () => {
+      if (!scrolling) {
+        // Первый реальный скролл — отключаем плавный transition вступления,
+        // дальше всё идёт 1:1 со скроллом, без задержки
+        scrolling = true;
+        fadeEls.forEach((el) => { el.style.transition = "none"; });
+        if (reveal) reveal.style.transition = "none";
+      }
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    addEventListener("resize", update);
+    update();
+  }
 
   /* ---------- Бегущая строка в шапке: "карусельное" сжатие у краёв ---------- */
   const marquee = $(".hero__marquee");
@@ -348,5 +524,33 @@ if (!location.hash) window.scrollTo(0, 0);
       if (on && !running) { running = true; raf = requestAnimationFrame(draw); }
       if (!on) { running = false; cancelAnimationFrame(raf); }
     }).observe(host);
+  }
+
+  /* ---------- Свечение у курсора: появляется после первого экрана ---------- */
+  const glow = $(".cursor-glow");
+  if (glow && !reduced && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    let tx = innerWidth / 2, ty = innerHeight / 2, gx = tx, gy = ty;
+    let active = false, moved = false;
+
+    addEventListener("pointermove", (e) => {
+      tx = e.clientX; ty = e.clientY;
+      if (!moved) { moved = true; gx = tx; gy = ty; glow.style.transform = `translate3d(${gx}px, ${gy}px, 0)`; }
+    }, { passive: true });
+
+    (function loop() {
+      gx += (tx - gx) * 0.16;
+      gy += (ty - gy) * 0.16;
+      glow.style.transform = `translate3d(${gx.toFixed(1)}px, ${gy.toFixed(1)}px, 0)`;
+      requestAnimationFrame(loop);
+    })();
+
+    // Включаем ровно тогда, когда первый экран (закреплённое видео) уходит из вида
+    const trigger = $(".hero-scrub") || $(".hero");
+    if (trigger) {
+      new IntersectionObserver(([e]) => {
+        active = !e.isIntersecting;
+        glow.classList.toggle("is-active", active);
+      }).observe(trigger);
+    }
   }
 })();
