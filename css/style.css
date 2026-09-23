@@ -368,12 +368,11 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
    ========================================================= */
 .manifest {
   font-family: var(--font-display); font-weight: 400;
-  font-size: clamp(22px, 2.8vw, 38px);
-  line-height: 1.35; letter-spacing: 0;
+  font-size: clamp(28px, 4.2vw, 64px);
+  line-height: 1.08; letter-spacing: -.015em;
   text-transform: uppercase;
-  text-align: justify;
   margin-bottom: clamp(60px, 9vw, 140px);
-  max-width: 50%;
+  max-width: 1200px;
 }
 
 .svc { border-top: 1px solid var(--line); }
@@ -833,8 +832,6 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   .hero__bottom { grid-template-columns: 1fr; gap: 36px; }
   .hero__scroll { display: none; }
   .hero__aside { justify-self: stretch; width: 100%; }
-
-  .manifest { max-width: 100%; }
 
   .svc__item { grid-template-columns: 44px 1fr 32px; }
   .svc__tags { grid-column: 2 / 3; grid-row: 2; text-align: left; margin-top: 8px; }
