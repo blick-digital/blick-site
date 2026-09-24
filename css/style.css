@@ -179,18 +179,18 @@ button, input, textarea { font: inherit; color: inherit; }
   .hero-scrub { height: auto; }
   .hero { position: relative; }
 }
-.hero__visual { position: absolute; inset: 0; z-index: 0; }
-.hero__canvas, .hero__video {
+/* Постер (первый кадр видео) виден сразу — и на телефоне, где автозапуск может быть запрещён */
+.hero__visual {
+  position: absolute; inset: 0; z-index: 0;
+  background: #0a0a0b url("../assets/video/hero-poster.jpg") center / cover no-repeat;
+}
+.hero__video {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
 }
 .hero__video { opacity: 0; transition: opacity 1.2s var(--ease); }
 .hero.has-video .hero__video { opacity: 1; }
-/* Анимация-заглушка скрыта по умолчанию — видна только если видео не подгрузилось вовремя */
-.hero__canvas { opacity: 0; transition: opacity .6s var(--ease); }
-.hero.canvas-fallback .hero__canvas { opacity: 1; }
-.hero.has-video .hero__canvas { opacity: 0; }
 .hero__vignette {
   position: absolute; inset: 0;
   background:
@@ -887,6 +887,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   .hero { height: auto; min-height: 100vh; min-height: 100svh; }
   .hero__top { margin-bottom: 42vh; grid-template-columns: 1fr; }
   .hero__nav, .hero__marquee { display: none; }
+  .hero__vignette { background: radial-gradient(120% 90% at 50% 40%, transparent 40%, rgba(10,10,11,.7) 100%), linear-gradient(to top, rgba(10,10,11,.92), rgba(10,10,11,.45) 45%, transparent 70%); }
   .hero__bottom { grid-template-columns: 1fr; gap: 36px; }
   .hero__scroll { display: none; }
   .hero__aside { justify-self: stretch; width: 100%; }
