@@ -195,9 +195,34 @@ if (!location.hash) window.scrollTo(0, 0);
       video.loop = true;
       video.addEventListener("playing", () => hero.classList.add("has-video"), { once: true });
       const tryPlay = () => { const p = video.play(); if (p && p.catch) p.catch(() => {}); };
-      video.addEventListener("loadeddata", tryPlay, { once: true });
-      video.addEventListener("canplay", tryPlay, { once: true });
-      // Если автозапуск запрещён системой — запускаем при первом касании/прокрутке пальцем
+
+      // Запасной вариант: если система запретила автозапуск (например, режим энергосбережения iOS),
+      // "проигрываем" видео вручную — сами двигаем время кадр за кадром, это не считается автозапуском
+      let manual = false;
+      const startManual = () => {
+        if (manual || !video.paused) return;
+        manual = true;
+        let vt = video.currentTime || 0, last = 0;
+        video.addEventListener("seeked", () => hero.classList.add("has-video"), { once: true });
+        const step = (ts) => {
+          if (!video.paused) { manual = false; return; } // настоящий play() заработал — отпускаем
+          if (!last) last = ts;
+          vt += (ts - last) / 1000; last = ts;
+          if (video.duration) {
+            if (vt >= video.duration) vt = 0;
+            if (!video.seeking) video.currentTime = vt;
+          }
+          requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      };
+
+      // Через секунду после загрузки страницы — старт (эта секунда покрывает подгрузку файла)
+      setTimeout(() => {
+        tryPlay();
+        setTimeout(startManual, 600);
+      }, 1000);
+      // Если система разрешит позже — первое касание запускает настоящее воспроизведение
       ["touchend", "pointerup", "click"].forEach((ev) =>
         addEventListener(ev, () => { if (video.paused) tryPlay(); }, { once: true, passive: true })
       );
