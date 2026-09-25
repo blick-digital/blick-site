@@ -29,7 +29,17 @@ if (!location.hash) window.scrollTo(0, 0);
 
   // Кнопка меню появляется, когда верхнее меню ушло за экран
   const topNav = $(".hero__nav") || $(".page-head nav");
-  if (topNav) {
+  const scrubWrap = $(".hero-scrub");
+  if (scrubWrap && !reduced && matchMedia("(min-width: 861px)").matches) {
+    // На главной hero закреплён и меню внутри него гаснет по скроллу — кнопка появляется, когда оно почти погасло
+    const upd = () => {
+      const range = Math.max(1, scrubWrap.offsetHeight - innerHeight);
+      fab.classList.toggle("is-visible", scrollY > scrubWrap.offsetTop + range * 0.3);
+    };
+    addEventListener("scroll", upd, { passive: true });
+    addEventListener("resize", upd);
+    upd();
+  } else if (topNav) {
     new IntersectionObserver(([e]) => fab.classList.toggle("is-visible", !e.isIntersecting)).observe(topNav);
   } else fab.classList.add("is-visible");
 
@@ -148,6 +158,8 @@ if (!location.hash) window.scrollTo(0, 0);
   const form = $(".form");
   if (form) {
     const status = $(".form__status", form);
+    const consentBox = form.elements.consent;
+    if (consentBox) consentBox.addEventListener("change", () => consentBox.closest(".consent").classList.remove("is-error"));
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       let ok = true;
@@ -158,7 +170,13 @@ if (!location.hash) window.scrollTo(0, 0);
         if (bad) ok = false;
       });
       status.classList.remove("ok");
+      // без согласия на обработку персональных данных заявка не отправляется
+      const consent = form.elements.consent;
+      const noConsent = consent && !consent.checked;
+      if (consent) consent.closest(".consent").classList.toggle("is-error", noConsent);
+      if (!ok && noConsent) { status.textContent = "Заполните имя и контакт и подтвердите согласие"; return; }
       if (!ok) { status.textContent = "Заполните имя и контакт"; return; }
+      if (noConsent) { status.textContent = "Подтвердите согласие на обработку персональных данных"; return; }
 
       const data = {
         name: form.elements.name.value.trim(),
@@ -325,9 +343,15 @@ if (!location.hash) window.scrollTo(0, 0);
       body.classList.remove("is-measuring");
       if (widest > W) body.style.fontSize = (base * W / widest * 0.995).toFixed(2) + "px";
       if (fade) fade.style.top = (reveal.offsetTop + body.offsetTop).toFixed(1) + "px";
-      // высота: от верха текста до низа экрана + отрезок --grad блока «услуги» (+2px под сплошной фон — без щели на стыке)
+      // Длина градиента: от верха текста до низа экрана + отрезок --grad блока «услуги».
+      // Слой продлён ещё на 300px сплошным цветом вниз — так при любой разнице высот экрана (vh / svh / innerHeight, тулбар Safari)
+      // между затемнением и сплошным фоном блока «услуги» не остаётся щели, через которую видно видео
       const grad = Math.min(innerHeight * 0.24, 170);
-      if (fade) fade.style.height = Math.max(0, hero.offsetHeight - reveal.offsetTop - body.offsetTop + grad + 2).toFixed(1) + "px";
+      const len = Math.max(0, hero.offsetHeight - reveal.offsetTop - body.offsetTop + grad);
+      if (fade) {
+        fade.style.setProperty("--fade-solid", len.toFixed(1) + "px");
+        fade.style.height = (len + 300).toFixed(1) + "px";
+      }
     }
     fitBody();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitBody);
@@ -441,15 +465,15 @@ if (!location.hash) window.scrollTo(0, 0);
     }).observe(hero);
   }
 
-  /* ---------- Свечение у курсора: появляется после первого экрана ---------- */
+  /* ---------- Свечение у курсора: всегда, с первого движения мыши ---------- */
   const glow = $(".cursor-glow");
   if (glow && !reduced && matchMedia("(hover: hover) and (pointer: fine)").matches) {
     let tx = innerWidth / 2, ty = innerHeight / 2, gx = tx, gy = ty;
-    let active = false, moved = false;
+    let moved = false;
 
     addEventListener("pointermove", (e) => {
       tx = e.clientX; ty = e.clientY;
-      if (!moved) { moved = true; gx = tx; gy = ty; glow.style.transform = `translate3d(${gx}px, ${gy}px, 0)`; }
+      if (!moved) { moved = true; gx = tx; gy = ty; glow.style.transform = `translate3d(${gx}px, ${gy}px, 0)`; glow.classList.add("is-active"); } // свечение — с первого движения мыши, на любом экране
     }, { passive: true });
 
     (function loop() {
@@ -459,14 +483,6 @@ if (!location.hash) window.scrollTo(0, 0);
       requestAnimationFrame(loop);
     })();
 
-    // Включаем ровно тогда, когда первый экран (закреплённое видео) уходит из вида
-    const trigger = $(".hero-scrub") || $(".hero");
-    if (trigger) {
-      new IntersectionObserver(([e]) => {
-        active = !e.isIntersecting;
-        glow.classList.toggle("is-active", active);
-      }).observe(trigger);
-    }
   }
 })();
 
