@@ -352,8 +352,14 @@ if (!location.hash) window.scrollTo(0, 0);
       const pinEnd = wrapTop + range;
       const covered = main ? y >= main.offsetTop + Math.min(innerHeight * 0.24, 170) : false; // блок «услуги» (градиент + сплошной фон) уже закрыл экран целиком
       let progress, extra = 0;
-      if (y <= wrapTop) {
+      if (y <= wrapTop && wrapTop > 0) {
         hero.style.position = "absolute";
+        hero.style.top = "0px";
+        progress = 0;
+      } else if (y <= wrapTop) {
+        // hero-scrub стоит в самом верху страницы (wrapTop = 0): держим hero закреплённым сразу, без переключения
+        // absolute → fixed на первом же пикселе скролла — в Safari браузер успевал отрисовать кадр раньше скрипта, и экран «дёргался»
+        hero.style.position = "fixed";
         hero.style.top = "0px";
         progress = 0;
       } else {
@@ -624,4 +630,35 @@ if (!location.hash) window.scrollTo(0, 0);
   addEventListener("load", layout);
   let t;
   addEventListener("resize", () => { clearTimeout(t); t = setTimeout(layout, 120); });
+})();
+
+/* ---------- Футер: правая колонка (почта + соцсети) ----------
+   верх блока «Почта» — на верхнем крае подписей «Имя / Контакт», низ соцсетей — на нижнем краю поля «Задача»;
+   расстояние между блоками подбирается автоматически */
+(() => {
+  const grid = document.querySelector(".footer__grid");
+  const form = grid && grid.querySelector(".form");
+  const contacts = grid && grid.querySelector(".contacts");
+  const area = form && form.querySelector("textarea");
+  const inputs = form && form.querySelectorAll(".form__row input");
+  const blocks = contacts ? [...contacts.children] : [];
+  if (!area || !inputs || !inputs.length || blocks.length < 2) return;
+  const topIn = (el) => { let y = 0; for (; el && el !== grid; el = el.offsetParent) y += el.offsetTop; return y; };
+  function layout() {
+    contacts.style.marginTop = ""; contacts.style.gap = "";
+    if (matchMedia("(max-width: 860px)").matches) return;
+    const lineY = topIn(inputs[0].closest(".field"));          // верх подписей «Имя / Контакт»
+    const areaBottom = topIn(area) + area.offsetHeight;       // нижний край поля «Задача»
+    contacts.style.marginTop = Math.max(0, lineY - topIn(contacts)).toFixed(1) + "px";
+    const total = blocks.reduce((sum, b) => sum + b.offsetHeight, 0);
+    const gap = (areaBottom - lineY - total) / (blocks.length - 1);
+    contacts.style.gap = Math.max(12, gap).toFixed(1) + "px";
+  }
+  layout();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+  addEventListener("load", layout);
+  let t;
+  addEventListener("resize", () => { clearTimeout(t); t = setTimeout(layout, 120); });
+  // поле «Задача» можно растянуть мышью — пересчитываем
+  if (window.ResizeObserver) new ResizeObserver(layout).observe(area);
 })();

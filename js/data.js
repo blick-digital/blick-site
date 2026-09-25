@@ -7,6 +7,7 @@
 
   featured: true — проект попадает в карточки «Кейсы» на главной (берутся первые пять).
   art — вид заглушки: orb | rings | grid | swirl | fibers | blob
+  overlay: true — картинка с прозрачным фоном показывается поверх заглушки (круги остаются на фоне)
 */
 window.PROJECTS = [
   {
@@ -50,13 +51,13 @@ window.PROJECTS = [
     featured: true,
   },
   {
-    title: "Rots Gear",
+    title: "Хоту-Ас",
     category: "design",
-    year: 2025,
-    desc: "Визуальная система бренда городских рюкзаков: логотип, 3D-рендеры товара и гайдлайн для маркетплейсов.",
-    tags: ["Брендинг", "3D-рендер", "Маркетплейсы"],
-    art: "blob", hue: "ember",
-    image: "",
+    year: 2026,
+    desc: "Айдентика и мерч для этно-проекта «Хоту-Ас» (Этноран, Якутия): геометрический орнамент, знак с оленем и паттерн на шоппере.",
+    tags: ["Айдентика", "Паттерн", "Мерч"],
+    art: "blob", hue: "ice",
+    image: "assets/works/hotu-as.jpg",
     featured: true,
   },
 ];
@@ -70,6 +71,9 @@ window.CATEGORIES = {
 
 /* Рендер визуала проекта: картинка, если есть, иначе заглушка */
 window.projectVisual = function (p) {
+  if (p.image && p.overlay) {
+    return `<div class="art art--${p.art} hue--${p.hue}" aria-hidden="true"><i></i><b></b></div><img class="art-img art-img--over" src="${p.image}" alt="${p.title}" loading="lazy">`;
+  }
   if (p.image) {
     return `<img class="art-img" src="${p.image}" alt="${p.title}" loading="lazy">`;
   }
