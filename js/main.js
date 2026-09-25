@@ -263,6 +263,9 @@ if (!location.hash) window.scrollTo(0, 0);
     wrap.classList.add("js-scrub");
     const fadeEls = [...$$(".hero__top > *", hero), ...$$(".hero__bottom > *", hero)];
     const reveal = $(".hero__reveal", hero);
+    const main = $("main");
+    const fade = $(".hero__fade", hero);
+    const body = reveal ? $(".hero__reveal-body", reveal) : null;
     const words = reveal ? wrapWords(reveal) : [];
     let scrolling = false; // пока false — не мешаем вступительной анимации на загрузке
     const clamp01 = (n) => Math.min(1, Math.max(0, n));
@@ -273,54 +276,64 @@ if (!location.hash) window.scrollTo(0, 0);
 
     let duration = 0;
     let ticking = false;
+
+    // Вступление: при загрузке видео само играет первую секунду (INTRO_END), дальше — только скролл.
+    // introT0 — время видео, с которого начинается перемотка скроллом (0, если вступление не запускалось)
+    const INTRO_END = 45 / 24; // кадр №45 при 24 к/с (1 с + 21 кадр) — до появления кругов на планшете
+    let introT0 = 0, introActive = false;
+    const endIntro = () => {
+      if (!introActive) return;
+      introActive = false;
+      video.pause();
+      introT0 = Math.min(video.currentTime, INTRO_END);
+      update();
+    };
+    // таймер, а не rAF: короткий шаг даёт остановку точно на нужном кадре, и он не засыпает в фоновой вкладке
+    const introWatch = () => {
+      if (!introActive) return;
+      if (video.currentTime >= INTRO_END) { video.currentTime = INTRO_END; endIntro(); return; }
+      setTimeout(introWatch, 30);
+    };
+    const startIntro = () => {
+      if (scrollY > 8) return;
+      const p = video.play();
+      if (p && p.then) p.then(() => { introActive = true; introWatch(); }).catch(() => {});
+    };
+    if (video.readyState >= 3) startIntro();
+    else video.addEventListener("canplay", startIntro, { once: true });
     video.addEventListener("loadedmetadata", () => { duration = video.duration || 0; });
 
-    // Правый край слова "ДИЗАЙН," выравнивается по правому краю слова "СТУДИЯ," —
-    // шрифты и размер разные, поэтому считаем сдвиг по фактическим границам слов
-    function alignBodyLine1() {
-      const studioLine1 = $(".hero__reveal-line--1", reveal); // "Мы — небольшая студия,"
-      const studioLine2 = $(".hero__reveal-line--2", reveal); // "С большими"
-      const designLine = $(".hero__reveal-body-line--1", reveal); // "Вы получаете современный дизайн,"
-      if (!studioLine1 || !studioLine2 || !designLine) return;
-      const rightWords = $$(".word", studioLine1);
-      const leftWords = $$(".word", studioLine2);
-      if (!rightWords.length || !leftWords.length) return;
-
-      // Сначала левый край в обычном потоке (растянутый на всю ширину flex-родителем — это нормально,
-      // ширина блока не влияет на положение его левого края)
-      designLine.style.marginLeft = "0px";
-      designLine.style.width = "";
-      const naturalLeft = designLine.getBoundingClientRect().left;
-
-      // Затем — сколько места строке нужно по-настоящему в одну линию. Внутри flex-колонки
-      // просто "width:auto" не сработает (элемент растянут stretch), поэтому на миг вынимаем
-      // его из потока, чтобы измерить честную ширину текста
-      const prevPos = designLine.style.position, prevVis = designLine.style.visibility;
-      designLine.style.position = "absolute";
-      designLine.style.visibility = "hidden";
-      designLine.style.width = "auto";
-      designLine.style.whiteSpace = "nowrap";
-      const naturalWidth = designLine.getBoundingClientRect().width;
-      designLine.style.position = prevPos;
-      designLine.style.visibility = prevVis;
-      designLine.style.whiteSpace = "";
-
-      const targetLeft = leftWords[0].getBoundingClientRect().left; // левый край буквы "С"
-      const targetRight = rightWords[rightWords.length - 1].getBoundingClientRect().right; // правый край "студия,"
-      const targetWidth = targetRight - targetLeft;
-
-      // "Вы" встаёт вровень с "С" слева, "дизайн," — вровень со "студия," справа;
-      // слова внутри растягиваются, чтобы заполнить именно этот промежуток.
-      // Если строке физически не хватает места (узкий экран) — не сжимаем её до переноса.
-      designLine.style.marginLeft = (targetLeft - naturalLeft).toFixed(1) + "px";
-      designLine.style.width = Math.max(targetWidth, naturalWidth).toFixed(1) + "px";
+    // Нижний текст: ширина блока — от левого края до правого края слова «студия,» в верхнем заголовке;
+    // строки растянуты на всю ширину (третья — по правому краю). Если шрифт не влезает — слегка уменьшаем.
+    function fitBody() {
+      if (!reveal || !body) return;
+      const line1 = $(".hero__reveal-line--1", reveal);
+      const w1 = line1 ? $$(".word", line1) : [];
+      if (!w1.length) return;
+      body.style.fontSize = "";
+      body.style.width = "";
+      const W = w1[w1.length - 1].getBoundingClientRect().right - reveal.getBoundingClientRect().left;
+      if (W <= 0) return;
+      body.style.width = W.toFixed(1) + "px";
+      body.classList.add("is-measuring");
+      const base = parseFloat(getComputedStyle(body).fontSize);
+      let widest = 0;
+      $$(".hero__reveal-body-line", body).forEach((l) => {
+        const r = document.createRange(); r.selectNodeContents(l);
+        widest = Math.max(widest, r.getBoundingClientRect().width);
+      });
+      body.classList.remove("is-measuring");
+      if (widest > W) body.style.fontSize = (base * W / widest * 0.995).toFixed(2) + "px";
+      if (fade) fade.style.top = (reveal.offsetTop + body.offsetTop).toFixed(1) + "px";
+      // высота: от верха текста до низа экрана + отрезок --grad блока «услуги» (+2px под сплошной фон — без щели на стыке)
+      const grad = Math.min(innerHeight * 0.24, 170);
+      if (fade) fade.style.height = Math.max(0, hero.offsetHeight - reveal.offsetTop - body.offsetTop + grad + 2).toFixed(1) + "px";
     }
-    if (reveal && words.length) {
-      alignBodyLine1();
-      if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignBodyLine1);
-      let art;
-      addEventListener("resize", () => { clearTimeout(art); art = setTimeout(alignBodyLine1, 150); });
-    }
+    fitBody();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitBody);
+    addEventListener("load", fitBody);
+    let fitT;
+    addEventListener("resize", () => { clearTimeout(fitT); fitT = setTimeout(fitBody, 120); });
 
     function update() {
       ticking = false;
@@ -328,22 +341,30 @@ if (!location.hash) window.scrollTo(0, 0);
       const range = Math.max(1, wrap.offsetHeight - innerHeight);
       const y = scrollY;
 
-      let progress;
+      // После конца видео hero остаётся закреплённым (последний кадр держится на экране),
+      // а следующий блок наезжает на него сверху — см. .hero-scrub.js-scrub + main
+      const pinEnd = wrapTop + range;
+      const covered = main ? y >= main.offsetTop + Math.min(innerHeight * 0.24, 170) : false; // блок «услуги» (градиент + сплошной фон) уже закрыл экран целиком
+      let progress, extra = 0;
       if (y <= wrapTop) {
         hero.style.position = "absolute";
         hero.style.top = "0px";
         progress = 0;
-      } else if (y >= wrapTop + range) {
-        hero.style.position = "absolute";
-        hero.style.top = range + "px";
-        progress = 1;
       } else {
         hero.style.position = "fixed";
         hero.style.top = "0px";
-        progress = (y - wrapTop) / range;
+        if (y >= pinEnd) { progress = 1; extra = y - pinEnd; }
+        else progress = (y - wrapTop) / range;
       }
+      hero.style.visibility = covered ? "hidden" : "";
+      // Текст второго экрана после конца видео уезжает вверх вместе со скроллом
+      const lift = extra ? `translateY(${(-extra).toFixed(1)}px)` : "";
+      if (reveal) reveal.style.transform = lift;
+      // затемнение поднимается вместе с текстом и плавно проявляется в первые 120px после конца видео
+      const ramp = Math.min(1, extra / 120);
+      if (fade) { fade.style.transform = lift; fade.style.opacity = String(ramp); }
 
-      if (duration) video.currentTime = progress * duration;
+      if (duration && !introActive) video.currentTime = introT0 + progress * (duration - introT0);
 
       if (scrolling) {
         // Текст и меню первого экрана затухают за первые 35% прокрутки
@@ -373,6 +394,7 @@ if (!location.hash) window.scrollTo(0, 0);
     }
 
     addEventListener("scroll", () => {
+      endIntro(); // пользователь начал скроллить — вступление заканчивается на текущем кадре
       if (!scrolling) {
         // Первый реальный скролл — отключаем плавный transition вступления,
         // дальше всё идёт 1:1 со скроллом, без задержки
@@ -446,4 +468,128 @@ if (!location.hash) window.scrollTo(0, 0);
       }).observe(trigger);
     }
   }
+})();
+
+/* ---------- Нижний левый блок hero: выравнивание по сетке ----------
+   • "Диджитал Ателье" — по правому краю, по центру буквы "B" из "( B )"
+   • BLICK — верх заглавных вровень с верхом строки "Мы собираем…"
+   • "визуальное производство" — по ширине BLICK (левый и правый край)
+   • низ "для бизнеса" — вровень с низом кнопки "Обсудить проект" */
+(() => {
+  const title = document.querySelector(".hero__title");
+  const aside = document.querySelector(".hero__aside");
+  if (!title || !aside) return;
+  const da = title.querySelector(".hero__da");
+  const nameLine = title.querySelector(".hero__line--name");
+  const name = title.querySelector(".hero__name");
+  const sub2 = title.querySelector(".hero__sub--2");
+  const sub3 = title.querySelector(".hero__sub--3");
+  const daText = da.firstElementChild, sub2Text = sub2.firstElementChild, sub3Text = sub3.firstElementChild;
+  const mark = aside.querySelector(".hero__mark");
+  const lead = aside.querySelector(".hero__lead");
+  const pill = aside.querySelector(".pill");
+  const ctx = document.createElement("canvas").getContext("2d");
+
+  // Положение базовой линии и размеры глифов внутри строки: считаем по метрикам шрифта
+  function metrics(el, sample) {
+    const cs = getComputedStyle(el);
+    const fs = parseFloat(cs.fontSize);
+    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${fs}px ${cs.fontFamily}`;
+    const m = ctx.measureText(sample || "H");
+    const lh = cs.lineHeight === "normal" ? fs * 1.2 : parseFloat(cs.lineHeight);
+    const base = (lh - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 + m.fontBoundingBoxAscent;
+    return { base, cap: ctx.measureText("H").actualBoundingBoxAscent, desc: m.actualBoundingBoxDescent };
+  }
+  // offsetTop относительно .hero__bottom (он position:relative) — не зависит от transform-анимаций
+  const top = (el) => { let y = 0; for (; el && !el.classList.contains("hero__bottom"); el = el.offsetParent) y += el.offsetTop; return y; };
+
+  // Границы самих букв (а не блока). Считаем без canvas: положение букв берём из DOM (Range),
+  // а боковые поля глифов — из таблиц шрифтов (в долях em), поэтому результат не зависит от браузера
+  const RSB = { K: .032, C: .058, О: .058, А: .075, ")": .08 };
+  const LSB = { B: .072, В: .072 };
+  function charRect(el, i) {
+    const node = i < 0 ? el.lastChild : el.firstChild; // первая/последняя буква — в крайних текстовых узлах
+    const r = document.createRange();
+    const k = i < 0 ? node.length + i : i;
+    r.setStart(node, k); r.setEnd(node, k + 1);
+    return r.getBoundingClientRect();
+  }
+  const fsOf = (el) => parseFloat(getComputedStyle(el).fontSize);
+  const lsOf = (el) => parseFloat(getComputedStyle(el).letterSpacing) || 0;
+  // правый край букв i-го символа (с учётом межбуквенного интервала, который добавляется после символа)
+  const inkRight = (el, i, rsb) => charRect(el, i).right - lsOf(el) - rsb * fsOf(el);
+  const inkLeft = (el, lsb) => charRect(el, 0).left + lsb * fsOf(el);
+
+  function layout() {
+    [da, sub2, sub3].forEach((l) => { l.style.marginTop = ""; l.style.marginBottom = ""; l.style.left = ""; });
+    title.style.removeProperty("--sub-fs");
+
+    // Телефон: без подгонки — строки просто выравниваются по правому краю блока
+    if (matchMedia("(max-width: 860px)").matches) { sub2.style.marginTop = "6px"; return; }
+
+    // Эталон — буквы BLICK: левый край "B", правый край "C" и правый край "K"
+    const refL = inkLeft(name, LSB.B);
+    const refC = inkRight(name, 3, RSB.C);
+    const refR = inkRight(name, 4, RSB.K);
+
+    // "визуальное производство": от левого края "B" до правого края "C"; "для бизнеса" — того же размера
+    const fs0 = fsOf(sub2Text);
+    const boxW = sub2Text.getBoundingClientRect().width;
+    const inkEm = boxW / fs0 - LSB.В - RSB.О;
+    if (inkEm > 0) title.style.setProperty("--sub-fs", ((refC - refL) / inkEm).toFixed(3) + "px");
+    sub2.style.position = sub3.style.position = da.style.position = "relative";
+    sub2.style.left = (refL - inkLeft(sub2Text, LSB.В)).toFixed(2) + "px";
+    sub3.style.left = (refR - inkRight(sub3Text, -1, RSB.А)).toFixed(2) + "px";
+    da.style.left = (refR - inkRight(daText, -1, RSB[")"])).toFixed(2) + "px";
+
+    const markY = top(mark) + (() => { const m = metrics(mark, "B"); return m.base - m.cap / 2; })();
+    const leadY = top(lead) + (() => { const m = metrics(lead); return m.base - m.cap; })();
+    const pillBottom = top(pill) + pill.offsetHeight;
+
+    const dm = metrics(daText, "Д");
+    da.style.marginTop = (markY - (dm.base - dm.cap / 2)).toFixed(2) + "px";
+
+    const nm = metrics(name);
+    const nameCap = top(name) + nm.base - nm.cap;
+    da.style.marginBottom = (leadY - nameCap).toFixed(2) + "px";
+
+    // строка набрана заглавными — низ букв это базовая линия (без выносных элементов)
+    const sm = metrics(sub3Text, "Д");
+    const inkBottom = top(sub3Text) + sm.base;
+    sub2.style.marginTop = Math.max(6, 6 + pillBottom - inkBottom).toFixed(2) + "px";
+  }
+
+  let t;
+  const run = () => { clearTimeout(t); t = setTimeout(layout, 80); };
+  layout();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+  addEventListener("load", layout);
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", layout);
+  addEventListener("resize", run);
+})();
+
+/* ---------- Подсказка к слову «Ателье» ---------- */
+(() => {
+  const word = document.querySelector(".hero__hint");
+  const tip = document.querySelector(".hero__tip");
+  const title = document.querySelector(".hero__title");
+  if (!word || !tip || !title) return;
+  const place = () => {
+    const w = word.getBoundingClientRect(), t = title.getBoundingClientRect();
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    // над словом, правый край подсказки — по правому краю слова; не выходим за экран
+    let left = w.right - tw;
+    left = Math.max(16, Math.min(left, innerWidth - 16 - tw));
+    tip.style.left = (left - t.left).toFixed(1) + "px";
+    tip.style.top = (w.top - t.top - th - 12).toFixed(1) + "px";
+  };
+  const open = () => { place(); tip.classList.add("is-open"); word.classList.add("is-open"); };
+  const close = () => { tip.classList.remove("is-open"); word.classList.remove("is-open"); };
+  word.addEventListener("mouseenter", open);
+  word.addEventListener("mouseleave", close);
+  word.addEventListener("focus", open);
+  word.addEventListener("blur", close);
+  word.addEventListener("click", (e) => { e.stopPropagation(); tip.classList.contains("is-open") ? close() : open(); });
+  document.addEventListener("click", close);
+  addEventListener("scroll", close, { passive: true });
 })();

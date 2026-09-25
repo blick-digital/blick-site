@@ -27,6 +27,13 @@
   font-display: swap;
 }
 @font-face {
+  font-family: "PP Neue Machina";
+  src: url("../assets/fonts/PPNeueMachina-InktrapRegularItalic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
   /* Bold-файла нет — переиспользуем Semibold, чтобы браузер не рисовал "жирный" синтетикой */
   font-family: "PP Neue Machina";
   src: url("../assets/fonts/PPNeueMachina-PlainSemibold.ttf") format("truetype");
@@ -223,7 +230,7 @@ button, input, textarea { font: inherit; color: inherit; }
   line-height: .95;
   letter-spacing: -.01em;
   display: flex; flex-direction: column;
-  gap: 10px;
+  gap: 0;
   width: max-content;
   max-width: 100%;
 }
@@ -232,21 +239,36 @@ button, input, textarea { font: inherit; color: inherit; }
 .hero__line--name { margin-left: calc(clamp(32px, 5.75vw, 94px) * -0.045); } /* оптическая компенсация левого поля глифа "B", сдвигаем обёртку строки — не сам текст, чтобы overflow:hidden его не срезал */
 .hero__name {
   font-size: clamp(32px, 5.75vw, 94px);
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: -.035em;
   line-height: .86;
   color: var(--text);
 }
-.hero__sub { font-size: clamp(13px, 1.3vw, 20px); }
-.hero__sub--1 > span {
-  display: block; width: 100%;
-  text-align: justify; text-align-last: justify;
+.hero__sub { font-size: var(--sub-fs, clamp(13px, 1.3vw, 20px)); line-height: 1.1; }
+.hero__sub > span { white-space: nowrap; }
+.hero__da { text-align: right; font-size: clamp(11px, calc(1vw + 2px), 18px); line-height: 1; font-weight: 500; letter-spacing: .04em; }
+.hero__da > span { white-space: nowrap; }
+.hero__hint { cursor: default; outline: none; text-decoration: underline dotted rgba(255, 181, 71, .7); text-underline-offset: .28em; transition: color .25s var(--ease); }
+.hero__hint:hover, .hero__hint:focus-visible, .hero__hint.is-open { color: var(--accent); }
+.hero__title { position: relative; }
+.hero__tip {
+  position: absolute; left: 0; top: 0; z-index: 5;
+  width: max-content; max-width: min(240px, calc(100vw - 32px));
+  padding: 8px 10px;
+  font-family: var(--font-mono); font-size: 10px; line-height: 1.5; letter-spacing: 0; text-transform: none; font-weight: 400;
+  color: rgba(255, 224, 170, .95);
+  text-shadow: 0 0 8px rgba(255, 181, 71, .45);
+  /* киберпанк: полупрозрачный янтарно-тёмный фон, тонкая светящаяся рамка */
+  background: linear-gradient(135deg, rgba(255, 150, 40, .16), rgba(10, 10, 11, .55) 60%);
+  border: 0; border-radius: 5px;
+  -webkit-backdrop-filter: blur(8px) saturate(150%); backdrop-filter: blur(8px) saturate(150%);
+  box-shadow: 0 0 14px rgba(255, 150, 40, .22), inset 0 0 12px rgba(255, 150, 40, .08);
+  opacity: 0; transform: translateY(6px); pointer-events: none;
+  transition: opacity .25s var(--ease), transform .25s var(--ease);
 }
-.hero__sub--2, .hero__sub--3 {
-  font-family: var(--font-body); font-weight: 400;
-  font-style: italic; text-transform: none; letter-spacing: -.01em;
-}
-.hero__sub--3 { align-self: flex-end; color: var(--muted); margin-top: -5px; }
+.hero__tip.is-open { opacity: 1; transform: none; }
+.hero__sub--2, .hero__sub--3 { font-family: var(--font-display); font-weight: 400; letter-spacing: 0; }
+.hero__sub--3 { align-self: flex-end; font-style: italic; }
 
 .hero__scroll {
   justify-self: center;
@@ -271,7 +293,7 @@ button, input, textarea { font: inherit; color: inherit; }
 /* Заголовок + текст на всю ширину — проявляются после первого экрана,
    слово за словом вместе со скроллом */
 .hero__reveal {
-  position: absolute; left: var(--pad); right: var(--pad); bottom: var(--pad);
+  position: absolute; inset: var(--pad);
   z-index: 3;
   pointer-events: none;
 }
@@ -288,17 +310,35 @@ button, input, textarea { font: inherit; color: inherit; }
 .hero__reveal-line--2 { padding-left: 0; }
 .hero__reveal-line--3 { padding-left: 4.4em; }
 .hero__reveal-body {
-  display: flex; flex-direction: column; gap: 6px;
+  position: absolute; left: 0; bottom: 0; width: 50%; /* точную ширину задаёт JS — от левого края до правого края слова «студия,» */
+  display: flex; flex-direction: column; gap: 0;
   margin: 0;
   font-family: var(--font-display); font-weight: 400;
   font-size: clamp(26px, 2.8vw, 37px);
   line-height: 1.2; letter-spacing: 0;
-  text-transform: uppercase;
+  text-transform: uppercase; text-align: left;
   color: var(--text);
 }
-.hero__reveal-body-line { display: block; width: 100%; }
-.hero__reveal-body-line--1 { text-align: justify; text-align-last: justify; }
-.hero__reveal-body-line--2 { text-align: justify; text-align-last: justify; }
+.hero__reveal-body-line { display: block; white-space: nowrap; text-align: justify; text-align-last: justify; }
+.hero__reveal-body-line--3 { text-align: right; text-align-last: right; }
+.hero__reveal-body.is-measuring .hero__reveal-body-line { text-align: left; text-align-last: left; }
+/* Затемнение под текстом второго экрана: начинается у верха «Вы получаете…» и доходит до сплошного фона блока «услуги» */
+.hero__fade {
+  position: absolute; left: 0; right: 0; top: 100%; height: 0; z-index: 2;
+  background: linear-gradient(to bottom, rgba(10, 10, 11, 0) 0%, rgba(10, 10, 11, .5) 48%, var(--bg) 100%);
+  opacity: 0; pointer-events: none;
+}
+.hero-scrub:not(.js-scrub) .hero__fade { display: none; }
+/* После конца видео hero остаётся на месте (последний кадр), а блок «услуги» сразу наезжает на него:
+   сверху — градиент из прозрачного в фон, дальше сплошной фон. Только там, где включён закреплённый режим. */
+.hero-scrub.js-scrub + main {
+  --grad: min(24vh, 170px);
+  position: relative; z-index: 6;
+  /* Затемнение видео целиком рисует .hero__fade (внутри hero, под текстом) — оно доходит до этой точки.
+     Сам блок «услуги» прозрачный на верхние --grad и сплошной ниже: так на стыке нет ни щели, ни ступеньки */
+  background: linear-gradient(var(--bg), var(--bg)) bottom / 100% calc(100% - var(--grad)) no-repeat;
+}
+.hero-scrub.js-scrub + main > .services { padding-top: clamp(24px, 4vw, 56px); }
 /* Слово-за-словом: просто из прозрачного в 100% непрозрачности, без блюра и сдвига */
 .hero__reveal .word { display: inline-block; opacity: 0; }
 /* Без JS (или на мобильных/reduced-motion, где закрепления нет) — слой не нужен, остаётся заголовок */
@@ -401,6 +441,26 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   transition: opacity .2s linear;
 }
 .hero__marquee__track i { font-style: normal; color: var(--accent); font-size: .55em; }
+
+/* Глитч: редкие короткие сдвиги строки и расхождение цветных каналов (цвет строки обычный, как в шапке) */
+.hero__marquee { animation: holo-glitch 6s steps(1, end) infinite; }
+.hero__marquee .hero__marquee__track { animation: marquee 46s linear infinite, holo-split 6s steps(1, end) infinite; }
+/* transform и opacity у строки принадлежат скроллу (исчезание hero) — глитч двигает только translate и filter */
+@keyframes holo-glitch {
+  0%, 100% { translate: 0 0; filter: none; }
+  40% { translate: -2px 0; filter: brightness(.85); }
+  41% { translate: 4px 0; filter: none; }
+  42% { translate: 0 0; }
+  78% { translate: 2px 0; filter: brightness(.75); }
+  79% { translate: -4px 0; filter: none; }
+  80% { translate: 0 0; }
+}
+@keyframes holo-split {
+  0%, 39%, 43%, 77%, 81%, 100% { text-shadow: none; }
+  40%, 41%, 42% { text-shadow: -5px 0 rgba(0, 229, 255, .7), 5px 0 rgba(255, 60, 110, .6); }
+  78%, 79%, 80% { text-shadow: 4px 0 rgba(0, 229, 255, .7), -4px 0 rgba(255, 60, 110, .6); }
+}
+@media (prefers-reduced-motion: reduce) { .hero__marquee, .hero__marquee .hero__marquee__track { animation: none; } }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* =========================================================
@@ -572,6 +632,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .hue--olive { --a: #d9d38c; --b: #6b7a2a; --c: #10110b; }
 .hue--ice   { --a: #bfe6ff; --b: #3a7bd5; --c: #090d14; }
 .hue--steel { --a: #d8dde6; --b: #59606e; --c: #0e0f12; }
+.hue--violet { --a: #d2b8ff; --b: #6a3fd8; --c: #0d0914; }
 .hue--mint  { --a: #b8ffd9; --b: #1f9e73; --c: #08120e; }
 
 /* orb — светящаяся сфера */
@@ -812,16 +873,17 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   overflow-wrap: anywhere;
 }
 .contacts__big:hover { color: var(--accent); }
-.socials { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; }
+.socials { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(2, auto); grid-auto-flow: column; gap: 4px 20px; }
 
 .footer__bottom {
   position: relative;
-  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
   padding: 22px 0;
   border-top: 1px solid var(--line);
   font-size: 12px; color: var(--muted);
 }
-.footer__bottom .navlink { font-size: 12px; }
+.footer__bottom .navlink { font-size: 12px; justify-self: end; }
+.footer__bottom > span:nth-child(2) { text-align: center; }
 
 /* =========================================================
    Страница «Все работы»
@@ -928,7 +990,9 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   .stat:nth-child(3) { padding-left: 0; }
   .step { min-height: 0; }
   .step h3 { padding-top: 36px; }
-  .footer__bottom { flex-direction: column; align-items: flex-start; }
+  .footer__bottom { grid-template-columns: 1fr; justify-items: start; }
+  .footer__bottom > span:nth-child(2) { text-align: left; }
+  .footer__bottom .navlink { justify-self: start; }
 }
 
 /* =========================================================
