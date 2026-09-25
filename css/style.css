@@ -272,13 +272,24 @@ button, input, textarea { font: inherit; color: inherit; }
 
 .hero__scroll {
   justify-self: center;
-  align-self: center;
-  display: grid; place-items: center;
-  width: 44px; height: 44px;
-  color: var(--text);
-  animation: nudge 2.4s var(--ease-io) infinite;
+  align-self: end; /* низ иконки — на одной линии с низом кнопки «Обсудить проект» */
+  display: block; line-height: 0;
+  color: #343233; /* цвет иконки, без прозрачности */
 }
-@keyframes nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+.hero__scroll svg { height: 46px; width: auto; display: block; overflow: visible; }
+/* Стрелка ходит внутри овала с запасом ~4px от стенок сверху и снизу; в крайних точках «ударяет» — овал слегка отскакивает */
+.hero__scroll-arrow { animation: scroll-arrow 1.9s var(--ease-io) infinite; }
+.hero__scroll-oval { animation: scroll-oval 1.9s ease-out infinite; }
+@keyframes scroll-arrow { 0%, 100% { transform: translateY(3px); } 50% { transform: translateY(146px); } }
+@keyframes scroll-oval {
+  0%   { transform: translateY(-12px); }
+  9%   { transform: translateY(0); }
+  43%  { transform: translateY(0); }
+  50%  { transform: translateY(14px); }
+  59%  { transform: translateY(0); }
+  91%  { transform: translateY(0); }
+  100% { transform: translateY(-12px); }
+}
 
 .hero__aside {
   justify-self: end;
@@ -306,9 +317,14 @@ button, input, textarea { font: inherit; color: inherit; }
   line-height: 1.08; letter-spacing: -.01em;
   color: var(--text);
 }
-.hero__reveal-line--1 { padding-left: 1.5em; }
-.hero__reveal-line--2 { padding-left: 0; }
-.hero__reveal-line--3 { padding-left: 4.4em; }
+/* Контейнер заголовка фиксированной ширины: первая строка растянута от левого до правого края,
+   вторая — по левому краю, третья — по правому */
+.hero__reveal-title { width: 15.2em; }
+.hero__reveal-line { display: block; white-space: nowrap; }
+.hero__reveal-line--1 { text-align: justify; text-align-last: justify; }
+.hero__reveal-line--2 { text-align: left; }
+.hero__reveal-line--3 { text-align: right; }
+.hero__reveal-title.is-measuring .hero__reveal-line--1 { text-align-last: left; }
 .hero__reveal-body {
   position: absolute; right: 0; bottom: 0; width: max-content;
   display: flex; flex-direction: column; gap: 0;

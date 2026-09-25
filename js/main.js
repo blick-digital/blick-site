@@ -490,6 +490,7 @@ if (!location.hash) window.scrollTo(0, 0);
   const sub3 = title.querySelector(".hero__sub--3");
   const daText = da.firstElementChild, sub2Text = sub2.firstElementChild, sub3Text = sub3.firstElementChild;
   const mark = aside.querySelector(".hero__mark");
+  const scrollIcon = document.querySelector(".hero__scroll");
   const lead = aside.querySelector(".hero__lead");
   const pill = aside.querySelector(".pill");
   const ctx = document.createElement("canvas").getContext("2d");
@@ -529,6 +530,7 @@ if (!location.hash) window.scrollTo(0, 0);
     title.style.removeProperty("--sub-fs");
 
     // Телефон: без подгонки — строки просто выравниваются по правому краю блока
+    if (scrollIcon) scrollIcon.style.marginBottom = "";
     if (matchMedia("(max-width: 860px)").matches) { sub2.style.marginTop = "6px"; return; }
 
     // Эталон — буквы BLICK: левый край "B", правый край "C" и правый край "K"
@@ -558,9 +560,24 @@ if (!location.hash) window.scrollTo(0, 0);
     da.style.marginBottom = (leadY - nameCap).toFixed(2) + "px";
 
     // строка набрана заглавными — низ букв это базовая линия (без выносных элементов)
-    const sm = metrics(sub3Text, "Д");
-    const inkBottom = top(sub3Text) + sm.base;
-    sub2.style.marginTop = Math.max(6, 6 + pillBottom - inkBottom).toFixed(2) + "px";
+    // строка «для бизнеса» набрана заглавными — низ букв это базовая линия. Берём её из самой вёрстки:
+    // нулевой inline-элемент встаёт ровно на базовую линию в любом браузере (без расчётов по метрикам шрифта)
+    let probe = sub3Text.querySelector(".baseline-probe");
+    if (!probe) {
+      probe = document.createElement("span");
+      probe.className = "baseline-probe";
+      probe.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
+      sub3Text.insertBefore(probe, sub3Text.firstChild);
+    }
+    const inkBottom = top(probe);
+    // отступ считаем от нулевого (в начале layout margin сброшен): ровно столько, чтобы базовая линия легла на низ кнопки
+    sub2.style.marginTop = (pillBottom - inkBottom).toFixed(2) + "px";
+    // иконка прокрутки: низ — вровень с низом кнопки «Обсудить проект»; измеряем фактическое положение и доводим
+    if (scrollIcon) {
+      scrollIcon.style.marginBottom = "0px";
+      const iconBottom = top(scrollIcon) + scrollIcon.offsetHeight;
+      scrollIcon.style.marginBottom = Math.max(0, iconBottom - pillBottom).toFixed(2) + "px";
+    }
   }
 
   let t;
@@ -661,4 +678,34 @@ if (!location.hash) window.scrollTo(0, 0);
   addEventListener("resize", () => { clearTimeout(t); t = setTimeout(layout, 120); });
   // поле «Задача» можно растянуть мышью — пересчитываем
   if (window.ResizeObserver) new ResizeObserver(layout).observe(area);
+})();
+
+/* ---------- Заголовок второго экрана: «ВОЗМОЖНОСТЯМИ» вровень с концом первой строки ----------
+   Если первая строка в браузере не растянулась (или не влезла), ширина контейнера подстраивается под неё,
+   а третья строка сдвигается так, чтобы её последняя буква встала ровно под последней буквой «СТУДИЯ». */
+(() => {
+  const title = document.querySelector(".hero__reveal-title");
+  if (!title) return;
+  const l1 = title.querySelector(".hero__reveal-line--1");
+  const l3 = title.querySelector(".hero__reveal-line--3");
+  if (!l1 || !l3) return;
+  const lastRight = (line) => { const w = line.querySelectorAll(".word"); return w.length ? w[w.length - 1].getBoundingClientRect().right : 0; };
+  function layout() {
+    title.style.width = ""; l3.style.marginRight = "";
+    if (!title.querySelector(".word")) return;
+    // естественная ширина первой строки (без растяжки)
+    title.classList.add("is-measuring");
+    const r = document.createRange(); r.selectNodeContents(l1);
+    const natural = r.getBoundingClientRect().width;
+    title.classList.remove("is-measuring");
+    if (natural > title.getBoundingClientRect().width) title.style.width = Math.ceil(natural) + "px";
+    // выравниваем конец третьей строки по концу первой
+    const diff = lastRight(l3) - lastRight(l1);
+    if (Math.abs(diff) > 0.3) l3.style.marginRight = diff.toFixed(2) + "px";
+  }
+  layout();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+  addEventListener("load", layout);
+  let t;
+  addEventListener("resize", () => { clearTimeout(t); t = setTimeout(layout, 120); });
 })();
