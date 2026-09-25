@@ -310,18 +310,18 @@ button, input, textarea { font: inherit; color: inherit; }
 .hero__reveal-line--2 { padding-left: 0; }
 .hero__reveal-line--3 { padding-left: 4.4em; }
 .hero__reveal-body {
-  position: absolute; left: 0; bottom: 0; width: 50%; /* точную ширину задаёт JS — от левого края до правого края слова «студия,» */
+  position: absolute; right: 0; bottom: 0; width: max-content;
   display: flex; flex-direction: column; gap: 0;
   margin: 0;
   font-family: var(--font-display); font-weight: 400;
   font-size: clamp(26px, 2.8vw, 37px);
   line-height: 1.2; letter-spacing: 0;
-  text-transform: uppercase; text-align: left;
+  text-transform: uppercase; text-align: right;
   color: var(--text);
 }
-.hero__reveal-body-line { display: block; white-space: nowrap; text-align: justify; text-align-last: justify; }
-.hero__reveal-body-line--3 { text-align: right; text-align-last: right; }
-.hero__reveal-body.is-measuring .hero__reveal-body-line { text-align: left; text-align-last: left; }
+.hero__reveal-body-line { display: block; white-space: nowrap; }
+/* Первая строка — по левому краю контейнера (ширина контейнера = самая длинная строка), остальные — по правому */
+.hero__reveal-body-line--first { text-align: left; }
 /* Затемнение под текстом второго экрана: начинается у верха «Вы получаете…» и доходит до сплошного фона блока «услуги» */
 .hero__fade {
   position: absolute; left: 0; right: 0; top: 100%; height: 0; z-index: 2;

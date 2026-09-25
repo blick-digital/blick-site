@@ -321,27 +321,9 @@ if (!location.hash) window.scrollTo(0, 0);
     else video.addEventListener("canplay", startIntro, { once: true });
     video.addEventListener("loadedmetadata", () => { duration = video.duration || 0; });
 
-    // Нижний текст: ширина блока — от левого края до правого края слова «студия,» в верхнем заголовке;
-    // строки растянуты на всю ширину (третья — по правому краю). Если шрифт не влезает — слегка уменьшаем.
+    // Затемнение под текстом второго экрана: считаем его положение от верха нижнего текста
     function fitBody() {
       if (!reveal || !body) return;
-      const line1 = $(".hero__reveal-line--1", reveal);
-      const w1 = line1 ? $$(".word", line1) : [];
-      if (!w1.length) return;
-      body.style.fontSize = "";
-      body.style.width = "";
-      const W = w1[w1.length - 1].getBoundingClientRect().right - reveal.getBoundingClientRect().left;
-      if (W <= 0) return;
-      body.style.width = W.toFixed(1) + "px";
-      body.classList.add("is-measuring");
-      const base = parseFloat(getComputedStyle(body).fontSize);
-      let widest = 0;
-      $$(".hero__reveal-body-line", body).forEach((l) => {
-        const r = document.createRange(); r.selectNodeContents(l);
-        widest = Math.max(widest, r.getBoundingClientRect().width);
-      });
-      body.classList.remove("is-measuring");
-      if (widest > W) body.style.fontSize = (base * W / widest * 0.995).toFixed(2) + "px";
       if (fade) fade.style.top = (reveal.offsetTop + body.offsetTop).toFixed(1) + "px";
       // Длина градиента: от верха текста до низа экрана + отрезок --grad блока «услуги».
       // Слой продлён ещё на 300px сплошным цветом вниз — так при любой разнице высот экрана (vh / svh / innerHeight, тулбар Safari)
@@ -608,4 +590,38 @@ if (!location.hash) window.scrollTo(0, 0);
   word.addEventListener("click", (e) => { e.stopPropagation(); tip.classList.contains("is-open") ? close() : open(); });
   document.addEventListener("click", close);
   addEventListener("scroll", close, { passive: true });
+})();
+
+/* ---------- «Кейсы»: пояснение справа выровнено по нижнему краю букв заголовка ----------
+   низ последней строки — вровень с базовой линией «КЕЙСЫ» */
+(() => {
+  const intro = document.querySelector(".works__intro");
+  const h = intro && intro.querySelector("h2");
+  const note = intro && intro.querySelector(".works__note");
+  if (!h || !note) return;
+  const ctx = document.createElement("canvas").getContext("2d");
+  const metr = (el, lh) => {
+    const cs = getComputedStyle(el);
+    const fs = parseFloat(cs.fontSize);
+    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${fs}px ${cs.fontFamily}`;
+    const m = ctx.measureText("H");
+    const L = lh || (parseFloat(cs.lineHeight) || fs * 1.2);
+    return { L, base: (L - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 + m.fontBoundingBoxAscent, cap: m.actualBoundingBoxAscent };
+  };
+  function layout() {
+    note.style.lineHeight = ""; note.style.marginTop = ""; intro.style.alignItems = "";
+    if (matchMedia("(max-width: 860px)").matches) return;
+    intro.style.alignItems = "flex-start";
+    const hm = metr(h);
+    const baseY = (h.offsetTop - intro.offsetTop) + hm.base; // базовая линия «КЕЙСЫ»
+    const n0 = metr(note);
+    const lines = Math.max(1, Math.round(note.offsetHeight / n0.L));
+    // межстрочный интервал не трогаем — сдвигаем блок так, чтобы базовая линия последней строки легла на базовую линию «КЕЙСЫ»
+    note.style.marginTop = Math.max(0, baseY - ((lines - 1) * n0.L + n0.base) + 2).toFixed(2) + "px"; // +2px: по просьбе, чуть ниже линии
+  }
+  layout();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+  addEventListener("load", layout);
+  let t;
+  addEventListener("resize", () => { clearTimeout(t); t = setTimeout(layout, 120); });
 })();
