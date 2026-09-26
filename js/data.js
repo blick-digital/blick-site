@@ -7,10 +7,19 @@
 
   featured: true — проект попадает в карточки «Кейсы» на главной (берутся первые пять).
   art — вид заглушки: orb | rings | grid | swirl | fibers | blob
+  slug — адрес страницы кейса: case.html?p=<slug>
+  blocks — содержимое страницы кейса (необязательно), по порядку сверху вниз:
+    { type: "banner", src: "assets/works/xxx.jpg", alt: "…" }          — одно фото на всю ширину экрана
+    { type: "grid", images: ["a.jpg", "b.jpg"] }                          — сетка на всю ширину экрана: фото в две колонки (можно 2, 4, 6…)
+    { type: "text", title: "О проекте", body: ["абзац 1", "абзац 2"] }  — текстовый блок
+    { type: "gallery", images: ["a.jpg", "b.jpg"] }                       — 2–3 картинки в ряд внутри полей
+  Если blocks нет — страница покажет сетку-заглушку из двух плиток и описание desc.
+  facts — строки справа от заголовка: [["Клиент", "…"], ["Роль", "…"]]
   overlay: true — картинка с прозрачным фоном показывается поверх заглушки (круги остаются на фоне)
 */
 window.PROJECTS = [
   {
+    slug: "nova-bank",
     title: "Nova Bank",
     category: "app",
     year: 2026,
@@ -21,6 +30,7 @@ window.PROJECTS = [
     featured: true,
   },
   {
+    slug: "oliva-casa",
     title: "Oliva Casa",
     category: "design",
     year: 2026,
@@ -31,6 +41,7 @@ window.PROJECTS = [
     featured: true,
   },
   {
+    slug: "pulse-motion",
     title: "Pulse Motion",
     category: "video",
     year: 2025,
@@ -41,6 +52,7 @@ window.PROJECTS = [
     featured: true,
   },
   {
+    slug: "exode-auto",
     title: "Exode Auto",
     category: "web",
     year: 2025,
@@ -51,6 +63,7 @@ window.PROJECTS = [
     featured: true,
   },
   {
+    slug: "hotu-as",
     title: "Хоту-Ас",
     category: "design",
     year: 2026,
@@ -58,6 +71,14 @@ window.PROJECTS = [
     tags: ["Айдентика", "Паттерн", "Мерч"],
     art: "blob", hue: "ice",
     image: "assets/works/hotu-as.jpg",
+    facts: [["Клиент", "Этноран, Якутия"], ["Год", "2026"], ["Услуги", "Айдентика, паттерн, мерч"]],
+    blocks: [
+      { type: "grid", images: ["assets/works/hotu-as.jpg", "assets/works/hotu-as.jpg"] }, // заглушка: замените вторым фото
+      { type: "text", title: "О проекте", body: [
+        "Айдентика для этно-проекта «Хоту-Ас»: знак с оленем, яркий геометрический орнамент и фирменный паттерн, который работает на мерче, упаковке и в digital.",
+        "Здесь вы можете описать задачу клиента, ход работы и результат. Текст и баннеры на всю ширину экрана добавляются в блоки этого кейса в js/data.js.",
+      ] },
+    ],
     featured: true,
   },
 ];

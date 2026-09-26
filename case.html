@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <script>
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    if (!location.hash) window.scrollTo(0, 0);
+    addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Кейс — BLICK</title>
+  <meta name="description" content="Кейс студии BLICK.">
+  <meta name="theme-color" content="#0A0A0B">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <button class="menu-fab" type="button" aria-expanded="false" aria-controls="overlay-menu">
+    <span class="menu-fab__dot"></span><span class="menu-fab__label">меню</span>
+  </button>
+
+  <nav class="overlay" id="overlay-menu" aria-label="Меню">
+    <div class="overlay__inner">
+      <span class="mono overlay__tag">[ навигация ]</span>
+      <ul class="overlay__list">
+        <li><a href="index.html"><span class="mono">01</span>Главная</a></li>
+        <li><a href="index.html#services"><span class="mono">02</span>Услуги</a></li>
+        <li><a href="index.html#works"><span class="mono">03</span>Кейсы</a></li>
+        <li><a href="works.html"><span class="mono">04</span>Все работы</a></li>
+        <li><a href="index.html#contact"><span class="mono">05</span>Контакты</a></li>
+      </ul>
+      <div class="overlay__foot mono">
+        <a href="mailto:hello@blick.studio">hello@blick.studio</a>
+        <a href="https://t.me/" target="_blank" rel="noopener">Telegram ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="page-head" id="top">
+    <div class="hero__brand">
+      <a href="index.html" class="logo">(BLICK)</a>
+      <span class="mono tag">[ v.01b ]</span>
+    </div>
+    <nav class="hero__nav" aria-label="Основное меню">
+      <a href="index.html" class="navlink">главная <span class="arr">↗</span></a>
+      <a href="index.html#services" class="navlink">услуги <span class="arr">↗</span></a>
+      <a href="works.html" class="navlink" aria-current="page">кейсы <span class="arr">↗</span></a>
+      <a href="index.html#contact" class="navlink">контакты <span class="arr">↗</span></a>
+    </nav>
+  </header>
+
+  <main class="case" data-case>
+    <p class="case__loading mono">Загрузка…</p>
+  </main>
+
+  <footer class="footer" id="contact">
+    <div class="footer__cta">
+      <span class="mono tag">( контакты )</span>
+      <h2 class="footer__title" data-reveal>Давайте создадим<br><em>креативное</em> вместе</h2>
+    </div>
+
+    <div class="footer__grid">
+      <form class="form" novalidate>
+        <fieldset class="chips">
+          <legend class="mono form__label">Что нужно сделать?</legend>
+          <label class="chip"><input type="checkbox" name="type" value="design"><span>Дизайн</span></label>
+          <label class="chip"><input type="checkbox" name="type" value="web"><span>Сайт</span></label>
+          <label class="chip"><input type="checkbox" name="type" value="app"><span>Приложение</span></label>
+          <label class="chip"><input type="checkbox" name="type" value="video"><span>Видео / AI</span></label>
+          <label class="chip"><input type="checkbox" name="type" value="other"><span>Пока не знаю</span></label>
+        </fieldset>
+
+        <div class="form__row">
+          <label class="field">
+            <span class="mono form__label">Имя</span>
+            <input type="text" name="name" autocomplete="name" placeholder="Как к вам обращаться" required>
+          </label>
+          <label class="field">
+            <span class="mono form__label">Контакт</span>
+            <input type="text" name="contact" autocomplete="email" placeholder="Email или @telegram" required>
+          </label>
+        </div>
+        <label class="field">
+          <span class="mono form__label">Задача</span>
+          <textarea name="message" rows="3" placeholder="Пара слов о проекте, сроках и бюджете"></textarea>
+        </label>
+
+        <div class="form__foot">
+          <button type="submit" class="pill pill--accent">Отправить заявку <span class="arr">→</span></button>
+          <label class="consent">
+            <input type="checkbox" name="consent">
+            <span>Я согласен(на) на <a href="privacy.html" target="_blank" rel="noopener">обработку персональных данных</a></span>
+          </label>
+          <p class="mono form__status" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+
+      <div class="contacts">
+        <div class="contacts__block">
+          <span class="mono form__label">Почта</span>
+          <a href="mailto:hello@blick.studio" class="contacts__big">hello@blick.studio</a>
+        </div>
+        <div class="contacts__block">
+          <span class="mono form__label">Соцсети</span>
+          <ul class="socials">
+            <li><a href="https://t.me/" target="_blank" rel="noopener" class="navlink">Telegram <span class="arr">↗</span></a></li>
+            <li><a href="https://www.instagram.com/" target="_blank" rel="noopener" class="navlink">Запрещенка <span class="arr">↗</span></a></li>
+            <li><a href="https://www.behance.net/" target="_blank" rel="noopener" class="navlink">Behance <span class="arr">↗</span></a></li>
+            <li><a href="https://www.pinterest.com/" target="_blank" rel="noopener" class="navlink">Pinterest <span class="arr">↗</span></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom mono">
+      <span>© 2026 BLICK · Digital Atelier</span>
+      <span>Санкт-Петербург · работаем по всему миру</span>
+      <span class="footer__right">
+        <a href="privacy.html" class="footer__legal">Политика конфиденциальности</a>
+        <a href="#top" class="navlink">наверх <span class="arr">↑</span></a>
+      </span>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

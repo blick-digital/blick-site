@@ -280,7 +280,7 @@ button, input, textarea { font: inherit; color: inherit; }
 /* Стрелка ходит внутри овала с запасом ~4px от стенок сверху и снизу; в крайних точках «ударяет» — овал слегка отскакивает */
 .hero__scroll-arrow { animation: scroll-arrow 1.9s var(--ease-io) infinite; }
 .hero__scroll-oval { animation: scroll-oval 1.9s ease-out infinite; }
-@keyframes scroll-arrow { 0%, 100% { transform: translateY(3px); } 50% { transform: translateY(146px); } }
+@keyframes scroll-arrow { 0%, 100% { transform: translateY(-17px); } 50% { transform: translateY(166px); } }
 @keyframes scroll-oval {
   0%   { transform: translateY(-12px); }
   9%   { transform: translateY(0); }
@@ -1065,3 +1065,49 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .legal a:not(.back) { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .legal__note { font-size: 12px; color: var(--accent); margin: 0 0 8px; }
 .legal__date { font-size: 12px; color: var(--muted); margin-top: 30px; }
+
+/* =========================================================
+   Страница кейса
+   ========================================================= */
+.wcard__more { display: inline-flex; align-items: center; gap: .5em; margin-top: 14px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.wcard__more:hover { color: var(--text); }
+.case { padding: clamp(40px, 7vw, 110px) 0 clamp(60px, 8vw, 120px); }
+.case__top { display: flex; justify-content: space-between; align-items: center; padding: 0 var(--pad); margin-bottom: 28px; }
+.case__top .back { margin-bottom: 0; }
+.case__head {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; flex-wrap: wrap;
+  padding: 0 var(--pad) clamp(24px, 3vw, 40px);
+}
+.case__head h1 { font-size: clamp(44px, 8vw, 132px); margin: 0; }
+.case__facts { display: flex; gap: clamp(20px, 3vw, 48px); flex-wrap: wrap; font-size: 12px; }
+.case__facts dt { color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-size: 11px; margin-bottom: 6px; }
+.case__facts dd { margin: 0; }
+.case__lead { max-width: 60ch; padding: 0 var(--pad); margin: 0 0 clamp(36px, 5vw, 72px); font-size: clamp(16px, 1.5vw, 20px); line-height: 1.6; color: #c9c8c2; }
+/* баннер — на всю ширину экрана, без полей и скруглений */
+.case__banner { margin: 0 0 clamp(36px, 5vw, 72px); width: 100%; background: var(--surface); }
+.case__banner img { display: block; width: 100%; height: auto; }
+.case__banner--art { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
+.case__banner--art .art, .case__banner--art .art-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* сетка кейса: фото в две колонки на всю ширину экрана */
+.case__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; align-items: start; margin: 0 0 clamp(36px, 5vw, 72px); }
+.case__grid img { display: block; width: 100%; height: auto; }
+.case__tile { position: relative; margin: 0; aspect-ratio: 4 / 5; overflow: hidden; background: var(--surface); }
+.case__tile .art, .case__tile .art-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.case__gallery { display: grid; gap: 12px; padding: 0 var(--pad); margin-bottom: clamp(36px, 5vw, 72px); }
+.case__gallery--2 { grid-template-columns: repeat(2, 1fr); }
+.case__gallery--3 { grid-template-columns: repeat(3, 1fr); }
+.case__gallery img { width: 100%; height: auto; display: block; border-radius: var(--radius); }
+.case__text { display: grid; grid-template-columns: 1fr 2fr; gap: clamp(20px, 4vw, 80px); padding: 0 var(--pad); margin-bottom: clamp(36px, 5vw, 72px); }
+.case__text h2 { font-size: 12px; font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0; }
+.case__text p { max-width: 62ch; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.7; color: #c9c8c2; margin: 0 0 14px; }
+.case__next { display: flex; flex-direction: column; gap: 10px; padding: clamp(28px, 4vw, 56px) var(--pad) 0; border-top: 1px solid var(--line); margin-top: clamp(20px, 3vw, 40px); }
+.case__next .mono { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.case__next strong { font-size: clamp(28px, 5vw, 72px); font-weight: 500; transition: color .3s; }
+.case__next:hover strong { color: var(--accent); }
+.case__loading { padding: 0 var(--pad); color: var(--muted); }
+@media (max-width: 860px) {
+  .case__text { grid-template-columns: 1fr; }
+  .case__grid { grid-template-columns: 1fr; }
+  .case__gallery--3 { grid-template-columns: 1fr; }
+  .case__gallery--2 { grid-template-columns: 1fr; }
+}

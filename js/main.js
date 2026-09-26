@@ -2,6 +2,18 @@
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 if (!location.hash) window.scrollTo(0, 0);
 
+// Просмотр черновика из админки: ?preview=1 подменяет данные кейсов тем, что сохранено в браузере
+if (/[?&]preview=1/.test(location.search)) {
+  try {
+    const d = JSON.parse(localStorage.getItem("blick-draft"));
+    if (d && d.projects) {
+      const imgs = d.images || {};
+      const rep = (v) => typeof v === "string" ? (imgs[v] || v) : Array.isArray(v) ? v.map(rep) : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, rep(x)])) : v;
+      window.PROJECTS = rep(d.projects);
+    }
+  } catch (e) {}
+}
+
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -49,7 +61,9 @@ if (!location.hash) window.scrollTo(0, 0);
       <h3>${esc(p.title)}</h3>
       <p>${esc(p.desc)}</p>
       <div class="wcard__tags">${p.tags.map((t) => `<span>${esc(t)}</span>`).join("")}</div>
+      <a class="wcard__more mono" href="case.html?p=${esc(p.slug)}">Смотреть кейс <span class="arr">↗</span></a>
     </div>`;
+  const caseUrl = (card) => { const a = card.querySelector(".wcard__more"); return a ? a.getAttribute("href") : null; };
 
   /* ---------- Главная: 5 избранных карточек ---------- */
   const row = $("[data-featured]");
@@ -76,7 +90,10 @@ if (!location.hash) window.scrollTo(0, 0);
     cards.forEach((card) => {
       if (canHover) card.addEventListener("mouseenter", () => setActive(card));
       card.addEventListener("focus", () => setActive(card));
-      card.addEventListener("click", () => setActive(card.classList.contains("is-active") && !canHover ? null : card));
+      card.addEventListener("click", (e) => {
+        if (canHover && !e.target.closest("a")) { const u = caseUrl(card); if (u) { location.href = u; return; } } // на десктопе клик по карточке открывает кейс
+        setActive(card.classList.contains("is-active") && !canHover ? null : card);
+      });
     });
     if (canHover) row.addEventListener("mouseleave", () => setActive(null));
     row.addEventListener("focusout", (e) => { if (!row.contains(e.relatedTarget)) setActive(null); });
@@ -98,6 +115,11 @@ if (!location.hash) window.scrollTo(0, 0);
         </div>
       </article>`).join("");
 
+    // клик по карточке открывает кейс (на телефоне — по ссылке «Смотреть кейс» в раскрытой плашке)
+    $$(".gcard", grid).forEach((card) => card.addEventListener("click", (e) => {
+      if (canHover && !e.target.closest("a")) { const u = caseUrl(card); if (u) location.href = u; }
+    }));
+
     const count = $("[data-count-all]");
     if (count) count.textContent = `[ ${pad(PROJECTS.length)} ]`;
 
@@ -114,6 +136,61 @@ if (!location.hash) window.scrollTo(0, 0);
       const f = btn.dataset.f;
       $$(".gcard", grid).forEach((c) => c.classList.toggle("is-hidden", f !== "all" && c.dataset.cat !== f));
     });
+  }
+
+  /* ---------- Страница кейса: case.html?p=<slug> ---------- */
+  const caseRoot = $("[data-case]");
+  if (caseRoot && window.PROJECTS) {
+    const slug = new URLSearchParams(location.search).get("p");
+    const idx = PROJECTS.findIndex((p) => p.slug === slug);
+    const p = PROJECTS[idx];
+    if (!p) {
+      caseRoot.innerHTML = `<a href="works.html" class="back mono">← все работы</a><h1 class="display">КЕЙС НЕ НАЙДЕН</h1>`;
+    } else {
+      document.title = `${p.title} — BLICK`;
+      const blocks = p.blocks && p.blocks.length ? p.blocks : [
+        { type: "grid", art: true },
+        { type: "text", title: "О проекте", body: [p.desc] },
+      ];
+      const renderBlock = (b) => {
+        if (b.type === "banner") {
+          return b.src
+            ? `<figure class="case__banner"><img src="${esc(b.src)}" alt="${esc(b.alt || p.title)}"></figure>`
+            : `<figure class="case__banner case__banner--art">${projectVisual({ ...p, image: "" })}</figure>`;
+        }
+        if (b.type === "grid") {
+          // сетка на всю ширину экрана: фото в две колонки, без полей
+          if (b.art || !(b.images || []).length) {
+            return `<div class="case__grid">${[0, 1].map(() => `<figure class="case__tile">${projectVisual({ ...p, image: "" })}</figure>`).join("")}</div>`;
+          }
+          return `<div class="case__grid">${b.images.map((src) => `<img src="${esc(src)}" alt="${esc(p.title)}">`).join("")}</div>`;
+        }
+        if (b.type === "gallery") {
+          return `<div class="case__gallery case__gallery--${b.images.length}">${b.images.map((src) => `<img src="${esc(src)}" alt="">`).join("")}</div>`;
+        }
+        if (b.type === "text") {
+          return `<section class="case__text">${b.title ? `<h2 class="mono">${esc(b.title)}</h2>` : ""}<div>${(b.body || []).map((t) => `<p>${esc(t)}</p>`).join("")}</div></section>`;
+        }
+        return "";
+      };
+      const facts = p.facts || [["Направление", CATEGORIES[p.category]], ["Год", String(p.year)], ["Услуги", p.tags.join(", ")]];
+      const next = PROJECTS[(idx + 1) % PROJECTS.length];
+      caseRoot.innerHTML = `
+        <div class="case__top">
+          <a href="works.html" class="back mono">← все работы</a>
+          <span class="mono tag">[ ${pad(idx + 1)} / ${pad(PROJECTS.length)} ]</span>
+        </div>
+        <header class="case__head">
+          <h1 class="display">${esc(p.title)}</h1>
+          <dl class="case__facts mono">${facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
+        </header>
+        <p class="case__lead">${esc(p.desc)}</p>
+        ${blocks.map(renderBlock).join("")}
+        <a class="case__next" href="case.html?p=${esc(next.slug)}">
+          <span class="mono">следующий кейс</span>
+          <strong class="display">${esc(next.title)} <span class="arr">↗</span></strong>
+        </a>`;
+    }
   }
 
   /* ---------- Появление по скроллу ---------- */
