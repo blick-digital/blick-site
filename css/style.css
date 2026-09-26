@@ -277,10 +277,10 @@ button, input, textarea { font: inherit; color: inherit; }
   color: #343233; /* цвет иконки, без прозрачности */
 }
 .hero__scroll svg { height: 46px; width: auto; display: block; overflow: visible; }
-/* Стрелка ходит внутри овала с запасом ~4px от стенок сверху и снизу; в крайних точках «ударяет» — овал слегка отскакивает */
+/* Стрелка ходит внутри овала с запасом ~7px от стенок сверху и снизу; в крайних точках «ударяет» — овал слегка отскакивает */
 .hero__scroll-arrow { animation: scroll-arrow 1.9s var(--ease-io) infinite; }
 .hero__scroll-oval { animation: scroll-oval 1.9s ease-out infinite; }
-@keyframes scroll-arrow { 0%, 100% { transform: translateY(-17px); } 50% { transform: translateY(166px); } }
+@keyframes scroll-arrow { 0%, 100% { transform: translateY(8px); } 50% { transform: translateY(141px); } }
 @keyframes scroll-oval {
   0%   { transform: translateY(-12px); }
   9%   { transform: translateY(0); }
