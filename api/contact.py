@@ -2,11 +2,12 @@
 Приём заявок с формы сайта BLICK (Vercel, Python).
 
 POST /api/contact  {name, contact, message, types[], consent}
-Письмо уходит на почту студии через SMTP (Gmail).
+Письмо уходит на почту студии через SMTP (по умолчанию Яндекс Почта).
 
 Секреты хранятся ТОЛЬКО в переменных окружения проекта Vercel, в репозиторий они не попадают:
-  SMTP_USER      — почта, с которой отправляем (blickdesign.ru@gmail.com)
-  SMTP_PASSWORD  — «пароль приложения» Google (не обычный пароль от почты)
+  SMTP_USER      — почта, с которой отправляем (blickdesign@yandex.ru)
+  SMTP_PASSWORD  — «пароль приложения» почтового сервиса (не обычный пароль от ящика)
+  SMTP_HOST      — сервер исходящей почты, по умолчанию smtp.yandex.ru (для Mail.ru — smtp.mail.ru)
   CONTACT_TO     — необязательно: куда слать заявки (по умолчанию на SMTP_USER)
 """
 import json
@@ -58,7 +59,7 @@ def build_message(data, sender, to):
 
 def send_mail(msg):
     user, password = os.environ["SMTP_USER"], os.environ["SMTP_PASSWORD"]
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20, context=ssl.create_default_context()) as s:
+    with smtplib.SMTP_SSL(os.environ.get("SMTP_HOST") or "smtp.yandex.ru", 465, timeout=20, context=ssl.create_default_context()) as s:
         s.login(user, password)
         s.send_message(msg)
 

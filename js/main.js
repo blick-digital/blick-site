@@ -314,7 +314,7 @@ if (/[?&]preview=1/.test(location.search)) {
             status.classList.add("ok");
             form.reset();
           } else {
-            status.textContent = res.error || "Не удалось отправить. Напишите нам на почту blickdesign.ru@gmail.com";
+            status.textContent = res.error || "Не удалось отправить. Напишите нам на почту blickdesign@yandex.ru";
           }
         });
     });
