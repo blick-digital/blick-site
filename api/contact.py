@@ -58,8 +58,8 @@ def build_message(data, sender, to):
 
 
 def send_mail(msg):
-    user, password = os.environ["SMTP_USER"], os.environ["SMTP_PASSWORD"]
-    with smtplib.SMTP_SSL(os.environ.get("SMTP_HOST") or "smtp.yandex.ru", 465, timeout=20, context=ssl.create_default_context()) as s:
+    user, password = os.environ["SMTP_USER"].strip(), os.environ["SMTP_PASSWORD"].strip()
+    with smtplib.SMTP_SSL((os.environ.get("SMTP_HOST") or "smtp.yandex.ru").strip(), 465, timeout=20, context=ssl.create_default_context()) as s:
         s.login(user, password)
         s.send_message(msg)
 
@@ -99,10 +99,14 @@ class handler(BaseHTTPRequestHandler):
                 raise ValueError("некорректный запрос")
             if data.get("website"):  # ловушка для ботов: людям это поле не видно
                 return self._send(200, {"ok": True})
-            sender = os.environ["SMTP_USER"]
+            sender = os.environ["SMTP_USER"].strip()
             send_mail(build_message(data, sender, os.environ.get("CONTACT_TO") or sender))
             self._send(200, {"ok": True})
         except (ValueError, json.JSONDecodeError) as e:
             self._send(400, {"ok": False, "error": str(e)})
-        except Exception:  # noqa: BLE001
-            self._send(502, {"ok": False, "error": "Не удалось отправить заявку. Напишите нам на почту."})
+        except Exception as e:  # noqa: BLE001
+            # код ошибки без текста сервера и без личных данных — чтобы понять причину сбоя
+            code = getattr(e, "smtp_code", None)
+            tag = type(e).__name__ + (f" {code}" if code else "")
+            print("contact: отправка не удалась:", tag, flush=True)
+            self._send(502, {"ok": False, "error": f"Не удалось отправить заявку ({tag}). Напишите нам на почту."})
