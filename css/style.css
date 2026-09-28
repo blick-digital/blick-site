@@ -99,18 +99,19 @@ button, input, textarea { font: inherit; color: inherit; }
 
 /* Зерно поверх страницы */
 .grain {
-  position: fixed; inset: -50%;
+  position: fixed; inset: -5%;
   z-index: 100; pointer-events: none;
   opacity: .06;
+  will-change: transform;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: grain 8s steps(10) infinite;
 }
 @keyframes grain {
   0%, 100% { transform: translate(0, 0); }
-  20% { transform: translate(-3%, 2%); }
-  40% { transform: translate(2%, -4%); }
-  60% { transform: translate(-4%, -1%); }
-  80% { transform: translate(3%, 3%); }
+  20% { transform: translate(-2%, 1.5%); }
+  40% { transform: translate(1.5%, -3%); }
+  60% { transform: translate(-3%, -1%); }
+  80% { transform: translate(2%, 2%); }
 }
 
 /* ---------- Ссылки меню со стрелкой ---------- */
@@ -385,9 +386,10 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
   cursor: pointer;
   opacity: 0; transform: translateY(-12px); pointer-events: none;
-  transition: opacity .5s var(--ease), transform .5s var(--ease), background .3s;
+  visibility: hidden; /* скрытая кнопка не считает размытие фона, пока её не видно */
+  transition: opacity .5s var(--ease), transform .5s var(--ease), background .3s, visibility 0s .5s;
 }
-.menu-fab.is-visible, .menu-open .menu-fab { opacity: 1; transform: none; pointer-events: auto; }
+.menu-fab.is-visible, .menu-open .menu-fab { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
 .menu-fab:hover { background: rgba(40, 40, 44, .75); }
 .menu-fab__dot {
   width: 8px; height: 8px; border-radius: 50%;
@@ -577,10 +579,17 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   overflow: hidden;
   background: var(--surface);
   isolation: isolate;
+  contain: paint;
 }
 .wcard__media .art, .wcard__media .art-img {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-  transition: transform 1.2s var(--ease), filter .8s var(--ease);
+  transition: transform 1.2s var(--ease);
+  will-change: transform;
+}
+.wcard__media::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: rgba(12, 12, 13, .5);
+  opacity: 0; transition: opacity .8s var(--ease);
 }
 /* Картинка с прозрачным фоном поверх кругов: высота — доля карточки, по центру (через translate,
    чтобы не конфликтовать с transform: scale при наведении) */
@@ -633,8 +642,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 /* Активная карточка ≈ вдвое шире (почти квадрат), соседи сужаются */
 .works__row.has-active .wcard { flex-grow: .85; }
 .works__row.has-active .wcard.is-active { flex-grow: 2.6; }
-.works__row.has-active .wcard:not(.is-active) .wcard__media .art,
-.works__row.has-active .wcard:not(.is-active) .wcard__media .art-img { filter: brightness(.55) saturate(.7); }
+.works__row.has-active .wcard:not(.is-active) .wcard__media::after { opacity: 1; }
 .wcard.is-active .wcard__media .art,
 .wcard.is-active .wcard__media .art-img { transform: scale(1.06); }
 .wcard.is-active .wcard__plate { transform: none; }
@@ -1008,7 +1016,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   .wcard__plate { transform: none; }
   .wcard__plate > * { opacity: 1; transform: none; }
   .wcard__plate h3 { display: none; }
-  .works__row.has-active .wcard:not(.is-active) .wcard__media .art { filter: none; }
+  .works__row.has-active .wcard:not(.is-active) .wcard__media::after { opacity: 0; }
 
   .footer__grid { grid-template-columns: 1fr; }
   .form__row { grid-template-columns: 1fr; }
