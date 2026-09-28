@@ -1089,8 +1089,10 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .case__banner--art { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
 .case__banner--art .art, .case__banner--art .art-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 /* сетка кейса: фото в две колонки на всю ширину экрана */
-.case__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; align-items: start; margin: 0 0 clamp(36px, 5vw, 72px); }
+.case__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; align-items: center; margin: 0 0 clamp(36px, 5vw, 72px); }
 .case__grid img { display: block; width: 100%; height: auto; }
+/* нечётное число фото: последнее ставим по центру, в размер остальных */
+.case__grid > :last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc(50% - 3px); }
 .case__tile { position: relative; margin: 0; aspect-ratio: 4 / 5; overflow: hidden; background: var(--surface); }
 .case__tile .art, .case__tile .art-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .case__gallery { display: grid; gap: 12px; padding: 0 var(--pad); margin-bottom: clamp(36px, 5vw, 72px); }
@@ -1110,4 +1112,41 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   .case__grid { grid-template-columns: 1fr; }
   .case__gallery--3 { grid-template-columns: 1fr; }
   .case__gallery--2 { grid-template-columns: 1fr; }
+}
+
+/* одно фото по центру */
+.case__single { margin: 0 0 clamp(36px, 5vw, 72px); padding: 0 var(--pad); display: flex; justify-content: center; }
+.case__single img { display: block; max-width: 100%; max-height: 92vh; width: auto; height: auto; border-radius: var(--radius); }
+.case__single--scroll img { max-height: none; width: min(900px, 100%); }
+/* PDF по центру: окно с прокруткой внутри страницы */
+.case__pdf { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 var(--pad); margin-bottom: clamp(36px, 5vw, 72px); }
+.case__pdf-frame { width: min(1100px, 100%); max-height: 88vh; border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden; background: #1a1a1c; }
+.case__pdf--portrait .case__pdf-frame { width: min(560px, 100%); }
+.case__pdf-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.case__pdf-open { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.case__pdf-open:hover { color: var(--accent); }
+/* ролики */
+.case__videos { padding: 0; }
+.case__video { position: relative; margin: 0; background: var(--surface); }
+.case__video video { display: block; width: 100%; height: auto; }
+.case__video figcaption { position: absolute; left: 14px; bottom: 12px; font-size: 11px; color: #fff; text-transform: uppercase; letter-spacing: .06em; text-shadow: 0 1px 10px rgba(0,0,0,.6); }
+@media (max-width: 860px) {
+  .case__grid > :last-child:nth-child(odd) { width: 100%; }
+}
+
+/* ряды фото: в каждом ряду одинаковая высота, без полей и обрезки (ширина — по формату снимка) */
+.case__rows { display: flex; flex-direction: column; gap: 6px; margin: 0 0 clamp(36px, 5vw, 72px); }
+.case__row { display: flex; gap: 6px; }
+.case__row img { display: block; flex-basis: 0; min-width: 0; width: 0; height: auto; }
+@media (max-width: 860px) {
+  .case__row { flex-direction: column; }
+  .case__row img { flex: none !important; width: 100%; }
+}
+/* заглушка вместо метки Veo в правом нижнем углу роликов */
+.case__video::after {
+  content: "BLICK"; position: absolute; right: 0.5%; bottom: 1.5%; width: 9.5%; height: 6.5%;
+  display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 500; font-size: clamp(8px, 1vw, 14px); letter-spacing: .08em; color: #ededea;
+  background: rgba(10, 10, 11, .78); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border-radius: 4px; pointer-events: none;
 }

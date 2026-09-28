@@ -56,6 +56,8 @@ if (/[?&]preview=1/.test(location.search)) {
   } else fab.classList.add("is-visible");
 
   /* ---------- Карточка проекта ---------- */
+  const caption = (p) => (p.format || CATEGORIES[p.category]) + (p.year ? ` · ${p.year}` : "");
+  const url = (path) => encodeURI(path); // пути с пробелами, скобками и кириллицей
   const plate = (p) => `
     <div class="wcard__plate">
       <h3>${esc(p.title)}</h3>
@@ -78,7 +80,7 @@ if (/[?&]preview=1/.test(location.search)) {
         </div>
         <div class="wcard__caption">
           <strong>${esc(p.title)}</strong>
-          <span>${CATEGORIES[p.category]} · ${p.year}</span>
+          <span>${esc(caption(p))}</span>
         </div>
       </article>`).join("");
 
@@ -99,7 +101,7 @@ if (/[?&]preview=1/.test(location.search)) {
     row.addEventListener("focusout", (e) => { if (!row.contains(e.relatedTarget)) setActive(null); });
   }
 
-  /* ---------- Страница «Все работы» ---------- */
+  /* ---------- Страница «Кейсы» ---------- */
   const grid = $("[data-grid]");
   if (grid && window.PROJECTS) {
     grid.innerHTML = PROJECTS.map((p, i) => `
@@ -111,7 +113,7 @@ if (/[?&]preview=1/.test(location.search)) {
         </div>
         <div class="gcard__caption">
           <strong>${esc(p.title)}</strong>
-          <span>${CATEGORIES[p.category]} · ${p.year}</span>
+          <span>${esc(caption(p))}</span>
         </div>
       </article>`).join("");
 
@@ -125,7 +127,7 @@ if (/[?&]preview=1/.test(location.search)) {
 
     const filters = $("[data-filters]");
     const cats = [["all", "Все"], ...Object.entries({ design: "Дизайн", web: "Сайты", app: "Приложения", video: "Видео / AI" })];
-    filters.innerHTML = cats.map(([k, label]) => {
+    filters.innerHTML = cats.filter(([k]) => k === "all" || PROJECTS.some((p) => p.category === k)).map(([k, label]) => {
       const n = k === "all" ? PROJECTS.length : PROJECTS.filter((p) => p.category === k).length;
       return `<button class="filter${k === "all" ? " is-on" : ""}" type="button" data-f="${k}" aria-pressed="${k === "all"}">${label}<sup>${n}</sup></button>`;
     }).join("");
@@ -145,7 +147,7 @@ if (/[?&]preview=1/.test(location.search)) {
     const idx = PROJECTS.findIndex((p) => p.slug === slug);
     const p = PROJECTS[idx];
     if (!p) {
-      caseRoot.innerHTML = `<a href="works.html" class="back mono">← все работы</a><h1 class="display">КЕЙС НЕ НАЙДЕН</h1>`;
+      caseRoot.innerHTML = `<a href="works.html" class="back mono">← все кейсы</a><h1 class="display">КЕЙС НЕ НАЙДЕН</h1>`;
     } else {
       document.title = `${p.title} — BLICK`;
       const blocks = p.blocks && p.blocks.length ? p.blocks : [
@@ -155,29 +157,49 @@ if (/[?&]preview=1/.test(location.search)) {
       const renderBlock = (b) => {
         if (b.type === "banner") {
           return b.src
-            ? `<figure class="case__banner"><img src="${esc(b.src)}" alt="${esc(b.alt || p.title)}"></figure>`
+            ? `<figure class="case__banner"><img src="${esc(url(b.src))}" alt="${esc(b.alt || p.title)}"></figure>`
             : `<figure class="case__banner case__banner--art">${projectVisual({ ...p, image: "" })}</figure>`;
         }
         if (b.type === "grid") {
-          // сетка на всю ширину экрана: фото в две колонки, без полей
           if (b.art || !(b.images || []).length) {
             return `<div class="case__grid">${[0, 1].map(() => `<figure class="case__tile">${projectVisual({ ...p, image: "" })}</figure>`).join("")}</div>`;
           }
-          return `<div class="case__grid">${b.images.map((src) => `<img src="${esc(src)}" alt="${esc(p.title)}">`).join("")}</div>`;
+          // фото рядами по 3 (хвост — по 2), в каждом ряду одинаковая высота: ширина каждого фото пропорциональна его формату
+          const n = b.images.length, sizes = [];
+          for (let k = n; k > 0;) { if (k === 4) { sizes.push(2, 2); break; } const t = Math.min(3, k); sizes.push(t); k -= t; }
+          let i = 0;
+          return `<div class="case__rows">${sizes.map((t) => `<div class="case__row">${b.images.slice(i, (i += t)).map((src, j) => {
+            const idx = i - t + j, ar = (b.ratios && b.ratios[idx]) || 1.5;
+            return `<img src="${esc(url(src))}" alt="${esc(p.title)}" loading="lazy" data-ar="${ar}" style="flex-grow:${ar};aspect-ratio:${ar}">`;
+          }).join("")}</div>`).join("")}</div>`;
+        }
+        if (b.type === "single") {
+          return `<figure class="case__single${b.scroll ? " case__single--scroll" : ""}"><img src="${esc(url(b.src))}" alt="${esc(b.alt || p.title)}"></figure>`;
+        }
+        if (b.type === "pdf") {
+          // PDF по центру в окне с прокруткой; на телефонах, где PDF не листается внутри страницы, работает ссылка
+          const r = b.ratio || 842 / 595, portrait = r < 1;
+          return `<section class="case__pdf${portrait ? " case__pdf--portrait" : ""}">
+            <div class="case__pdf-frame" style="aspect-ratio:${r.toFixed(4)}"><iframe src="${esc(url(b.src))}#toolbar=0&navpanes=0&view=FitH" title="${esc(b.title || "PDF")}" loading="lazy"></iframe></div>
+            <a class="case__pdf-open mono" href="${esc(url(b.src))}" target="_blank" rel="noopener">${esc(b.title || "Открыть PDF")} — открыть отдельно ↗</a>
+          </section>`;
+        }
+        if (b.type === "videos") {
+          return `<div class="case__grid case__videos">${b.items.map((v) => `<figure class="case__video"><video src="${esc(url(v.src))}#t=0.1" muted loop playsinline preload="metadata" aria-label="${esc(v.title || "")}"></video>${v.title ? `<figcaption class="mono">${esc(v.title)}</figcaption>` : ""}</figure>`).join("")}</div>`;
         }
         if (b.type === "gallery") {
-          return `<div class="case__gallery case__gallery--${b.images.length}">${b.images.map((src) => `<img src="${esc(src)}" alt="">`).join("")}</div>`;
+          return `<div class="case__gallery case__gallery--${b.images.length}">${b.images.map((src) => `<img src="${esc(url(src))}" alt="" loading="lazy">`).join("")}</div>`;
         }
         if (b.type === "text") {
           return `<section class="case__text">${b.title ? `<h2 class="mono">${esc(b.title)}</h2>` : ""}<div>${(b.body || []).map((t) => `<p>${esc(t)}</p>`).join("")}</div></section>`;
         }
         return "";
       };
-      const facts = p.facts || [["Направление", CATEGORIES[p.category]], ["Год", String(p.year)], ["Услуги", p.tags.join(", ")]];
+      const facts = p.facts || [["Направление", CATEGORIES[p.category]], ...(p.year ? [["Год", String(p.year)]] : []), ["Услуги", p.tags.join(", ")]];
       const next = PROJECTS[(idx + 1) % PROJECTS.length];
       caseRoot.innerHTML = `
         <div class="case__top">
-          <a href="works.html" class="back mono">← все работы</a>
+          <a href="works.html" class="back mono">← все кейсы</a>
           <span class="mono tag">[ ${pad(idx + 1)} / ${pad(PROJECTS.length)} ]</span>
         </div>
         <header class="case__head">
@@ -190,6 +212,17 @@ if (/[?&]preview=1/.test(location.search)) {
           <span class="mono">следующий кейс</span>
           <strong class="display">${esc(next.title)} <span class="arr">↗</span></strong>
         </a>`;
+      // пропорции фото в рядах уточняем по реальному размеру файла (если в данных их нет или они неточные)
+      $$(".case__row img", caseRoot).forEach((img) => {
+        const fix = () => { if (!img.naturalWidth) return; const ar = img.naturalWidth / img.naturalHeight; if (Math.abs(ar - parseFloat(img.dataset.ar)) > 0.01) { img.dataset.ar = ar; img.style.flexGrow = ar; img.style.aspectRatio = ar; } };
+        if (img.complete) fix(); else img.addEventListener("load", fix, { once: true });
+      });
+      // ролики играют, пока видны на экране
+      const vids = $$("video", caseRoot);
+      if (vids.length && "IntersectionObserver" in window) {
+        const vio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { const pr = e.target.play(); if (pr && pr.catch) pr.catch(() => {}); } else e.target.pause(); }), { threshold: 0.35 });
+        vids.forEach((v) => vio.observe(v));
+      }
     }
   }
 
