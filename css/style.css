@@ -56,6 +56,15 @@
   font-style: normal;
   font-display: swap;
 }
+@font-face {
+  /* Gothic 60 — только для слова «креативное» в футере. Курсивного начертания у шрифта нет,
+     поэтому наклон делаем сами (псевдокурсив) — см. .footer__title em */
+  font-family: "Gothic 60";
+  src: url("../assets/fonts/Gothic60-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --bg: #0a0a0b;
@@ -877,7 +886,13 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   font-size: clamp(44px, 8.4vw, 150px); line-height: .92; letter-spacing: -.03em;
   text-transform: uppercase;
 }
-.footer__title em { font-family: var(--font-body); font-style: italic; font-weight: 400; text-transform: none; color: var(--accent); letter-spacing: -.04em; }
+.footer__title em {
+  font-family: "Gothic 60", var(--font-body);
+  font-style: normal; /* курсивного начертания нет — наклоняем сами, иначе браузер рисует свой, кривой */
+  font-weight: 400; text-transform: none; color: var(--accent); letter-spacing: -.04em;
+  font-size: .88em; /* Gothic 60 шире Manrope — иначе слово вылезает за экран на узких телефонах */
+  display: inline-block; transform: skewX(-12deg); transform-origin: 0 100%;
+}
 
 .footer__grid {
   position: relative;
