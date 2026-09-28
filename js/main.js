@@ -373,9 +373,15 @@ if (/[?&]preview=1/.test(location.search)) {
       document.addEventListener("visibilitychange", () => { if (!document.hidden && video.paused) tryPlay(); });
     }
     video.addEventListener("error", () => video.remove(), { once: true }); // останется постер
-    // телефонам и reduced-motion — облегчённая версия ролика (2 МБ вместо 10), скраб на десктопе — полная
+    // телефонам и reduced-motion — облегчённая версия ролика (2 МБ вместо 5), скраб на десктопе — полная
     video.src = (!scrubEnabled && video.dataset.srcLight) || video.dataset.src;
     if (!scrubEnabled) video.load();
+    // Полную закачку ролика включаем только после первой отрисовки страницы: пока грузятся
+    // стили, шрифты и скрипты, видео не отнимает у них канал — на экране в это время постер
+    // именно смена preload, без повторного load(): load() сбросил бы уже начавшееся вступление
+    const fullLoad = () => { video.preload = "auto"; };
+    if (document.readyState === "complete") setTimeout(fullLoad, 0);
+    else addEventListener("load", fullLoad, { once: true });
   }
 
   /* ---------- Закреплённый hero: скролл перематывает видео вперёд/назад, текст затухает ---------- */
