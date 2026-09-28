@@ -293,14 +293,30 @@ if (/[?&]preview=1/.test(location.search)) {
         contact: form.elements.contact.value.trim(),
         message: form.elements.message.value.trim(),
         types: $$("input[name=type]:checked", form).map((i) => i.value),
+        consent: true,
       };
-      // Здесь подключается отправка: fetch на Formspree / бот Telegram / свой сервер.
-      // fetch("https://formspree.io/f/XXXX", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-      console.info("Заявка:", data);
-
-      status.textContent = "Спасибо! Ответим в течение рабочего дня.";
-      status.classList.add("ok");
-      form.reset();
+      // Заявка уходит на почту студии через api/contact.py (Vercel)
+      const btn = $("button[type=submit]", form);
+      if (btn.disabled) return;
+      btn.disabled = true;
+      status.textContent = "Отправляем…";
+      fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Requested-With": "blick-form" },
+        body: JSON.stringify(data),
+      })
+        .then((r) => r.json().catch(() => ({})).then((j) => ({ ok: r.ok && j.ok, error: j.error })))
+        .catch(() => ({ ok: false }))
+        .then((res) => {
+          btn.disabled = false;
+          if (res.ok) {
+            status.textContent = "Спасибо! Ответим в течение рабочего дня.";
+            status.classList.add("ok");
+            form.reset();
+          } else {
+            status.textContent = res.error || "Не удалось отправить. Напишите нам на почту blickdesign.ru@gmail.com";
+          }
+        });
     });
   }
 
