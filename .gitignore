@@ -1,6 +1,5 @@
 .DS_Store
 .claude/
-admin.html
 admin_server.py
 start-admin.command
 *.bak
