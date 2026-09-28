@@ -373,7 +373,8 @@ if (/[?&]preview=1/.test(location.search)) {
       document.addEventListener("visibilitychange", () => { if (!document.hidden && video.paused) tryPlay(); });
     }
     video.addEventListener("error", () => video.remove(), { once: true }); // останется постер
-    video.src = video.dataset.src;
+    // телефонам и reduced-motion — облегчённая версия ролика (2 МБ вместо 10), скраб на десктопе — полная
+    video.src = (!scrubEnabled && video.dataset.srcLight) || video.dataset.src;
     if (!scrubEnabled) video.load();
   }
 
@@ -655,9 +656,21 @@ if (/[?&]preview=1/.test(location.search)) {
     [da, sub2, sub3].forEach((l) => { l.style.marginTop = ""; l.style.marginBottom = ""; l.style.left = ""; });
     title.style.removeProperty("--sub-fs");
 
-    // Телефон: без подгонки — строки просто выравниваются по правому краю блока
+    name.style.fontSize = ""; nameLine.style.marginLeft = "";
+
+    // Телефон: BLICK растягиваем на всю ширину блока — левый край "B" вровень с "визуальное",
+    // правый край "K" вровень с "производство", "для бизнеса" и ")" сверху
     if (scrollIcon) scrollIcon.style.marginBottom = "";
-    if (matchMedia("(max-width: 860px)").matches) { sub2.style.marginTop = "6px"; return; }
+    if (matchMedia("(max-width: 860px)").matches) {
+      sub2.style.marginTop = "6px";
+      const tL = inkLeft(sub2Text, LSB.В), tR = inkRight(sub2Text, -1, RSB.О);
+      const nL = inkLeft(name, LSB.B), nR = inkRight(name, 4, RSB.K);
+      if (nR > nL && tR > tL) {
+        name.style.fontSize = (fsOf(name) * (tR - tL) / (nR - nL)).toFixed(2) + "px";
+        nameLine.style.marginLeft = (parseFloat(getComputedStyle(nameLine).marginLeft) + tL - inkLeft(name, LSB.B)).toFixed(2) + "px";
+      }
+      return;
+    }
 
     // Эталон — буквы BLICK: левый край "B", правый край "C" и правый край "K"
     const refL = inkLeft(name, LSB.B);
