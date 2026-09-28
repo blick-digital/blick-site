@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/style.css">
   <style>
     body { overflow-x: auto; }
+    body.locked .adm { filter: blur(10px); pointer-events: none; user-select: none; }
     .adm { display: grid; grid-template-columns: 340px 1fr; min-height: 100vh; }
     .adm__side { border-right: 1px solid var(--line); padding: 24px 16px; position: sticky; top: 0; height: 100vh; overflow: auto; }
     .adm__main { padding: 28px clamp(20px, 3vw, 48px) 120px; max-width: 980px; }
@@ -83,11 +84,11 @@
 <dialog id="loginDlg" style="max-width:380px">
   <form id="loginForm" autocomplete="on">
     <h1 style="font-size:20px;margin-bottom:6px">Вход в админку</h1>
-    <p class="hint" style="margin:0 0 16px">Введите логин и пароль, которые вы задали в настройках Vercel.</p>
+    <p class="hint" id="loginHint" style="margin:0 0 16px"></p>
     <label class="fld"><span>Логин</span><input id="loginName" name="username" autocomplete="username" required></label>
     <label class="fld"><span>Пароль</span><input id="loginPass" name="password" type="password" autocomplete="current-password" required></label>
     <div class="log err" id="loginErr" style="margin:0 0 12px"></div>
-    <button class="btn btn--acc" type="submit">Войти</button>
+    <button class="btn btn--acc" id="loginSubmit" type="submit">Войти</button>
   </form>
 </dialog>
 
@@ -443,6 +444,7 @@
 
   // ---------- локальное сохранение в проект (через admin_server.py) ----------
   function showLogin() { const d = $("#loginDlg"); if (!d.open) { $("#loginErr").textContent = ""; d.showModal(); setTimeout(() => $("#loginName").focus(), 50); } }
+  $("#loginDlg").addEventListener("cancel", (e) => e.preventDefault()); // Esc не закрывает окно входа
   async function detectMode() {
     local = false; remote = false; authed = false; let configured = true;
     if (location.protocol.startsWith("http")) {
@@ -458,8 +460,14 @@
     if (local) { banner.style.color = "var(--accent)"; banner.innerHTML = "✓ Подключено к папке проекта: «Сохранить в проект» записывает изменения прямо в js/data.js, загрузка картинок кладёт файлы в assets/works/."; }
     else if (remote && !configured) { banner.style.color = "#ff8a5c"; banner.innerHTML = "⚠ Админка на сайте ещё не настроена: в проекте Vercel не заданы переменные окружения (логин, пароль, токен GitHub). См. инструкцию."; }
     else if (remote && authed) { banner.style.color = "var(--accent)"; banner.innerHTML = "✓ Вы вошли. «Сохранить на сайт» записывает кейсы в репозиторий GitHub, сайт обновится сам через 1–2 минуты."; }
-    else if (remote) { banner.style.color = "#ffb547"; banner.innerHTML = "Войдите, чтобы сохранять изменения на сайт."; showLogin(); }
+    else if (remote) { banner.style.color = "#ffb547"; banner.innerHTML = "Войдите, чтобы сохранять изменения на сайт."; }
     else { banner.style.color = "#ffb547"; banner.innerHTML = "⚠ Админка открыта как обычный файл, поэтому сохранить в проект не получится. Запустите <b>start-admin.command</b> (двойной клик в папке проекта) или откройте админку на сайте. Пока можно нажать «Скачать data.js»."; }
+    // на сайте интерфейс закрыт, пока не выполнен вход (а если админка не настроена — вход недоступен)
+    const locked = remote && !authed;
+    document.body.classList.toggle("locked", locked);
+    $("#loginSubmit").disabled = !configured;
+    $("#loginHint").textContent = configured ? "Введите логин и пароль, которые вы задали в настройках Vercel." : "Админка ещё не настроена: в проекте Vercel не заданы переменные окружения (логин, хеш пароля, секрет, токен GitHub). Добавьте их по инструкции и сделайте Redeploy.";
+    if (locked) showLogin(); else if ($("#loginDlg").open) $("#loginDlg").close();
     const ok = canSave();
     $("#saveBtn").disabled = !ok; $("#saveBtn").style.opacity = ok ? "1" : ".45";
     $("#saveBtn").textContent = remote ? "Сохранить на сайт" : "Сохранить в проект";
