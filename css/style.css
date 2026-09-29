@@ -200,7 +200,8 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   height: var(--h); padding: 0 28px;
   border: 1px solid var(--line-2); border-radius: 999px;
   background: transparent;
-  font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+  /* тот же шрифт, что у «Диджитал Ателье» в хиро — PP Neue Machina, не моно */
+  font-family: var(--font-display); font-weight: 500; font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
   cursor: pointer;
   transition: color .45s var(--ease), border-color .45s var(--ease), transform .2s;
 }
