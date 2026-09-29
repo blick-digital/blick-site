@@ -362,7 +362,7 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   display: flex; flex-direction: column; gap: 22px;
 }
 .hero__aside-head { display: flex; justify-content: space-between; align-items: center; }
-.hero__mark { font-size: 26px; letter-spacing: .1em; margin-left: -.14em; }
+.hero__mark { font-family: var(--font-display); font-weight: 500; font-size: 26px; letter-spacing: .1em; margin-left: -.14em; }
 .hero__lead { font-size: 13px; line-height: 1.6; color: var(--muted); }
 .hero__aside .pill { align-self: flex-start; min-width: 200px; }
 
