@@ -716,33 +716,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .wcard.is-active .wcard__plate > *:nth-child(3) { transition-delay: .39s; }
 .wcard.is-active .wcard__num { color: var(--accent); }
 
-.works { position: relative; } /* точка отсчёта для фоновой надписи ниже */
-.works__more { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: clamp(48px, 6vw, 90px); }
-
-/* Огромная фоновая надпись под кейсами — вылезает за края экрана по ширине,
-   но НЕ добавляет высоты разделу: элемент абсолютный, ложится в те же отступы
-   .section, что были и без него, просто лежит фоном под остальным содержимым. */
-.works__wordmark {
-  position: absolute;
-  z-index: 0;
-  left: 50%;
-  bottom: 0;
-  /* центрируем сам текст напрямую (не блок на 100vw + text-align):
-     при переполнении text-align центрирует ненадёжно, съезжает к одному краю.
-     Ширина блока не задана — сжимается по содержимому, transform центрирует его точно. */
-  transform: translateX(-50%);
-  font-family: var(--font-display); font-weight: 500;
-  font-size: clamp(110px, 42vw, 680px); /* тянется вместе с шириной экрана — резиновая */
-  line-height: .82;
-  letter-spacing: -.02em;
-  color: #151515;
-  white-space: nowrap;
-  user-select: none;
-  pointer-events: none;
-}
-@media (max-width: 860px) {
-  .works__wordmark { display: none; } /* на телефоне слово займёт весь экран без пользы — прячем */
-}
+.works__more { display: flex; justify-content: center; margin-top: clamp(48px, 6vw, 90px); }
 
 /* =========================================================
    Абстрактные заглушки проектов
