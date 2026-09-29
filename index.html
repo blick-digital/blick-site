@@ -5,6 +5,19 @@
     // Максимально рано отключаем восстановление скролла браузером и сбрасываем позицию —
     // иначе при обновлении страницы на долю секунды виден старый кадр/состояние баннера
     document.documentElement.className += " js"; // заставку показываем только если скрипты работают
+    // Шрифты первого экрана — в загрузку сразу, параллельно со стилями: иначе Safari
+    // находит их только после разбора CSS и вёрстки (замер на живом сайте: 4,7 с).
+    // Только по http(s): предзагрузка обязана идти с crossorigin, а при открытии файла
+    // с диска (file://) такой запрос не проходит — и шрифты из папки переставали браться.
+    if (location.protocol === "http:" || location.protocol === "https:") {
+      ["PPNeueMachina-InktrapMedium.ttf", "PPNeueMachina-InktrapRegular.ttf",
+       "Manrope-Variable.ttf", "JetBrainsMono-Variable.ttf"].forEach(function (f) {
+        var l = document.createElement("link");
+        l.rel = "preload"; l.as = "font"; l.type = "font/ttf"; l.crossOrigin = "anonymous";
+        l.href = "assets/fonts/" + f;
+        document.head.appendChild(l);
+      });
+    }
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     if (!location.hash) window.scrollTo(0, 0);
     // Если страница восстановлена из кэша браузера (bfcache) — там застыло старое состояние
@@ -16,12 +29,6 @@
   <title>BLICK — Digital Atelier</title>
   <meta name="description" content="BLICK — digital-ателье: графический дизайн, сайты, мобильные приложения и AI-видео для бизнеса.">
   <meta name="theme-color" content="#0A0A0B">
-  <!-- Шрифты первого экрана — в загрузку сразу, параллельно со стилями.
-       Иначе Safari находит их только после разбора CSS и вёрстки, и это стоило ~4,7 с. -->
-  <link rel="preload" as="font" type="font/ttf" crossorigin href="assets/fonts/PPNeueMachina-InktrapMedium.ttf">
-  <link rel="preload" as="font" type="font/ttf" crossorigin href="assets/fonts/PPNeueMachina-InktrapRegular.ttf">
-  <link rel="preload" as="font" type="font/ttf" crossorigin href="assets/fonts/Manrope-Variable.ttf">
-  <link rel="preload" as="font" type="font/ttf" crossorigin href="assets/fonts/JetBrainsMono-Variable.ttf">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="is-booting">
