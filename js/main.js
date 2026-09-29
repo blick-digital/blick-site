@@ -22,11 +22,98 @@ if (/[?&]preview=1/.test(location.search)) {
   const pad = (n) => String(n).padStart(2, "0");
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+  /* Заставка загрузки: пока она на экране, страница не листается и вступление не идёт.
+     bootReady выполняется, когда заставка ушла (или сразу, если её на странице нет). */
+  let bootResolve;
+  const bootReady = new Promise((r) => { bootResolve = r; });
+
+  /* ---------- Заставка загрузки ---------- */
+  (() => {
+    const boot = $("#boot");
+    // Блок намеренно стоит первым и ни от чего не зависит: если ниже по файлу что-то
+    // сломается, заставка всё равно снимется и сайт останется рабочим.
+    const video = $(".hero__video");
+    const scrubEnabled = $(".hero-scrub") && !reduced && matchMedia("(min-width: 861px)").matches;
+    if (!boot) { bootResolve(); return; }
+    const MIN = 550;    // минимум на экране — чтобы заставка не мигала на быстром интернете
+    const MAX = 9000;   // страховка: дольше не держим никогда, даже если что-то не догрузилось
+    const t0 = performance.now();
+    let fonts = 0, loaded = 0, vFailed = 0, shown = 0, done = false;
+
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fonts = 1; });
+    else fonts = 1;
+    // Ждём только то, что нужно первому экрану: шрифты, ролик и постер под ним.
+    // Обложки кейсов лежат ниже и догрузятся сами, пока идёт вступление и прокрутка hero —
+    // если ждать событие load, заставка висела бы лишние секунды из-за картинок, которых ещё не видно.
+    const poster = (video && video.getAttribute("poster")) || "";
+    if (poster) {
+      const im = new Image();
+      im.onload = im.onerror = () => { loaded = 1; };
+      im.src = poster;
+      if (im.complete) loaded = 1;
+    } else loaded = 1;
+    if (video) video.addEventListener("error", () => { vFailed = 1; }, { once: true });
+
+    // Доля загруженного ролика: для скраба нужен весь (перемотка прыгает куда угодно),
+    // для зацикленного видео на телефоне достаточно первых секунд
+    const videoPart = () => {
+      if (!video || vFailed) return 1;
+      if (!video.duration) return 0;
+      const need = scrubEnabled ? video.duration : Math.min(video.duration, 3);
+      let end = 0;
+      for (let i = 0; i < video.buffered.length; i++) {
+        if (video.buffered.start(i) <= 0.05) end = Math.max(end, video.buffered.end(i));
+      }
+      // хвост в доли секунды может не догрузиться никогда — считаем почти полное за полное
+      return end >= need - 0.2 ? 1 : Math.min(1, end / need);
+    };
+
+    const paint = (p) => {
+      shown = Math.max(shown, p);            // прогресс не отматываем назад
+      boot.style.setProperty("--p", shown.toFixed(4));
+    };
+
+    const finish = () => {
+      if (done) return;
+      done = true;
+      paint(1);
+      setTimeout(() => {                      // даём блику дойти до конца слова
+        boot.classList.add("is-done");
+        document.body.classList.remove("is-booting");
+        scrollTo(0, 0);
+        bootResolve();
+        setTimeout(() => boot.remove(), 800);
+      }, 280);
+    };
+
+    const tick = () => {
+      if (done) return;
+      const el = performance.now() - t0;
+      const p = 0.15 * fonts + 0.65 * videoPart() + 0.20 * loaded;
+      paint(Math.min(0.99, p));
+      if ((p >= 0.99 && el >= MIN) || el >= MAX) return finish();
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    // Страховка на таймере, а не на кадрах анимации: в фоновой вкладке браузер
+    // перестаёт выдавать кадры, и без неё заставка висела бы, пока вкладку не откроют
+    setTimeout(finish, MAX);
+    // вкладку вернули — продолжаем считать прогресс
+    document.addEventListener("visibilitychange", () => { if (!document.hidden && !done) requestAnimationFrame(tick); });
+  })();
+
   /* ---------- Интро ---------- */
-  const ready = () => requestAnimationFrame(() => document.body.classList.add("is-loaded"));
-  if (document.fonts && document.fonts.ready) {
-    Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1200))]).then(ready);
-  } else ready();
+  const ready = () => {
+    const on = () => document.body.classList.add("is-loaded");
+    requestAnimationFrame(on);
+    setTimeout(on, 80); // в фоновой вкладке кадров не выдают — подстраховываемся таймером
+  };
+  const readyAfterFonts = () => {
+    if (document.fonts && document.fonts.ready) {
+      Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1200))]).then(ready);
+    } else ready();
+  };
+  bootReady.then(readyAfterFonts);
 
   /* ---------- Меню ---------- */
   const fab = $(".menu-fab");
@@ -376,12 +463,6 @@ if (/[?&]preview=1/.test(location.search)) {
     // телефонам и reduced-motion — облегчённая версия ролика (2 МБ вместо 5), скраб на десктопе — полная
     video.src = (!scrubEnabled && video.dataset.srcLight) || video.dataset.src;
     if (!scrubEnabled) video.load();
-    // Полную закачку ролика включаем только после первой отрисовки страницы: пока грузятся
-    // стили, шрифты и скрипты, видео не отнимает у них канал — на экране в это время постер
-    // именно смена preload, без повторного load(): load() сбросил бы уже начавшееся вступление
-    const fullLoad = () => { video.preload = "auto"; };
-    if (document.readyState === "complete") setTimeout(fullLoad, 0);
-    else addEventListener("load", fullLoad, { once: true });
   }
 
   /* ---------- Закреплённый hero: скролл перематывает видео вперёд/назад, текст затухает ---------- */
@@ -450,8 +531,10 @@ if (/[?&]preview=1/.test(location.search)) {
       const p = video.play();
       if (p && p.then) p.then(() => { introActive = true; introWatch(); }).catch(() => {});
     };
-    if (video.readyState >= 3) startIntro();
-    else video.addEventListener("canplay", startIntro, { once: true });
+    bootReady.then(() => {                    // вступление — только когда заставка ушла
+      if (video.readyState >= 3) startIntro();
+      else video.addEventListener("canplay", startIntro, { once: true });
+    });
     video.addEventListener("loadedmetadata", () => { duration = video.duration || 0; });
 
     // Затемнение под текстом второго экрана: считаем его положение от верха нижнего текста

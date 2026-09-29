@@ -762,10 +762,10 @@ window.CATEGORIES = {
 /* Рендер визуала проекта: картинка, если есть, иначе заглушка */
 window.projectVisual = function (p) {
   if (p.image && p.overlay) {
-    return `<div class="art art--${p.art} hue--${p.hue}" aria-hidden="true"><i></i><b></b></div><img class="art-img art-img--over" src="${encodeURI(p.image)}" alt="${p.title}" loading="lazy">`;
+    return `<div class="art art--${p.art} hue--${p.hue}" aria-hidden="true"><i></i><b></b></div><img class="art-img art-img--over" src="${encodeURI(p.image)}" alt="${p.title}" loading="lazy" decoding="async">`;
   }
   if (p.image) {
-    return `<img class="art-img" src="${encodeURI(p.image)}" alt="${p.title}" loading="lazy">`;
+    return `<img class="art-img" src="${encodeURI(p.image)}" alt="${p.title}" loading="lazy" decoding="async">`;
   }
   return `<div class="art art--${p.art} hue--${p.hue}" aria-hidden="true"><i></i><b></b></div>`;
 };

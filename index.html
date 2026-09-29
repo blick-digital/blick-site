@@ -4,6 +4,7 @@
   <script>
     // Максимально рано отключаем восстановление скролла браузером и сбрасываем позицию —
     // иначе при обновлении страницы на долю секунды виден старый кадр/состояние баннера
+    document.documentElement.className += " js"; // заставку показываем только если скрипты работают
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     if (!location.hash) window.scrollTo(0, 0);
     // Если страница восстановлена из кэша браузера (bfcache) — там застыло старое состояние
@@ -17,7 +18,14 @@
   <meta name="theme-color" content="#0A0A0B">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="is-booting">
+  <!-- Заставка на время загрузки: держит экран, пока не подгрузятся шрифты и ролик.
+       Логотип «проявляется» бликом слева направо — полоса света идёт по проценту загрузки. -->
+  <div class="boot" id="boot" aria-hidden="true">
+    <div class="boot__logo"><span>(BLICK)</span></div>
+    <div class="boot__bar"><i></i></div>
+  </div>
+
   <div class="grain" aria-hidden="true"></div>
 
   <!-- Плавающая кнопка меню (появляется после первого экрана и всегда на мобильных) -->
@@ -49,7 +57,7 @@
     <header class="hero">
       <div class="hero__visual" aria-hidden="true">
         <!-- Видео: assets/video/hero.mp4. Перематывается скроллом, не проигрывается само. -->
-        <video class="hero__video" muted playsinline preload="metadata" poster="assets/video/hero-poster.jpg" data-src="assets/video/hero.mp4" data-src-light="assets/video/hero-mobile.mp4"></video>
+        <video class="hero__video" muted playsinline preload="auto" poster="assets/video/hero-poster.jpg" data-src="assets/video/hero.mp4" data-src-light="assets/video/hero-mobile.mp4"></video>
         <div class="hero__vignette"></div>
       </div>
 
