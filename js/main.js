@@ -44,7 +44,7 @@ if (/[?&]preview=1/.test(location.search)) {
     // поэтому ждём поимённо только шрифты первого экрана и не дольше 1,5 с.
     // document.fonts.load ещё и сам запускает загрузку — Safari иначе тянет шрифт лениво.
     const needFonts = ['500 1em "PP Neue Machina"', '400 1em "PP Neue Machina"',
-                       '400 1em "Manrope"', '400 1em "JetBrains Mono"'];
+                       '400 1em "Manrope"', '400 1em "TT Autonomous Mono Trial Variable Roman"'];
     const markFonts = () => { if (!fonts) { fonts = 1; mark.fonts = Math.round(performance.now() - t0); } };
     if (document.fonts && document.fonts.load) {
       Promise.race([

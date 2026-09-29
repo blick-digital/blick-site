@@ -11,7 +11,7 @@
     // с диска (file://) такой запрос не проходит — и шрифты из папки переставали браться.
     if (location.protocol === "http:" || location.protocol === "https:") {
       ["PPNeueMachina-InktrapMedium.ttf", "PPNeueMachina-InktrapRegular.ttf",
-       "Manrope-Variable.ttf", "JetBrainsMono-Variable.ttf"].forEach(function (f) {
+       "Manrope-Variable.ttf", "TT Autonomous Mono Trial Variable Roman.ttf"].forEach(function (f) {
         var l = document.createElement("link");
         l.rel = "preload"; l.as = "font"; l.type = "font/ttf"; l.crossOrigin = "anonymous";
         l.href = "assets/fonts/" + f;

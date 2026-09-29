@@ -50,9 +50,9 @@
   font-display: swap;
 }
 @font-face {
-  font-family: "JetBrains Mono";
-  src: url("../assets/fonts/JetBrainsMono-Variable.ttf") format("truetype");
-  font-weight: 100 800;
+  font-family: "TT Autonomous Mono Trial Variable Roman";
+  src: url("../assets/fonts/TT Autonomous Mono Trial Variable Roman.ttf") format("truetype");
+  font-weight: 400 700;
   font-style: normal;
   font-display: swap;
 }
@@ -79,7 +79,7 @@
   --accent-deep: #ff7a1a;
 
   --font-display: "PP Neue Machina", "Unbounded", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-mono: "TT Autonomous Mono Trial Variable Roman", ui-monospace, monospace;
   --font-body: "Manrope", system-ui, sans-serif;
 
   --pad: clamp(16px, 2.2vw, 36px);
