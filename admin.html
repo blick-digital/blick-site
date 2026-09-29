@@ -60,7 +60,7 @@
 <div class="adm">
   <aside class="adm__side">
     <h1>Админка BLICK</h1>
-    <small>Редактор кейсов. На сайте (после входа) кнопка «Сохранить на сайт» обновляет кейсы через GitHub. Локально (start-admin.command) — записывает в js/data.js папки проекта.</small>
+    <small>Редактор кейсов. На сайте (после входа) кнопка «Сохранить на сайт» пишет прямо в файлы на хостинге. Локально (start-admin.command) — записывает в js/data.js папки проекта.</small>
     <p class="hint" id="count" style="margin-top:14px"></p>
     <ul class="plist" id="plist"></ul>
     <button class="btn" id="addProject" type="button">+ Новый кейс</button>
@@ -104,12 +104,12 @@
   const DRAFT = "blick-draft";
 
   let local = false;   // админка запущена через start-admin.command (локальный сервер)
-  let remote = false;  // админка открыта на сайте (Vercel): нужен вход по логину и паролю
+  let remote = false;  // админка открыта на сайте: нужен вход по логину и паролю
   let authed = false;  // вошли ли мы (для remote)
   const canSave = () => local || (remote && authed);
-  const apiUrl = (act) => (remote ? "/api/admin?action=" + act : "/api/" + act);
+  const apiUrl = (act) => (remote ? "/api/admin.php?action=" + act : "/api/" + act);
   const apiOpts = (body) => ({ method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Requested-With": "blick-admin" }, body: JSON.stringify(body) });
-  const PENDING = "blick-pending"; // после сохранения на сайте деплой занимает ~1–2 минуты: пока не догнал, старый js/data.js не должен затирать правки
+  const PENDING = "blick-pending"; // страховка на случай, если файл на сервере обновится не мгновенно — старый js/data.js не должен затирать свежие правки
   // ---------- состояние ----------
   // base — то, что сейчас лежит в файле js/data.js (снимок). Админка всегда сверяется с файлом:
   // если файл поменялся (например, кейс добавили через Claude), изменения подтягиваются автоматически.
@@ -451,22 +451,22 @@
       try { const r = await fetch("/api/ping", { cache: "no-store" }); if (r.ok) { const j = await r.json(); if (j.ok && j.root) local = true; } } catch (e) {}
       if (!local) {
         try {
-          const r = await fetch("/api/admin?action=me", { cache: "no-store", credentials: "same-origin" });
+          const r = await fetch("/api/admin.php?action=me", { cache: "no-store", credentials: "same-origin" });
           if (r.ok) { const j = await r.json(); if (j.ok && j.mode === "remote") { remote = true; authed = !!j.auth; configured = !!j.configured; } }
         } catch (e) {}
       }
     }
     const banner = $("#modeBanner");
     if (local) { banner.style.color = "var(--accent)"; banner.innerHTML = "✓ Подключено к папке проекта: «Сохранить в проект» записывает изменения прямо в js/data.js, загрузка картинок кладёт файлы в assets/works/."; }
-    else if (remote && !configured) { banner.style.color = "#ff8a5c"; banner.innerHTML = "⚠ Админка на сайте ещё не настроена: в проекте Vercel не заданы переменные окружения (логин, пароль, токен GitHub). См. инструкцию."; }
-    else if (remote && authed) { banner.style.color = "var(--accent)"; banner.innerHTML = "✓ Вы вошли. «Сохранить на сайт» записывает кейсы в репозиторий GitHub, сайт обновится сам через 1–2 минуты."; }
+    else if (remote && !configured) { banner.style.color = "#ff8a5c"; banner.innerHTML = "⚠ Админка на сайте ещё не настроена: на сервере нет config.php с логином, паролем и секретом. См. инструкцию."; }
+    else if (remote && authed) { banner.style.color = "var(--accent)"; banner.innerHTML = "✓ Вы вошли. «Сохранить на сайт» пишет кейсы прямо в файл на сервере — изменения видны сразу."; }
     else if (remote) { banner.style.color = "#ffb547"; banner.innerHTML = "Войдите, чтобы сохранять изменения на сайт."; }
     else { banner.style.color = "#ffb547"; banner.innerHTML = "⚠ Админка открыта как обычный файл, поэтому сохранить в проект не получится. Запустите <b>start-admin.command</b> (двойной клик в папке проекта) или откройте админку на сайте. Пока можно нажать «Скачать data.js»."; }
     // на сайте интерфейс закрыт, пока не выполнен вход (а если админка не настроена — вход недоступен)
     const locked = remote && !authed;
     document.body.classList.toggle("locked", locked);
     $("#loginSubmit").disabled = !configured;
-    $("#loginHint").textContent = configured ? "Введите логин и пароль, которые вы задали в настройках Vercel." : "Админка ещё не настроена: в проекте Vercel не заданы переменные окружения (логин, хеш пароля, секрет, токен GitHub). Добавьте их по инструкции и сделайте Redeploy.";
+    $("#loginHint").textContent = configured ? "Введите логин и пароль от админки." : "Админка ещё не настроена: на сервере нет файла config.php с логином, хешем пароля и секретом. Добавьте его по инструкции.";
     if (locked) showLogin(); else if ($("#loginDlg").open) $("#loginDlg").close();
     const ok = canSave();
     $("#saveBtn").disabled = !ok; $("#saveBtn").style.opacity = ok ? "1" : ".45";
@@ -476,12 +476,12 @@
   $("#loginForm").addEventListener("submit", async (e) => {
     e.preventDefault(); $("#loginErr").textContent = "";
     try {
-      const res = await fetch("/api/admin?action=login", apiOpts({ login: $("#loginName").value.trim(), password: $("#loginPass").value }));
+      const res = await fetch("/api/admin.php?action=login", apiOpts({ login: $("#loginName").value.trim(), password: $("#loginPass").value }));
       const j = await res.json(); if (!j.ok) throw new Error(j.error || "ошибка входа");
       $("#loginPass").value = ""; $("#loginDlg").close(); await detectMode(); status("Вы вошли", "ok");
     } catch (er) { $("#loginErr").textContent = er.message; }
   });
-  $("#logoutBtn").addEventListener("click", async () => { await fetch("/api/admin?action=logout", apiOpts({})); await detectMode(); });
+  $("#logoutBtn").addEventListener("click", async () => { await fetch("/api/admin.php?action=logout", apiOpts({})); await detectMode(); });
   $("#saveBtn").addEventListener("click", async () => {
     if (!canSave()) { if (remote) return showLogin(); return status("Сохранение работает через start-admin.command или на сайте после входа", "err"); }
     try {
@@ -492,7 +492,7 @@
       state.projects = projects; state.base = clone(projects); base = clone(projects); state.images = {};
       if (remote) { try { localStorage.setItem(PENDING, JSON.stringify({ hash: hash(projects), until: Date.now() + 4 * 60 * 1000 })); } catch (er) {} }
       save(); render();
-      status(remote ? `Сохранено в GitHub (${j.count} кейсов). Сайт обновится через 1–2 минуты.` : `Сохранено в js/data.js (${j.count} кейсов). Сообщите Claude — он проверит и обновит сайт.`, "ok");
+      status(remote ? `Сохранено (${j.count} кейсов). Изменения уже на сайте.` : `Сохранено в js/data.js (${j.count} кейсов). Сообщите Claude — он проверит и обновит сайт.`, "ok");
     } catch (e) { status("Ошибка сохранения: " + e.message, "err"); }
   });
   detectMode();

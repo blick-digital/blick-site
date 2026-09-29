@@ -718,6 +718,29 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 
 .works__more { display: flex; justify-content: center; margin-top: clamp(48px, 6vw, 90px); }
 
+/* Огромная фоновая надпись под кейсами — вылезает за края экрана.
+   Вырывается из паддингов .section приёмом position:relative + 100vw + отрицательный margin,
+   дальше обрезается body { overflow-x: hidden }. */
+.works__wordmark {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  margin-top: clamp(40px, 7vw, 110px);
+  text-align: center;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(220px, 42vw, 780px);
+  line-height: .82;
+  letter-spacing: -.02em;
+  color: #151515;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+}
+@media (max-width: 860px) {
+  .works__wordmark { display: none; } /* на телефоне слово займёт весь экран без пользы — прячем */
+}
+
 /* =========================================================
    Абстрактные заглушки проектов
    ========================================================= */
