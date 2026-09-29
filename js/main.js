@@ -36,11 +36,11 @@ if (/[?&]preview=1/.test(location.search)) {
     const scrubEnabled = $(".hero-scrub") && !reduced && matchMedia("(min-width: 861px)").matches;
     if (!boot) { bootResolve(); return; }
     const MIN = 550;    // минимум на экране — чтобы заставка не мигала на быстром интернете
-    const MAX = 9000;   // страховка: дольше не держим никогда, даже если что-то не догрузилось
+    const MAX = 7000;   // страховка: дольше не держим никогда, даже если что-то не догрузилось
     const t0 = performance.now();
     let fonts = 0, loaded = 0, vFailed = 0, shown = 0, done = false;
 
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fonts = 1; });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fonts = 1; mark.fonts = Math.round(performance.now() - t0); });
     else fonts = 1;
     // Ждём только то, что нужно первому экрану: шрифты, ролик и постер под ним.
     // Обложки кейсов лежат ниже и догрузятся сами, пока идёт вступление и прокрутка hero —
@@ -48,18 +48,26 @@ if (/[?&]preview=1/.test(location.search)) {
     const poster = (video && video.getAttribute("poster")) || "";
     if (poster) {
       const im = new Image();
-      im.onload = im.onerror = () => { loaded = 1; };
+      im.onload = im.onerror = () => { loaded = 1; mark.poster = Math.round(performance.now() - t0); };
       im.src = poster;
       if (im.complete) loaded = 1;
     } else loaded = 1;
     if (video) video.addEventListener("error", () => { vFailed = 1; }, { once: true });
+    // canplaythrough / readyState 4 = браузер сам считает, что доиграет без остановок.
+    // Это надёжнее, чем ждать полный буфер: Safari часто перестаёт качать, не дойдя до конца.
+    let canThrough = 0;
+    if (video) video.addEventListener("canplaythrough", () => { canThrough = 1; }, { once: true });
+    const mark = { fonts: 0, poster: 0, video: 0 };
 
     // Доля загруженного ролика: для скраба нужен весь (перемотка прыгает куда угодно),
     // для зацикленного видео на телефоне достаточно первых секунд
     const videoPart = () => {
       if (!video || vFailed) return 1;
+      if (canThrough || video.readyState >= 4) return 1;
       if (!video.duration) return 0;
-      const need = scrubEnabled ? video.duration : Math.min(video.duration, 3);
+      // половины ролика хватает, чтобы отпустить экран: остальное дойдёт, пока идёт
+      // вступление и прокрутка hero — до конца ролика пользователь доберётся не раньше
+      const need = scrubEnabled ? video.duration * 0.5 : Math.min(video.duration, 3);
       let end = 0;
       for (let i = 0; i < video.buffered.length; i++) {
         if (video.buffered.start(i) <= 0.05) end = Math.max(end, video.buffered.end(i));
@@ -83,12 +91,31 @@ if (/[?&]preview=1/.test(location.search)) {
         scrollTo(0, 0);
         bootResolve();
         setTimeout(() => boot.remove(), 800);
+        if (/[?&]debug=1/.test(location.search)) {
+          const v = video || {};
+          const d = document.createElement("pre");
+          d.style.cssText = "position:fixed;left:12px;top:12px;z-index:300;margin:0;padding:12px 14px;" +
+            "background:rgba(10,10,11,.92);color:#ededea;font:12px/1.6 ui-monospace,monospace;" +
+            "border:1px solid rgba(255,255,255,.16);border-radius:6px;white-space:pre";
+          d.textContent =
+            "заставка висела: " + Math.round(performance.now() - t0) + " мс\n" +
+            "шрифты готовы:   " + (mark.fonts || "—") + " мс\n" +
+            "постер готов:    " + (mark.poster || "—") + " мс\n" +
+            "ролик готов:     " + (mark.video || "не успел") + " мс\n" +
+            "readyState:      " + (v.readyState != null ? v.readyState : "—") + " (4 = хватит на всё)\n" +
+            "в буфере:        " + (v.buffered && v.buffered.length ? v.buffered.end(0).toFixed(1) : 0) +
+              " из " + (v.duration ? v.duration.toFixed(1) : "?") + " с\n" +
+            "нажмите, чтобы убрать";
+          d.onclick = () => d.remove();
+          document.body.appendChild(d);
+        }
       }, 280);
     };
 
     const tick = () => {
       if (done) return;
       const el = performance.now() - t0;
+      if (!mark.video && videoPart() >= 1) mark.video = Math.round(el);
       const p = 0.15 * fonts + 0.65 * videoPart() + 0.20 * loaded;
       paint(Math.min(0.99, p));
       if ((p >= 0.99 && el >= MIN) || el >= MAX) return finish();
