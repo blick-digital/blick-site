@@ -40,8 +40,18 @@ if (/[?&]preview=1/.test(location.search)) {
     const t0 = performance.now();
     let fonts = 0, loaded = 0, vFailed = 0, shown = 0, done = false;
 
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fonts = 1; mark.fonts = Math.round(performance.now() - t0); });
-    else fonts = 1;
+    // document.fonts.ready в Safari разрешается очень поздно (замер на живом сайте: 4,7 с),
+    // поэтому ждём поимённо только шрифты первого экрана и не дольше 1,5 с.
+    // document.fonts.load ещё и сам запускает загрузку — Safari иначе тянет шрифт лениво.
+    const needFonts = ['500 1em "PP Neue Machina"', '400 1em "PP Neue Machina"',
+                       '400 1em "Manrope"', '400 1em "JetBrains Mono"'];
+    const markFonts = () => { if (!fonts) { fonts = 1; mark.fonts = Math.round(performance.now() - t0); } };
+    if (document.fonts && document.fonts.load) {
+      Promise.race([
+        Promise.all(needFonts.map((f) => document.fonts.load(f).catch(() => {}))),
+        new Promise((r) => setTimeout(r, 1500)),
+      ]).then(markFonts);
+    } else markFonts();
     // Ждём только то, что нужно первому экрану: шрифты, ролик и постер под ним.
     // Обложки кейсов лежат ниже и догрузятся сами, пока идёт вступление и прокрутка hero —
     // если ждать событие load, заставка висела бы лишние секунды из-за картинок, которых ещё не видно.
