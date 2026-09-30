@@ -67,16 +67,16 @@
 }
 
 :root {
-  --bg: #0a0a0b;
-  --surface: #131315;
-  --surface-2: #1b1b1e;
-  --text: #ededea;
-  --muted: #8a8a86;
-  --faint: #55554f;
-  --line: rgba(255, 255, 255, .08);
-  --line-2: rgba(255, 255, 255, .16);
-  --accent: #ffb547;
-  --accent-deep: #ff7a1a;
+  --bg: #f7f7f7;
+  --surface: #efefec;
+  --surface-2: #e4e4e0;
+  --text: #1b1b1b;
+  --muted: #6e6e6a;
+  --faint: #b0b0aa;
+  --line: rgba(27, 27, 27, .1);
+  --line-2: rgba(27, 27, 27, .18);
+  --accent: #ff8800;
+  --accent-deep: #cc6d00;
 
   --font-display: "PP Neue Machina", "Unbounded", system-ui, sans-serif;
   --font-mono: "TT Autonomous Mono Trial Variable Roman", ui-monospace, monospace;
@@ -87,7 +87,7 @@
   --ease-io: cubic-bezier(.65, 0, .35, 1);
   --radius: 14px;
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -145,8 +145,8 @@ html.js .boot {
   background-image: linear-gradient(90deg,
     var(--accent) 0%,
     var(--accent) calc(var(--p) * 100%),
-    #3b3b38 calc(var(--p) * 100%),
-    #3b3b38 100%);
+    #dcdcd8 calc(var(--p) * 100%),
+    #dcdcd8 100%);
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
@@ -218,7 +218,7 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .pill .arr { transition: transform .45s var(--ease); }
 .pill:hover .arr { transform: translate(3px, -3px); }
 .pill--big { --h: 60px; padding: 0 40px; font-size: 13px; }
-.pill--accent { background: var(--accent); color: #140d02; border-color: var(--accent); }
+.pill--accent { background: var(--accent); color: #1b1b1b; border-color: var(--accent); }
 .pill--accent::before { background: var(--text); }
 
 /* =========================================================
@@ -255,6 +255,9 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .hero__visual {
   position: absolute; inset: 0; z-index: 0;
   background: #0a0a0b url("../assets/video/hero-poster.jpg") center / cover no-repeat;
+  /* Временно убрано на время подбора новой светлой палитры — старое тёмное видео
+     не сочетается с ней. Чтобы вернуть: удалите это правило. */
+  display: none;
 }
 .hero__video {
   position: absolute; inset: 0;
@@ -313,7 +316,7 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .hero__sub > span { white-space: nowrap; }
 .hero__da { text-align: right; font-size: clamp(11px, calc(1vw + 2px), 18px); line-height: 1; font-weight: 500; letter-spacing: .04em; }
 .hero__da > span { white-space: nowrap; }
-.hero__hint { cursor: default; outline: none; text-decoration: underline dotted rgba(255, 181, 71, .7); text-underline-offset: .28em; transition: color .25s var(--ease); }
+.hero__hint { cursor: default; outline: none; text-decoration: underline dotted rgba(255, 136, 0, .7); text-underline-offset: .28em; transition: color .25s var(--ease); }
 .hero__hint:hover, .hero__hint:focus-visible, .hero__hint.is-open { color: var(--accent); }
 .hero__title { position: relative; }
 .hero__tip {
@@ -321,13 +324,12 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   width: max-content; max-width: min(240px, calc(100vw - 32px));
   padding: 8px 10px;
   font-family: var(--font-mono); font-size: 10px; line-height: 1.5; letter-spacing: 0; text-transform: none; font-weight: 400;
-  color: rgba(255, 224, 170, .95);
-  text-shadow: 0 0 8px rgba(255, 181, 71, .45);
-  /* киберпанк: полупрозрачный янтарно-тёмный фон, тонкая светящаяся рамка */
-  background: linear-gradient(135deg, rgba(255, 150, 40, .16), rgba(10, 10, 11, .55) 60%);
+  color: #7a3d00;
+  /* светлая версия: тёплый полупрозрачный фон, тонкая янтарная рамка-свечение */
+  background: linear-gradient(135deg, rgba(255, 136, 0, .12), rgba(247, 247, 247, .75) 60%);
   border: 0; border-radius: 5px;
   -webkit-backdrop-filter: blur(8px) saturate(150%); backdrop-filter: blur(8px) saturate(150%);
-  box-shadow: 0 0 14px rgba(255, 150, 40, .22), inset 0 0 12px rgba(255, 150, 40, .08);
+  box-shadow: 0 0 14px rgba(255, 136, 0, .16), inset 0 0 12px rgba(255, 136, 0, .05);
   opacity: 0; transform: translateY(6px); pointer-events: none;
   transition: opacity .25s var(--ease), transform .25s var(--ease);
 }
@@ -339,7 +341,7 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   justify-self: center;
   align-self: end; /* низ иконки — на одной линии с низом кнопки «Обсудить проект» */
   display: block; line-height: 0;
-  color: #343233; /* цвет иконки, без прозрачности */
+  color: #b8b8b3; /* цвет иконки, без прозрачности */
 }
 .hero__scroll svg { height: 46px; width: auto; display: block; overflow: visible; }
 /* Стрелка ходит внутри овала с запасом ~7px от стенок сверху и снизу; в крайних точках «ударяет» — овал слегка отскакивает */
@@ -406,7 +408,7 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 /* Затемнение под текстом второго экрана: начинается у верха «Вы получаете…» и доходит до сплошного фона блока «услуги» */
 .hero__fade {
   position: absolute; left: 0; right: 0; top: 100%; height: 0; z-index: 2;
-  background: linear-gradient(to bottom, rgba(10, 10, 11, 0) 0, rgba(10, 10, 11, .5) calc(var(--fade-solid, 300px) * .48), var(--bg) var(--fade-solid, 300px), var(--bg) 100%);
+  background: linear-gradient(to bottom, rgba(247, 247, 247, 0) 0, rgba(247, 247, 247, .5) calc(var(--fade-solid, 300px) * .48), var(--bg) var(--fade-solid, 300px), var(--bg) 100%);
   opacity: 0; pointer-events: none;
 }
 .hero-scrub:not(.js-scrub) .hero__fade { display: none; }
@@ -445,7 +447,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   display: inline-flex; align-items: center; gap: 10px;
   height: 42px; padding: 0 18px 0 14px;
   border: 1px solid var(--line-2); border-radius: 999px;
-  background: rgba(19, 19, 21, .6);
+  background: rgba(255, 255, 255, .65);
   -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%);
   font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
   cursor: pointer;
@@ -454,7 +456,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   transition: opacity .5s var(--ease), transform .5s var(--ease), background .3s, visibility 0s .5s;
 }
 .menu-fab.is-visible, .menu-open .menu-fab { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
-.menu-fab:hover { background: rgba(40, 40, 44, .75); }
+.menu-fab:hover { background: rgba(255, 255, 255, .88); }
 .menu-fab__dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--accent);
@@ -465,7 +467,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 
 .overlay {
   position: fixed; inset: 0; z-index: 55;
-  background: rgba(10, 10, 11, .86);
+  background: rgba(247, 247, 247, .92);
   -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
   opacity: 0; visibility: hidden;
   transition: opacity .5s var(--ease), visibility 0s .5s;
@@ -590,7 +592,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 }
 .svc__item::before {
   content: ""; position: absolute; inset: 0 calc(var(--pad) * -1);
-  background: linear-gradient(90deg, rgba(255,181,71,.07), transparent 60%);
+  background: linear-gradient(90deg, rgba(255,136,0,.08), transparent 60%);
   opacity: 0; transition: opacity .5s var(--ease);
   pointer-events: none;
 }
@@ -936,14 +938,14 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .footer {
   position: relative;
   padding: clamp(80px, 10vw, 160px) var(--pad) 0;
-  background: linear-gradient(to bottom, var(--bg), #0e0d0c);
+  background: linear-gradient(to bottom, var(--bg), #ededea);
   border-top: 1px solid var(--line);
   overflow: hidden;
 }
 .footer::before {
   content: ""; position: absolute; left: 50%; bottom: -30%;
   width: 90vw; height: 60vw; transform: translateX(-50%);
-  background: radial-gradient(ellipse, rgba(255,122,26,.18), transparent 65%);
+  background: radial-gradient(ellipse, rgba(255,136,0,.14), transparent 65%);
   pointer-events: none;
 }
 .footer__cta { position: relative; margin-bottom: clamp(48px, 7vw, 100px); }
@@ -1164,7 +1166,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .legal { max-width: 860px; padding: clamp(40px, 7vw, 110px) var(--pad) clamp(60px, 8vw, 120px); }
 .legal h1 { font-size: clamp(26px, 4vw, 56px); margin: 0 0 20px; }
 .legal h2 { font-family: var(--font-display); font-weight: 500; font-size: clamp(16px, 1.6vw, 22px); margin: 34px 0 10px; text-transform: uppercase; }
-.legal p { color: #c9c8c2; font-size: 15px; line-height: 1.7; margin: 0 0 10px; }
+.legal p { color: #4a4a46; font-size: 15px; line-height: 1.7; margin: 0 0 10px; }
 .legal a:not(.back) { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .legal__note { font-size: 12px; color: var(--accent); margin: 0 0 8px; }
 .legal__date { font-size: 12px; color: var(--muted); margin-top: 30px; }
@@ -1185,7 +1187,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .case__facts { display: flex; gap: clamp(20px, 3vw, 48px); flex-wrap: wrap; font-size: 12px; }
 .case__facts dt { color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-size: 11px; margin-bottom: 6px; }
 .case__facts dd { margin: 0; }
-.case__lead { max-width: 60ch; padding: 0 var(--pad); margin: 0 0 clamp(36px, 5vw, 72px); font-size: clamp(16px, 1.5vw, 20px); line-height: 1.6; color: #c9c8c2; }
+.case__lead { max-width: 60ch; padding: 0 var(--pad); margin: 0 0 clamp(36px, 5vw, 72px); font-size: clamp(16px, 1.5vw, 20px); line-height: 1.6; color: #4a4a46; }
 /* баннер — на всю ширину экрана, без полей и скруглений */
 .case__banner { margin: 0 0 clamp(36px, 5vw, 72px); width: 100%; background: var(--surface); }
 .case__banner img { display: block; width: 100%; height: auto; }
@@ -1204,7 +1206,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .case__gallery img { width: 100%; height: auto; display: block; border-radius: var(--radius); }
 .case__text { display: grid; grid-template-columns: 1fr 2fr; gap: clamp(20px, 4vw, 80px); padding: 0 var(--pad); margin-bottom: clamp(36px, 5vw, 72px); }
 .case__text h2 { font-size: 12px; font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0; }
-.case__text p { max-width: 62ch; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.7; color: #c9c8c2; margin: 0 0 14px; }
+.case__text p { max-width: 62ch; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.7; color: #4a4a46; margin: 0 0 14px; }
 .case__next { display: flex; flex-direction: column; gap: 10px; padding: clamp(28px, 4vw, 56px) var(--pad) 0; border-top: 1px solid var(--line); margin-top: clamp(20px, 3vw, 40px); }
 .case__next .mono { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
 .case__next strong { font-size: clamp(28px, 5vw, 72px); font-weight: 500; transition: color .3s; }
@@ -1223,7 +1225,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .case__single--scroll img { max-height: none; width: min(900px, 100%); }
 /* PDF по центру: окно с прокруткой внутри страницы */
 .case__pdf { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 var(--pad); margin-bottom: clamp(36px, 5vw, 72px); }
-.case__pdf-frame { width: min(1100px, 100%); max-height: 88vh; border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden; background: #1a1a1c; }
+.case__pdf-frame { width: min(1100px, 100%); max-height: 88vh; border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden; background: #ededea; }
 .case__pdf--portrait .case__pdf-frame { width: min(560px, 100%); }
 .case__pdf-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
 .case__pdf-open { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
