@@ -22,6 +22,25 @@ if (/[?&]preview=1/.test(location.search)) {
   const pad = (n) => String(n).padStart(2, "0");
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+  const scrubEnabled = $(".hero-scrub") && !reduced && matchMedia("(min-width: 861px)").matches;
+
+  /* ---------- Hero-кадры (десктоп): последовательность JPG вместо видео ----------
+     Перемотка скроллом двигает индекс кадра и рисует его в canvas — быстрее и стабильнее,
+     чем перемотка <video>, и не зависит от политик автозапуска/энергосбережения браузера. */
+  const FRAME_COUNT = 120;
+  const FRAME_RATE = 24; // кадров/сек в исходном ролике — только для тайминга вступления
+  const framePath = (i) => "assets/video/hero-frames/frame-" + String(i).padStart(4, "0") + ".jpg";
+  const frames = [];
+  let framesLoadedCount = 0;
+  if (scrubEnabled) {
+    for (let i = 0; i < FRAME_COUNT; i++) {
+      const img = new Image();
+      img.onload = img.onerror = () => { framesLoadedCount++; };
+      img.src = framePath(i);
+      frames.push(img);
+    }
+  }
+
   /* Заставка загрузки: пока она на экране, страница не листается и вступление не идёт.
      bootReady выполняется, когда заставка ушла (или сразу, если её на странице нет). */
   let bootResolve;
@@ -33,7 +52,6 @@ if (/[?&]preview=1/.test(location.search)) {
     // Блок намеренно стоит первым и ни от чего не зависит: если ниже по файлу что-то
     // сломается, заставка всё равно снимется и сайт останется рабочим.
     const video = $(".hero__video");
-    const scrubEnabled = $(".hero-scrub") && !reduced && matchMedia("(min-width: 861px)").matches;
     if (!boot) { bootResolve(); return; }
     const MIN = 550;    // минимум на экране — чтобы заставка не мигала на быстром интернете
     const MAX = 7000;   // страховка: дольше не держим никогда, даже если что-то не догрузилось
@@ -86,6 +104,14 @@ if (/[?&]preview=1/.test(location.search)) {
       return end >= need - 0.2 ? 1 : Math.min(1, end / need);
     };
 
+    // Доля загруженных кадров (десктоп): половины достаточно, чтобы отпустить экран —
+    // остальные дойдут, пока идёт вступление и прокрутка hero
+    const framesPart = () => {
+      if (!FRAME_COUNT) return 1;
+      const need = Math.ceil(FRAME_COUNT * 0.5);
+      return Math.min(1, framesLoadedCount / need);
+    };
+
     const paint = (p) => {
       shown = Math.max(shown, p);            // прогресс не отматываем назад
       boot.style.setProperty("--p", shown.toFixed(4));
@@ -125,8 +151,9 @@ if (/[?&]preview=1/.test(location.search)) {
     const tick = () => {
       if (done) return;
       const el = performance.now() - t0;
-      if (!mark.video && videoPart() >= 1) mark.video = Math.round(el);
-      const p = 0.15 * fonts + 0.65 * videoPart() + 0.20 * loaded;
+      const mediaPart = scrubEnabled ? framesPart() : videoPart();
+      if (!mark.video && mediaPart >= 1) mark.video = Math.round(el);
+      const p = 0.15 * fonts + 0.65 * mediaPart + 0.20 * loaded;
       paint(Math.min(0.99, p));
       if ((p >= 0.99 && el >= MIN) || el >= MAX) return finish();
       requestAnimationFrame(tick);
@@ -444,19 +471,21 @@ if (/[?&]preview=1/.test(location.search)) {
     });
   }
 
-  /* ---------- Hero: фоновое видео (первый кадр — постер, виден сразу) ---------- */
+  /* ---------- Hero: фон (первый кадр виден сразу через CSS-постер) ---------- */
   const heroScrub = $(".hero-scrub");
   const hero = $(".hero");
   const video = $(".hero__video");
-  const scrubEnabled = heroScrub && !reduced && matchMedia("(min-width: 861px)").matches;
+  const canvas = $(".hero__canvas");
 
-  if (video) {
-    video.muted = true; // на iOS автозапуск возможен только у muted-видео
-    video.setAttribute("playsinline", "");
-    if (scrubEnabled) {
-      // Перемотка управляется скроллом — видео не проигрывается само
-      video.addEventListener("loadeddata", () => hero.classList.add("has-video"), { once: true });
-    } else {
+  if (scrubEnabled) {
+    // Десктоп: видео не используется вовсе — фон рисует canvas по кадрам (см. heroPinScrub)
+    if (video) video.remove();
+    if (canvas) heroPinScrub(heroScrub, hero, canvas);
+  } else {
+    if (canvas) canvas.remove();
+    if (video) {
+      video.muted = true; // на iOS автозапуск возможен только у muted-видео
+      video.setAttribute("playsinline", "");
       // Мобильные / reduced-motion — обычное фоновое видео в цикле.
       // Проявляем его только когда оно реально пошло (событие playing): в режиме энергосбережения
       // iOS блокирует автозапуск — тогда остаётся постер (первый кадр), а не пустой чёрный кадр.
@@ -495,15 +524,11 @@ if (/[?&]preview=1/.test(location.search)) {
         addEventListener(ev, () => { if (video.paused) tryPlay(); }, { once: true, passive: true })
       );
       document.addEventListener("visibilitychange", () => { if (!document.hidden && video.paused) tryPlay(); });
+      video.addEventListener("error", () => video.remove(), { once: true }); // останется постер
+      video.src = video.dataset.srcLight;
+      video.load();
     }
-    video.addEventListener("error", () => video.remove(), { once: true }); // останется постер
-    // телефонам и reduced-motion — облегчённая версия ролика (2 МБ вместо 5), скраб на десктопе — полная
-    video.src = (!scrubEnabled && video.dataset.srcLight) || video.dataset.src;
-    if (!scrubEnabled) video.load();
   }
-
-  /* ---------- Закреплённый hero: скролл перематывает видео вперёд/назад, текст затухает ---------- */
-  if (scrubEnabled) heroPinScrub(heroScrub, hero, video);
 
   // Оборачивает каждое слово внутри элемента в <span class="word">, не трогая теги внутри (например .accent)
   function wrapWords(root) {
@@ -528,7 +553,7 @@ if (/[?&]preview=1/.test(location.search)) {
     return [...root.querySelectorAll(".word")];
   }
 
-  function heroPinScrub(wrap, hero, video) {
+  function heroPinScrub(wrap, hero, canvas) {
     wrap.classList.add("js-scrub");
     const fadeEls = [...$$(".hero__top > *", hero), ...$$(".hero__bottom > *", hero)];
     const reveal = $(".hero__reveal", hero);
@@ -543,41 +568,59 @@ if (/[?&]preview=1/.test(location.search)) {
     // уезжает вместе с видео, когда закрепление отпускает в конце
     const REVEAL_START = 0.36, REVEAL_END = 0.92;
 
-    let duration = 0;
     let ticking = false;
 
-    // Вступление: при загрузке видео само играет первую секунду (INTRO_END), дальше — только скролл,
-    // до конца ролика (SCRUB_END — с запасом, реальный предел всё равно duration).
-    // introT0 — время видео, с которого начинается перемотка скроллом (0, если вступление не запускалось)
-    const INTRO_END = 1;
-    const SCRUB_END = 999;
-    let introT0 = 0, introActive = false;
+    // ---------- Рисование кадров ----------
+    const ctx = canvas.getContext("2d");
+    const dpr = Math.min(devicePixelRatio || 1, 2); // выше 2x — впустую, только тяжелее канвас
+    function sizeCanvas() {
+      const r = canvas.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.round(r.width * dpr));
+      canvas.height = Math.max(1, Math.round(r.height * dpr));
+    }
+    sizeCanvas();
+
+    let currentFrame = 0;
+    function drawFrame(i) {
+      currentFrame = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(i)));
+      const img = frames[currentFrame];
+      if (!img || !img.complete || !img.naturalWidth) return; // кадр ещё не догрузился — оставляем прежний
+      const cw = canvas.width, ch = canvas.height;
+      // object-fit: cover вручную — канвас не умеет сам
+      const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+      const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+      ctx.clearRect(0, 0, cw, ch);
+      ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+    }
+    const showFirstFrame = () => { hero.classList.add("has-video"); drawFrame(0); };
+    if (frames[0] && frames[0].complete && frames[0].naturalWidth) showFirstFrame();
+    else if (frames[0]) frames[0].addEventListener("load", showFirstFrame, { once: true });
+
+    // Вступление: первая секунда проигрывается сама (по номинальному фрейм-рейту исходника),
+    // дальше — только скролл, до последнего кадра.
+    // introT0Frame — кадр, с которого начинается перемотка скроллом (0, если вступление не запускалось)
+    const INTRO_END_FRAME = Math.min(FRAME_COUNT - 1, Math.round(FRAME_RATE));
+    let introT0Frame = 0, introActive = false;
     const endIntro = () => {
       if (!introActive) return;
       introActive = false;
-      video.pause();
-      introT0 = Math.min(video.currentTime, INTRO_END);
+      introT0Frame = currentFrame;
       update();
     };
-    // таймер, а не rAF: короткий шаг даёт остановку точно на нужном кадре, и он не засыпает в фоновой вкладке
-    const introWatch = () => {
+    // таймер, а не rAF: не засыпает в фоновой вкладке и не зависит от политик автозапуска видео
+    const introStep = (startTs) => {
       if (!introActive) return;
-      if (video.currentTime >= INTRO_END) { video.currentTime = INTRO_END; endIntro(); return; }
-      setTimeout(introWatch, 30);
+      const f = Math.round(((performance.now() - startTs) / 1000) * FRAME_RATE);
+      if (f >= INTRO_END_FRAME) { drawFrame(INTRO_END_FRAME); endIntro(); return; }
+      drawFrame(f);
+      setTimeout(() => introStep(startTs), 1000 / FRAME_RATE);
     };
     const startIntro = () => {
       if (scrollY > 8) return;
-      const p = video.play();
-      if (p && p.then) p.then(() => { introActive = true; introWatch(); }).catch(() => {});
+      introActive = true;
+      introStep(performance.now());
     };
-    // Подстраховка: если ролик короче INTRO_END и успевает доиграть до конца
-    // раньше, чем таймер introWatch это заметит, — просто отпускаем скролл сразу.
-    video.addEventListener("ended", () => { if (introActive) endIntro(); });
-    bootReady.then(() => {                    // вступление — только когда заставка ушла
-      if (video.readyState >= 3) startIntro();
-      else video.addEventListener("canplay", startIntro, { once: true });
-    });
-    video.addEventListener("loadedmetadata", () => { duration = video.duration || 0; });
+    bootReady.then(startIntro); // вступление — только когда заставка ушла
 
     // Затемнение под текстом второго экрана: считаем его положение от верха нижнего текста
     function fitBody() {
@@ -634,7 +677,7 @@ if (/[?&]preview=1/.test(location.search)) {
       const ramp = Math.min(1, extra / 120);
       if (fade) { fade.style.transform = lift; fade.style.opacity = String(ramp); }
 
-      if (duration && !introActive) video.currentTime = introT0 + progress * (Math.min(SCRUB_END, duration) - introT0);
+      if (!introActive) drawFrame(introT0Frame + progress * ((FRAME_COUNT - 1) - introT0Frame));
 
       if (scrolling) {
         // Текст и меню первого экрана затухают за первые 35% прокрутки
@@ -674,7 +717,7 @@ if (/[?&]preview=1/.test(location.search)) {
       }
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
     }, { passive: true });
-    addEventListener("resize", update);
+    addEventListener("resize", () => { sizeCanvas(); update(); });
     update();
   }
 
