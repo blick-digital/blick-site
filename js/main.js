@@ -546,9 +546,11 @@ if (/[?&]preview=1/.test(location.search)) {
     let duration = 0;
     let ticking = false;
 
-    // Вступление: при загрузке видео само играет первую секунду (INTRO_END), дальше — только скролл.
+    // Вступление: при загрузке видео само играет первые 5 секунд (INTRO_END), дальше — только скролл,
+    // и только до 8-й секунды (SCRUB_END) — не до конца ролика.
     // introT0 — время видео, с которого начинается перемотка скроллом (0, если вступление не запускалось)
-    const INTRO_END = 45 / 24; // кадр №45 при 24 к/с (1 с + 21 кадр) — до появления кругов на планшете
+    const INTRO_END = 5;
+    const SCRUB_END = 8;
     let introT0 = 0, introActive = false;
     const endIntro = () => {
       if (!introActive) return;
@@ -629,7 +631,7 @@ if (/[?&]preview=1/.test(location.search)) {
       const ramp = Math.min(1, extra / 120);
       if (fade) { fade.style.transform = lift; fade.style.opacity = String(ramp); }
 
-      if (duration && !introActive) video.currentTime = introT0 + progress * (duration - introT0);
+      if (duration && !introActive) video.currentTime = introT0 + progress * (Math.min(SCRUB_END, duration) - introT0);
 
       if (scrolling) {
         // Текст и меню первого экрана затухают за первые 35% прокрутки
