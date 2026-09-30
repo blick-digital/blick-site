@@ -546,11 +546,11 @@ if (/[?&]preview=1/.test(location.search)) {
     let duration = 0;
     let ticking = false;
 
-    // Вступление: при загрузке видео само играет первые 5 секунд (INTRO_END), дальше — только скролл,
-    // и только до 8-й секунды (SCRUB_END) — не до конца ролика.
+    // Вступление: при загрузке видео само играет первую секунду (INTRO_END), дальше — только скролл,
+    // до конца ролика (SCRUB_END — с запасом, реальный предел всё равно duration).
     // introT0 — время видео, с которого начинается перемотка скроллом (0, если вступление не запускалось)
-    const INTRO_END = 5;
-    const SCRUB_END = 8;
+    const INTRO_END = 1;
+    const SCRUB_END = 999;
     let introT0 = 0, introActive = false;
     const endIntro = () => {
       if (!introActive) return;
@@ -570,6 +570,9 @@ if (/[?&]preview=1/.test(location.search)) {
       const p = video.play();
       if (p && p.then) p.then(() => { introActive = true; introWatch(); }).catch(() => {});
     };
+    // Подстраховка: если ролик короче INTRO_END и успевает доиграть до конца
+    // раньше, чем таймер introWatch это заметит, — просто отпускаем скролл сразу.
+    video.addEventListener("ended", () => { if (introActive) endIntro(); });
     bootReady.then(() => {                    // вступление — только когда заставка ушла
       if (video.readyState >= 3) startIntro();
       else video.addEventListener("canplay", startIntro, { once: true });

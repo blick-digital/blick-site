@@ -228,7 +228,7 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
    Высота = сколько скролла займёт перемотка + затухание текста, до блока «услуги». */
 .hero-scrub {
   position: relative;
-  height: 300vh;
+  height: 200vh; /* скролл видео растянут на два экрана */
 }
 .hero {
   position: absolute;
@@ -255,9 +255,6 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .hero__visual {
   position: absolute; inset: 0; z-index: 0;
   background: #0a0a0b url("../assets/video/hero-poster.jpg") center / cover no-repeat;
-  /* Временно убрано на время подбора новой светлой палитры — старое тёмное видео
-     не сочетается с ней. Чтобы вернуть: удалите это правило. */
-  display: none;
 }
 .hero__video {
   position: absolute; inset: 0;
