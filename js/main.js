@@ -1020,9 +1020,11 @@ if (/[?&]preview=1/.test(location.search)) {
 
 
 /* ---------- Раздел «Кейсы»: нижний отступ = верхнему ----------
-   Расстояние от последнего элемента раздела (кнопка «Больше кейсов») до линии следующего раздела
-   делаем равным расстоянию от линии «Кейсов» до карточек. Верхнее зависит от размера заголовка,
-   поэтому считаем по факту и подгоняем нижний padding раздела. */
+   Расстояние от нижнего края карточек до линии следующего раздела делаем равным расстоянию от линии «Кейсов»
+   до верха карточек. Верхнее зависит от размера заголовка, поэтому считаем по факту.
+   Подгоняем нижний padding раздела; если его не хватает (над линией следующего раздела есть ещё его собственный
+   верхний отступ) — добираем отрицательным margin. Только уменьшаем: если места и так меньше, ничего не трогаем.
+   Нижняя граница — кнопка «Больше кейсов» остаётся минимум в 60px от линии (на узких экранах поэтому равенство приближённое). */
 (() => {
   const works = document.querySelector("#works");
   const next = works && works.nextElementSibling;
@@ -1031,12 +1033,22 @@ if (/[?&]preview=1/.test(location.search)) {
   const line = q(".section__head-line", works), row = q(".works__row", works), more = q(".works__more", works);
   const nextLine = q(".section__head-line", next);
   if (!line || !row || !more || !nextLine) return;
+  const MIN_BTN_GAP = 60; // кнопка «Больше кейсов» не должна прижиматься к линии следующего раздела
   function fit() {
-    works.style.paddingBottom = "";
-    const want = row.getBoundingClientRect().top - line.getBoundingClientRect().top;      // линия → карточки
-    const have = nextLine.getBoundingClientRect().top - more.getBoundingClientRect().bottom; // кнопка → следующая линия
+    works.style.paddingBottom = ""; works.style.marginBottom = "";
+    const medias = [...row.querySelectorAll(".wcard__media")];
+    if (!medias.length) return;
+    const cardsTop = Math.min(...medias.map((m) => m.getBoundingClientRect().top));
+    const cardsBottom = Math.max(...medias.map((m) => m.getBoundingClientRect().bottom));
+    const want = cardsTop - line.getBoundingClientRect().top;      // линия → верх карточек
+    const have = nextLine.getBoundingClientRect().top - cardsBottom; // низ карточек → следующая линия
+    const btnGap = nextLine.getBoundingClientRect().top - more.getBoundingClientRect().bottom;
+    const delta = Math.max(want - have, MIN_BTN_GAP - btnGap); // не ужимаем так, чтобы кнопка осталась ближе MIN_BTN_GAP к линии
+    if (delta >= 0) return;
     const pad = parseFloat(getComputedStyle(works).paddingBottom) || 0;
-    works.style.paddingBottom = Math.min(pad, Math.max(0, pad + want - have)).toFixed(1) + "px"; // только уменьшаем, не раздуваем
+    const rest = pad + delta;
+    if (rest >= 0) works.style.paddingBottom = rest.toFixed(1) + "px";
+    else { works.style.paddingBottom = "0px"; works.style.marginBottom = rest.toFixed(1) + "px"; }
   }
   fit();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
