@@ -522,28 +522,6 @@ if (/[?&]preview=1/.test(location.search)) {
   }
 
   // Оборачивает каждое слово внутри элемента в <span class="word">, не трогая теги внутри (например .accent)
-  function wrapWords(root) {
-    function walk(node) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        if (!node.textContent.trim()) return;
-        const frag = document.createDocumentFragment();
-        node.textContent.split(/(\s+)/).forEach((part) => {
-          if (!part) return;
-          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
-          const span = document.createElement("span");
-          span.className = "word";
-          span.textContent = part;
-          frag.appendChild(span);
-        });
-        node.replaceWith(frag);
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        [...node.childNodes].forEach(walk);
-      }
-    }
-    [...root.childNodes].forEach(walk);
-    return [...root.querySelectorAll(".word")];
-  }
-
   function heroPinScrub(wrap, hero, canvas) {
     wrap.classList.add("js-scrub");
     const fadeEls = [...$$(".hero__top > *", hero), ...$$(".hero__bottom > *", hero)];
@@ -551,9 +529,15 @@ if (/[?&]preview=1/.test(location.search)) {
     const main = $("main");
     const fade = $(".hero__fade", hero);
     const body = reveal ? $(".hero__reveal-body", reveal) : null;
-    const words = reveal ? wrapWords(reveal) : [];
-    // строки с оранжевой плашкой «выделенного текста»: её ширина следует за проявлением слов
-    const plates = reveal ? $$(".hero__reveal-line, .hero__reveal-body-line", reveal).map((el) => ({ el, ws: [...$$(".word", el)] })) : [];
+    // строки обеих надписей (SVG): каждая проявляется «шторкой» слева направо через свой clipPath
+    const units = reveal ? $$(".rv-unit", reveal).map((g) => {
+      const rect = g.previousElementSibling.firstElementChild; // <clipPath><rect class="rv-clip"></clipPath>
+      const bb = g.getBBox();
+      rect.setAttribute("x", (bb.x - 1).toFixed(2));
+      rect.setAttribute("y", (bb.y - 2).toFixed(2));
+      rect.setAttribute("height", (bb.height + 4).toFixed(2));
+      return { rect, w: bb.width + 2 };
+    }) : [];
     let scrolling = false; // пока false — не мешаем вступительной анимации на загрузке
     const clamp01 = (n) => Math.min(1, Math.max(0, n));
 
@@ -681,30 +665,17 @@ if (/[?&]preview=1/.test(location.search)) {
           el.style.pointerEvents = fade > 0.6 ? "none" : "";
         });
 
-        // Заголовок и текст проявляются следом — слово за словом вместе со скроллом:
-        // просто из прозрачного в 100% непрозрачности, без блюра и сдвига
-        if (reveal && words.length) {
+        // Надписи проявляются следом — строка за строкой вместе со скроллом
+        if (reveal && units.length) {
           const r = clamp01((progress - REVEAL_START) / (REVEAL_END - REVEAL_START));
-          const n = words.length;
-          // Окно проявления одного слова — соседние слова слегка перекрываются, не мигают по одному;
-          // старт слов растянут так, что последнее слово всегда доходит до 100% ровно при r = 1
+          const n = units.length;
+          // Окно проявления одной строки — соседние слегка перекрываются;
+          // старт растянут так, что последняя строка доходит до 100% ровно при r = 1
           const fadeSpan = Math.min(0.5, 3 / n);
           const startSpan = 1 - fadeSpan;
-          words.forEach((w, i) => {
-            const wordStart = n > 1 ? (i / (n - 1)) * startSpan : 0;
-            const t = clamp01((r - wordStart) / fadeSpan);
-            w.style.opacity = String(t);
-            w._t = t;
-          });
-          plates.forEach(({ el, ws }) => {
-            let prev = 0, right = 0;
-            for (const w of ws) {
-              if (!w._t) break;
-              const end = w.offsetLeft + w.offsetWidth;
-              right = prev + (end - prev) * w._t;
-              prev = end;
-            }
-            el.style.setProperty("--plate", right.toFixed(1) + "px");
+          units.forEach((u, i) => {
+            const start = n > 1 ? (i / (n - 1)) * startSpan : 0;
+            u.rect.setAttribute("width", (u.w * clamp01((r - start) / fadeSpan)).toFixed(2));
           });
         }
       }
@@ -1044,32 +1015,3 @@ if (/[?&]preview=1/.test(location.search)) {
   if (window.ResizeObserver) new ResizeObserver(layout).observe(area);
 })();
 
-/* ---------- Заголовок второго экрана: «ВОЗМОЖНОСТЯМИ» вровень с концом первой строки ----------
-   Если первая строка в браузере не растянулась (или не влезла), ширина контейнера подстраивается под неё,
-   а третья строка сдвигается так, чтобы её последняя буква встала ровно под последней буквой «СТУДИЯ». */
-(() => {
-  const title = document.querySelector(".hero__reveal-title");
-  if (!title) return;
-  const l1 = title.querySelector(".hero__reveal-line--1");
-  const l3 = title.querySelector(".hero__reveal-line--3");
-  if (!l1 || !l3) return;
-  const lastRight = (line) => { const w = line.querySelectorAll(".word"); return w.length ? w[w.length - 1].getBoundingClientRect().right : 0; };
-  function layout() {
-    title.style.width = ""; l3.style.marginRight = "";
-    if (!title.querySelector(".word")) return;
-    // естественная ширина первой строки (без растяжки)
-    title.classList.add("is-measuring");
-    const r = document.createRange(); r.selectNodeContents(l1);
-    const natural = r.getBoundingClientRect().width;
-    title.classList.remove("is-measuring");
-    if (natural > title.getBoundingClientRect().width) title.style.width = Math.ceil(natural) + "px";
-    // выравниваем конец третьей строки по концу первой
-    const diff = lastRight(l3) - lastRight(l1);
-    if (Math.abs(diff) > 0.3) l3.style.marginRight = diff.toFixed(2) + "px";
-  }
-  layout();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
-  addEventListener("load", layout);
-  let t;
-  addEventListener("resize", () => { clearTimeout(t); t = setTimeout(layout, 120); });
-})();

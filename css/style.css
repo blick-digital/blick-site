@@ -362,52 +362,17 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .hero__lead { font-size: 13px; line-height: 1.6; color: var(--muted); }
 .hero__aside .pill { align-self: flex-start; min-width: 200px; }
 
-/* Заголовок + текст на всю ширину — проявляются после первого экрана,
-   слово за словом вместе со скроллом */
+/* Две надписи второго экрана (SVG из assets/svg/) — проявляются после первого экрана,
+   строка за строкой вместе со скроллом. Размер — доля ширины экрана, как в макете */
 .hero__reveal {
   position: absolute; inset: var(--pad);
   z-index: 3;
   pointer-events: none;
 }
-.hero__reveal-title {
-  display: flex; flex-direction: column; gap: 0;
-  margin: 0 0 22px;
-  font-family: var(--font-display); font-weight: 600;
-  text-transform: uppercase;
-  font-size: clamp(26px, 3.6vw, 54px);
-  line-height: 1.08; letter-spacing: -.01em;
-  color: var(--text);
-}
-/* Контейнер заголовка фиксированной ширины: первая строка растянута от левого до правого края,
-   вторая — по левому краю, третья — по правому */
-.hero__reveal-title { width: 15.2em; }
-.hero__reveal-line { display: block; white-space: nowrap; }
-.hero__reveal-line--1 { text-align: justify; text-align-last: justify; }
-.hero__reveal-line--2 { text-align: left; align-self: flex-start; }
-.hero__reveal-line--3 { text-align: right; align-self: flex-end; }
-.hero__reveal-title.is-measuring .hero__reveal-line--1 { text-align-last: left; }
-.hero__reveal-body {
-  position: absolute; right: 0; bottom: 0; width: max-content;
-  display: flex; flex-direction: column; gap: 0;
-  margin: 0;
-  font-family: var(--font-display); font-weight: 600;
-  font-size: clamp(26px, 2.8vw, 37px);
-  line-height: 1.2; letter-spacing: 0;
-  text-transform: uppercase; text-align: right;
-  color: var(--text);
-}
-.hero__reveal-body-line { display: block; white-space: nowrap; }
-/* Первая строка — по левому краю контейнера (ширина контейнера = самая длинная строка), остальные — по правому */
-.hero__reveal-body-line--first { text-align: left; align-self: flex-start; }
-.hero__reveal-body-line:not(.hero__reveal-body-line--first) { align-self: flex-end; }
-
-/* Выделение, как будто текст выделили мышью: оранжевая плашка ровно по ширине строки.
-   Ширину (--plate) двигает скролл — плашка тянется слева направо вместе с проявлением слов */
-.hero__reveal-line, .hero__reveal-body-line {
-  position: relative;
-  background: linear-gradient(var(--accent), var(--accent)) 0 0 / var(--plate, 0px) 100% no-repeat;
-}
-.hero__reveal .accent { color: var(--text); } /* тире на оранжевой плашке иначе сливается */
+.hero__reveal-title, .hero__reveal-body { position: absolute; margin: 0; }
+.hero__reveal-title { top: 0; left: 0; width: 38.6vw; }
+.hero__reveal-body { right: 0; bottom: 0; width: 36.6vw; }
+.hero__reveal svg { display: block; width: 100%; height: auto; overflow: visible; }
 /* Затемнение под текстом второго экрана: начинается у верха «Вы получаете…» и доходит до сплошного фона блока «услуги» */
 .hero__fade {
   position: absolute; left: 0; right: 0; top: 100%; height: 0; z-index: 2;
@@ -425,8 +390,6 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   background: linear-gradient(var(--bg), var(--bg)) bottom / 100% calc(100% - var(--grad)) no-repeat;
 }
 .hero-scrub.js-scrub + main > .services { padding-top: clamp(24px, 4vw, 56px); }
-/* Слово-за-словом: просто из прозрачного в 100% непрозрачности, без блюра и сдвига */
-.hero__reveal .word { display: inline-block; opacity: 0; }
 /* Без JS (или на мобильных/reduced-motion, где закрепления нет) — слой не нужен, остаётся заголовок */
 .hero-scrub:not(.js-scrub) .hero__reveal { display: none; }
 
