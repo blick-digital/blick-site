@@ -371,7 +371,9 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 }
 .hero__reveal-title, .hero__reveal-body { position: absolute; margin: 0; }
 .hero__reveal-title { top: 0; left: 0; width: 38.6vw; }
-.hero__reveal-body { right: 0; bottom: 0; width: 36.6vw; }
+.hero__reveal-body { right: 0; bottom: 0; width: 35.4vw; }
+.hero__reveal .rv-o { fill: var(--accent); } /* оранжевый — всегда цвет сайта */
+.hero__reveal .rv-d { fill: #0f0f0f; }
 .hero__reveal svg { display: block; width: 100%; height: auto; overflow: visible; }
 /* Затемнение под текстом второго экрана: начинается у верха «Вы получаете…» и доходит до сплошного фона блока «услуги» */
 .hero__fade {
