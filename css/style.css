@@ -1140,30 +1140,41 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 }
 
 /* =========================================================
-   Свечение у курсора — тёплый акцентный блик, включается
-   после первого экрана (когда hero уходит из вида)
+   Курсор — дизайнерский crop-маркер: оранжевая точка в рамке из четырёх
+   угловых скобок (1px). Над изображением рамка растёт до границ картинки.
+   Создаётся в JS только для мыши (hover + fine pointer), при reduced-motion нет.
    ========================================================= */
-.cursor-glow {
-  position: fixed; top: 0; left: 0;
-  width: 260px; height: 260px;
-  margin: -130px 0 0 -130px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 181, 71, .38) 0%, rgba(255, 122, 26, .16) 42%, transparent 72%);
-  filter: blur(18px);
-  mix-blend-mode: screen;
+html.has-cursor, html.has-cursor * { cursor: none !important; }
+html.has-cursor input, html.has-cursor textarea { cursor: text !important; }
+html.has-cursor select, html.has-cursor iframe { cursor: auto !important; }
+
+.cursor-dot, .cursor-frame {
+  position: fixed; top: 0; left: 0; z-index: 9999;
   pointer-events: none;
-  z-index: 40;
-  opacity: 0;
-  transition: opacity .5s var(--ease);
+  opacity: 0; transition: opacity .25s var(--ease);
   will-change: transform;
 }
-.cursor-glow.is-active { opacity: 1; }
+.cursor-dot.is-visible, .cursor-frame.is-visible { opacity: 1; }
+.cursor-dot {
+  width: 6px; height: 6px; margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .8); /* тонкое кольцо, чтобы точка не терялась на оранжевых фото */
+  transition: opacity .25s var(--ease), scale .3s var(--ease);
+}
+.cursor-dot.is-link { scale: 1.8; }
+/* скобки белые + difference: на светлом фоне тёмные, на тёмном светлые */
+.cursor-frame { mix-blend-mode: difference; }
+.cursor-frame i { position: absolute; width: 7px; height: 7px; border: 0 solid #fff; }
+.cursor-frame i:nth-child(1) { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
+.cursor-frame i:nth-child(2) { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; }
+.cursor-frame i:nth-child(3) { bottom: 0; left: 0; border-bottom-width: 1px; border-left-width: 1px; }
+.cursor-frame i:nth-child(4) { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
   html { scroll-behavior: auto; }
   [data-reveal] { opacity: 1; transform: none; }
-  .cursor-glow { display: none; }
 }
 
 /* =========================================================

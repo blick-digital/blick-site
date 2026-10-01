@@ -745,24 +745,58 @@ if (/[?&]preview=1/.test(location.search)) {
     }).observe(hero);
   }
 
-  /* ---------- Свечение у курсора: всегда, с первого движения мыши ---------- */
-  const glow = $(".cursor-glow");
-  if (glow && !reduced && matchMedia("(hover: hover) and (pointer: fine)").matches) {
-    let tx = innerWidth / 2, ty = innerHeight / 2, gx = tx, gy = ty;
-    let moved = false;
+  /* ---------- Курсор: crop-маркер ----------
+     Оранжевая точка точно под мышью + рамка из четырёх угловых скобок вокруг неё.
+     Над изображением рамка плавно растягивается до границ картинки. */
+  if (!reduced && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    const FRAME_SEL = ".wcard__media, .case__banner, .case__tile, .case__video, .case__grid img, .case__gallery img, .case__single img, .case__rows img";
+    const LINK_SEL = "a, button, summary, label.chip, .chip, .filter, [role=button]";
+    const NATIVE_SEL = "input, textarea, select, iframe"; // здесь остаётся системный курсор
+    const IDLE = 26, LINK = 38, INSET = 8; // размеры рамки; INSET — отступ скобок внутрь картинки
+
+    const dot = document.createElement("div"); dot.className = "cursor-dot";
+    const frame = document.createElement("div"); frame.className = "cursor-frame";
+    frame.innerHTML = "<i></i><i></i><i></i><i></i>";
+    dot.setAttribute("aria-hidden", "true"); frame.setAttribute("aria-hidden", "true");
+    document.body.append(frame, dot);
+    document.documentElement.classList.add("has-cursor");
+
+    let px = -100, py = -100, seen = false, native = false, target = null, link = false, pressed = false;
+    const cur = { x: -100, y: -100, w: IDLE, h: IDLE };
+    const show = (on) => { dot.classList.toggle("is-visible", on); frame.classList.toggle("is-visible", on); };
 
     addEventListener("pointermove", (e) => {
-      tx = e.clientX; ty = e.clientY;
-      if (!moved) { moved = true; gx = tx; gy = ty; glow.style.transform = `translate3d(${gx}px, ${gy}px, 0)`; glow.classList.add("is-active"); } // свечение — с первого движения мыши, на любом экране
+      px = e.clientX; py = e.clientY;
+      const t = e.target instanceof Element ? e.target : null;
+      native = !!(t && t.closest(NATIVE_SEL));
+      target = !native && t ? t.closest(FRAME_SEL) : null;
+      link = !native && !!(t && t.closest(LINK_SEL));
+      dot.classList.toggle("is-link", link && !target);
+      if (!seen) { seen = true; cur.x = px - IDLE / 2; cur.y = py - IDLE / 2; }
+      show(!native);
     }, { passive: true });
+    document.documentElement.addEventListener("pointerleave", () => show(false));
+    addEventListener("pointerdown", () => { pressed = true; });
+    addEventListener("pointerup", () => { pressed = false; });
 
     (function loop() {
-      gx += (tx - gx) * 0.16;
-      gy += (ty - gy) * 0.16;
-      glow.style.transform = `translate3d(${gx.toFixed(1)}px, ${gy.toFixed(1)}px, 0)`;
+      let tx, ty, tw, th;
+      if (target && target.isConnected) {
+        // граница картинки берётся каждый кадр — карточка может расти при наведении, страница — скроллиться
+        const r = target.getBoundingClientRect();
+        tx = r.left + INSET; ty = r.top + INSET; tw = Math.max(IDLE, r.width - INSET * 2); th = Math.max(IDLE, r.height - INSET * 2);
+      } else {
+        const s = (link ? LINK : IDLE) * (pressed ? 0.8 : 1);
+        tw = th = s; tx = px - s / 2; ty = py - s / 2;
+      }
+      const k = target ? 0.18 : 0.32;
+      cur.x += (tx - cur.x) * k; cur.y += (ty - cur.y) * k;
+      cur.w += (tw - cur.w) * k; cur.h += (th - cur.h) * k;
+      frame.style.transform = `translate3d(${cur.x.toFixed(1)}px, ${cur.y.toFixed(1)}px, 0)`;
+      frame.style.width = cur.w.toFixed(1) + "px"; frame.style.height = cur.h.toFixed(1) + "px";
+      dot.style.transform = `translate3d(${px}px, ${py}px, 0)`;
       requestAnimationFrame(loop);
     })();
-
   }
 })();
 
