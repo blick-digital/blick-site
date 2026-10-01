@@ -217,8 +217,9 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .pill .arr { transition: transform .45s var(--ease); }
 .pill:hover .arr { transform: translate(3px, -3px); }
 .pill--big { --h: 60px; padding: 0 40px; font-size: 13px; }
-.pill--accent { background: var(--accent); color: #1b1b1b; border-color: var(--accent); }
-.pill--accent::before { background: var(--text); }
+/* «Отправить заявку»: без заливки, как остальные; при наведении заливается оранжевым */
+.pill--accent::before { background: var(--accent); }
+.pill.pill--accent:hover { color: #1b1b1b; --corner: var(--text); }
 
 /* ---------- Кнопки в стиле курсора: четыре угловые скобки вместо овальной рамки ----------
    Тонкие 1px-уголки по краям; при наведении расходятся чуть наружу и становятся оранжевыми */
