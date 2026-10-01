@@ -546,9 +546,17 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
    ========================================================= */
 .section { padding: clamp(80px, 12vw, 180px) var(--pad); }
 .section__head {
-  display: flex; justify-content: space-between;
-  padding-bottom: 16px; margin-bottom: clamp(40px, 6vw, 90px);
-  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center;
+  margin-bottom: clamp(40px, 6vw, 90px);
+}
+.section__head .tag { color: var(--accent); flex: none; }
+/* Короткая линия между номером раздела и его названием — не на всю ширину,
+   а ровно между двумя надписями, с отступом 10px от каждой */
+.section__head-line {
+  flex: 1 1 auto;
+  height: 1px;
+  margin: 0 10px;
+  background: var(--line-2);
 }
 
 /* Появление по скроллу */
@@ -590,7 +598,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   opacity: 0; transition: opacity .5s var(--ease);
   pointer-events: none;
 }
-.svc__num { color: var(--muted); font-size: 13px; }
+.svc__num { color: var(--accent); font-size: 13px; }
 .svc__title {
   font-family: var(--font-display); font-weight: 500;
   font-size: clamp(26px, 3.6vw, 56px); line-height: 1;
