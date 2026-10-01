@@ -256,12 +256,13 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   position: absolute; inset: 0; z-index: 0;
   background: #0a0a0b url("../assets/video/hero-poster.jpg") center / cover no-repeat;
 }
-.hero__canvas {
+.hero__video, .hero__canvas {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
 }
-.hero__canvas { opacity: 0; transition: opacity 1.2s var(--ease); }
-.hero.has-video .hero__canvas { opacity: 1; }
+.hero__video { object-fit: cover; }
+.hero__video, .hero__canvas { opacity: 0; transition: opacity 1.2s var(--ease); }
+.hero.has-video .hero__video, .hero.has-video .hero__canvas { opacity: 1; }
 .hero__vignette {
   position: absolute; inset: 0;
   pointer-events: none;
@@ -277,9 +278,6 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .hero__brand { display: flex; flex-direction: column; gap: clamp(28px, 6vh, 64px); }
 .logo { font-family: var(--font-display); font-size: clamp(20px, 2vw, 28px); font-weight: 500; letter-spacing: .02em; white-space: nowrap; }
 .hero__nav { display: flex; flex-direction: column; align-items: flex-end; }
-
-/* Только мобильные (см. медиа-запрос ниже): краткая версия заголовка в правом верхнем углу hero */
-.hero__mobile-id { display: none; }
 
 .hero__bottom {
   display: grid;
@@ -1093,19 +1091,14 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   .hero__scroll { display: none; }
   .hero__aside { justify-self: stretch; width: 100%; }
 
-  .hero__mobile-id {
-    display: flex; flex-direction: column; align-items: flex-end;
-    position: absolute; top: 70px; right: 0; /* верх — вровень с "[ v.01b ]" слева */
-    max-width: 62%;
-    padding: 10px 14px 16px;
+  /* Сам заголовок (тот же hero__title, не копия) переносится наверх, в правый угол —
+     top выставляется в JS (см. IIFE выравнивания), верх вровень с "[ v.01b ]" слева */
+  .hero__title { position: absolute; right: 0; z-index: 3; text-align: right; }
+  /* Белый градиент снизу вверх, уходящий в прозрачность — чтобы нижний текст (описание, кнопка)
+     читался поверх видео/фото */
+  .hero__vignette {
+    background: linear-gradient(to top, rgba(247, 247, 247, .96) 0%, rgba(247, 247, 247, .8) 22%, rgba(247, 247, 247, 0) 45%);
   }
-  .hero__mobile-id-glow {
-    position: absolute; z-index: -1; inset: -10px -20px -24px;
-    background: radial-gradient(ellipse at 100% 0%, rgba(247, 247, 247, .9) 0%, rgba(247, 247, 247, .55) 55%, transparent 80%);
-  }
-  .hero__mobile-id-da { font-family: var(--font-mono); font-size: 11px; letter-spacing: .02em; color: var(--muted); white-space: nowrap; }
-  .hero__mobile-id-name { font-family: var(--font-display); font-weight: 500; font-size: clamp(22px, 7vw, 32px); letter-spacing: -.02em; line-height: 1.1; margin-top: 2px; }
-  .hero__mobile-id-sub { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); margin-top: 4px; }
 
   .svc__item { grid-template-columns: 44px 1fr 32px; }
   .svc__tags { grid-column: 2 / 3; grid-row: 2; text-align: left; margin-top: 8px; }

@@ -51,11 +51,12 @@ if (/[?&]preview=1/.test(location.search)) {
     const boot = $("#boot");
     // Блок намеренно стоит первым и ни от чего не зависит: если ниже по файлу что-то
     // сломается, заставка всё равно снимется и сайт останется рабочим.
+    const video = $(".hero__video"); // только мобильная ветка; на десктопе кадры — см. framesPart
     if (!boot) { bootResolve(); return; }
     const MIN = 550;    // минимум на экране — чтобы заставка не мигала на быстром интернете
     const MAX = 7000;   // страховка: дольше не держим никогда, даже если что-то не догрузилось
     const t0 = performance.now();
-    let fonts = 0, loaded = 0, shown = 0, done = false;
+    let fonts = 0, loaded = 0, vFailed = 0, shown = 0, done = false;
 
     // document.fonts.ready в Safari разрешается очень поздно (замер на живом сайте: 4,7 с),
     // поэтому ждём поимённо только шрифты первого экрана и не дольше 1,5 с.
@@ -69,7 +70,7 @@ if (/[?&]preview=1/.test(location.search)) {
         new Promise((r) => setTimeout(r, 1500)),
       ]).then(markFonts);
     } else markFonts();
-    // Ждём только то, что нужно первому экрану: шрифты и постер (первый кадр).
+    // Ждём только то, что нужно первому экрану: шрифты, ролик/кадры и постер под ними.
     // Обложки кейсов лежат ниже и догрузятся сами, пока идёт вступление и прокрутка hero —
     // если ждать событие load, заставка висела бы лишние секунды из-за картинок, которых ещё не видно.
     const poster = "assets/video/hero-poster.jpg";
@@ -77,7 +78,26 @@ if (/[?&]preview=1/.test(location.search)) {
     im.onload = im.onerror = () => { loaded = 1; mark.poster = Math.round(performance.now() - t0); };
     im.src = poster;
     if (im.complete) loaded = 1;
+    if (video) video.addEventListener("error", () => { vFailed = 1; }, { once: true });
+    // canplaythrough / readyState 4 = браузер сам считает, что доиграет без остановок.
+    // Это надёжнее, чем ждать полный буфер: Safari часто перестаёт качать, не дойдя до конца.
+    let canThrough = 0;
+    if (video) video.addEventListener("canplaythrough", () => { canThrough = 1; }, { once: true });
     const mark = { fonts: 0, poster: 0, video: 0 };
+
+    // Доля загруженного ролика (мобильные): для зацикленного видео достаточно первых секунд
+    const videoPart = () => {
+      if (!video || vFailed) return 1;
+      if (canThrough || video.readyState >= 4) return 1;
+      if (!video.duration) return 0;
+      const need = Math.min(video.duration, 3);
+      let end = 0;
+      for (let i = 0; i < video.buffered.length; i++) {
+        if (video.buffered.start(i) <= 0.05) end = Math.max(end, video.buffered.end(i));
+      }
+      // хвост в доли секунды может не догрузиться никогда — считаем почти полное за полное
+      return end >= need - 0.2 ? 1 : Math.min(1, end / need);
+    };
 
     // Доля загруженных кадров (десктоп): половины достаточно, чтобы отпустить экран —
     // остальные дойдут, пока идёт вступление и прокрутка hero
@@ -122,7 +142,7 @@ if (/[?&]preview=1/.test(location.search)) {
     const tick = () => {
       if (done) return;
       const el = performance.now() - t0;
-      const mediaPart = scrubEnabled ? framesPart() : 1;
+      const mediaPart = scrubEnabled ? framesPart() : videoPart();
       if (!mark.video && mediaPart >= 1) mark.video = Math.round(el);
       const p = 0.15 * fonts + 0.65 * mediaPart + 0.20 * loaded;
       paint(Math.min(0.99, p));
@@ -445,15 +465,60 @@ if (/[?&]preview=1/.test(location.search)) {
   /* ---------- Hero: фон (первый кадр виден сразу через CSS-постер) ---------- */
   const heroScrub = $(".hero-scrub");
   const hero = $(".hero");
+  const video = $(".hero__video");
   const canvas = $(".hero__canvas");
 
   if (scrubEnabled) {
-    // Десктоп: фон рисует canvas по кадрам (см. heroPinScrub)
+    // Десктоп: видео не используется вовсе — фон рисует canvas по кадрам (см. heroPinScrub)
+    if (video) video.remove();
     if (canvas) heroPinScrub(heroScrub, hero, canvas);
   } else {
-    // Мобильные / reduced-motion: видео нет вовсе, остаётся статичный постер
-    // (CSS-фон .hero__visual — тот же первый кадр, что и на десктопе)
     if (canvas) canvas.remove();
+    if (video) {
+      video.muted = true; // на iOS автозапуск возможен только у muted-видео
+      video.setAttribute("playsinline", "");
+      // Мобильные / reduced-motion — обычное фоновое видео в цикле.
+      // Проявляем его только когда оно реально пошло (событие playing): в режиме энергосбережения
+      // iOS блокирует автозапуск — тогда остаётся постер (первый кадр), а не пустой чёрный кадр.
+      video.loop = true;
+      video.addEventListener("playing", () => hero.classList.add("has-video"), { once: true });
+      const tryPlay = () => { const p = video.play(); if (p && p.catch) p.catch(() => {}); };
+
+      // Запасной вариант: если система запретила автозапуск (например, режим энергосбережения iOS),
+      // "проигрываем" видео вручную — сами двигаем время кадр за кадром, это не считается автозапуском
+      let manual = false;
+      const startManual = () => {
+        if (manual || !video.paused) return;
+        manual = true;
+        let vt = video.currentTime || 0, last = 0;
+        video.addEventListener("seeked", () => hero.classList.add("has-video"), { once: true });
+        const step = (ts) => {
+          if (!video.paused) { manual = false; return; } // настоящий play() заработал — отпускаем
+          if (!last) last = ts;
+          vt += (ts - last) / 1000; last = ts;
+          if (video.duration) {
+            if (vt >= video.duration) vt = 0;
+            if (!video.seeking) video.currentTime = vt;
+          }
+          requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      };
+
+      // Через секунду после загрузки страницы — старт (эта секунда покрывает подгрузку файла)
+      setTimeout(() => {
+        tryPlay();
+        setTimeout(startManual, 600);
+      }, 1000);
+      // Если система разрешит позже — первое касание запускает настоящее воспроизведение
+      ["touchend", "pointerup", "click"].forEach((ev) =>
+        addEventListener(ev, () => { if (video.paused) tryPlay(); }, { once: true, passive: true })
+      );
+      document.addEventListener("visibilitychange", () => { if (!document.hidden && video.paused) tryPlay(); });
+      video.addEventListener("error", () => video.remove(), { once: true }); // останется постер
+      video.src = video.dataset.srcLight;
+      video.load();
+    }
   }
 
   // Оборачивает каждое слово внутри элемента в <span class="word">, не трогая теги внутри (например .accent)
@@ -720,6 +785,7 @@ if (/[?&]preview=1/.test(location.search)) {
   const scrollIcon = document.querySelector(".hero__scroll");
   const lead = aside.querySelector(".hero__lead");
   const pill = aside.querySelector(".pill");
+  const brandTag = document.querySelector(".hero__brand .tag"); // "[ v.01b ]" — ориентир для мобильного top ниже
   const ctx = document.createElement("canvas").getContext("2d");
 
   // Положение базовой линии и размеры глифов внутри строки: считаем по метрикам шрифта
@@ -771,8 +837,18 @@ if (/[?&]preview=1/.test(location.search)) {
         name.style.fontSize = (fsOf(name) * (tR - tL) / (nR - nL)).toFixed(2) + "px";
         nameLine.style.marginLeft = (parseFloat(getComputedStyle(nameLine).marginLeft) + tL - inkLeft(name, LSB.B)).toFixed(2) + "px";
       }
+      // Сам заголовок (CSS выше делает его position:absolute; right:0) поднимаем наверх,
+      // в правый угол — верх вровень с верхом "[ v.01b ]" слева. title.offsetParent — hero__bottom,
+      // поэтому top считаем как разницу между тегом и собственным верхом hero__bottom.
+      // offsetTop, а не getBoundingClientRect: на старте тег ещё сдвинут transform-анимацией появления
+      if (brandTag) {
+        const heroEl = title.closest(".hero");
+        const within = (el) => { let y = 0; for (; el && el !== heroEl; el = el.offsetParent) y += el.offsetTop; return y; };
+        title.style.top = (within(brandTag) - within(title.offsetParent)).toFixed(1) + "px";
+      }
       return;
     }
+    title.style.top = ""; // на десктопе заголовок остаётся в обычном потоке
 
     // Эталон — буквы BLICK: левый край "B", правый край "C" и правый край "K"
     const refL = inkLeft(name, LSB.B);
