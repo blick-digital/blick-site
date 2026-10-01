@@ -407,6 +407,9 @@ if (/[?&]preview=1/.test(location.search)) {
   }
 
   /* ---------- Форма ---------- */
+  // Адрес облачной функции Яндекса, которая шлёт письма на почту студии. Пока пусто — форма предлагает написать на почту
+  const FORM_ENDPOINT = "";
+  const FORM_FALLBACK = "Не удалось отправить. Напишите нам на почту blickdesign@yandex.ru";
   const form = $(".form");
   if (form) {
     const status = $(".form__status", form);
@@ -437,12 +440,13 @@ if (/[?&]preview=1/.test(location.search)) {
         types: $$("input[name=type]:checked", form).map((i) => i.value),
         consent: true,
       };
-      // Заявка уходит на почту студии через api/contact.py (Vercel)
+      // Заявка уходит на почту студии через облачную функцию (api/yandex-function/index.py, Яндекс Облако)
       const btn = $("button[type=submit]", form);
       if (btn.disabled) return;
+      if (!FORM_ENDPOINT) { status.textContent = FORM_FALLBACK; return; }
       btn.disabled = true;
       status.textContent = "Отправляем…";
-      fetch("/api/contact", {
+      fetch(FORM_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Requested-With": "blick-form" },
         body: JSON.stringify(data),
@@ -456,7 +460,7 @@ if (/[?&]preview=1/.test(location.search)) {
             status.classList.add("ok");
             form.reset();
           } else {
-            status.textContent = res.error || "Не удалось отправить. Напишите нам на почту blickdesign@yandex.ru";
+            status.textContent = res.error || FORM_FALLBACK;
           }
         });
     });
