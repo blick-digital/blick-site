@@ -550,6 +550,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   margin-bottom: clamp(40px, 6vw, 90px);
 }
 .section__head .tag { color: var(--accent); flex: none; }
+.section__head .tag:last-child { position: relative; top: -1px; }
 /* Короткая линия между номером раздела и его названием — не на всю ширину,
    а ровно между двумя надписями, с отступом 10px от каждой */
 .section__head-line {

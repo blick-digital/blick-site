@@ -814,7 +814,9 @@ if (/[?&]preview=1/.test(location.search)) {
   const RSB = { K: .032, C: .058, О: .058, А: .075, ")": .08 };
   const LSB = { B: .072, В: .072 };
   function charRect(el, i) {
-    const node = i < 0 ? el.lastChild : el.firstChild; // первая/последняя буква — в крайних текстовых узлах
+    let node = i < 0 ? el.lastChild : el.firstChild; // первая/последняя буква — в крайних текстовых узлах
+    // если крайний узел — элемент-обёртка (например, цветной span вокруг скобки), спускаемся до текста внутри
+    while (node && node.nodeType !== Node.TEXT_NODE) node = i < 0 ? node.lastChild : node.firstChild;
     const r = document.createRange();
     const k = i < 0 ? node.length + i : i;
     r.setStart(node, k); r.setEnd(node, k + 1);
