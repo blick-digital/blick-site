@@ -380,6 +380,7 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .hero__mark { font-family: var(--font-display); font-weight: 500; font-size: clamp(11px, calc(1vw + 2px), 18px); letter-spacing: .1em; margin-left: -.14em; } /* тот же кегль, что у «Диджитал Ателье» слева */
 .hero__lead { font-size: 13px; line-height: 1.6; color: var(--muted); }
 .hero__aside .pill { align-self: flex-start; min-width: 200px; }
+.works__more .pill { min-width: 200px; } /* тот же размер, что у «Обсудить проект» */
 
 /* Две надписи второго экрана (SVG из assets/svg/) — проявляются после первого экрана,
    строка за строкой вместе со скроллом. Размер — доля ширины экрана, как в макете */
