@@ -203,16 +203,18 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   /* тот же шрифт, что у «Диджитал Ателье» в хиро — PP Neue Machina, не моно */
   font-family: var(--font-display); font-weight: 500; font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
   cursor: pointer;
-  transition: color .45s var(--ease), border-color .45s var(--ease), transform .2s;
+  transition: color .7s var(--ease), border-color .45s var(--ease), transform .2s;
 }
 .pill::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
   background: var(--text);
-  transform: scaleY(0); transform-origin: 50% 100%; /* заливка вырастает снизу вверх */
-  transition: transform .55s var(--ease);
+  /* заливка расходится кругом от точки, где курсор вошёл в кнопку (--mx/--my/--mr ставит js: точка и радиус до дальнего угла,
+     чтобы круг заполнял кнопку ровно за всё время анимации при любом месте входа), и схлопывается к точке выхода */
+  clip-path: circle(0 at var(--mx, 50%) var(--my, 50%));
+  transition: clip-path 1.1s var(--ease);
 }
 .pill:hover { color: var(--bg); border-color: var(--text); }
-.pill:hover::before { transform: scaleY(1); }
+.pill:hover::before { clip-path: circle(var(--mr, 150%) at var(--mx, 50%) var(--my, 50%)); }
 .pill:active { transform: scale(.97); }
 .pill .arr { transition: transform .45s var(--ease); }
 .pill:hover .arr { transform: translate(3px, -3px); }
@@ -391,7 +393,7 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   pointer-events: none;
 }
 .hero__reveal-title, .hero__reveal-body { position: absolute; margin: 0; }
-.hero__reveal-title { top: 0; left: 0; width: 38.6vw; }
+.hero__reveal-title { top: 0; left: 0; width: 34.7vw; }
 .hero__reveal-body { right: 0; bottom: 0; width: 35.4vw; }
 .hero__reveal .rv-o { fill: var(--accent); } /* оранжевый — всегда цвет сайта */
 .hero__reveal .rv-d { fill: #0f0f0f; }

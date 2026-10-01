@@ -1044,3 +1044,21 @@ if (/[?&]preview=1/.test(location.search)) {
   let t;
   addEventListener("resize", () => { clearTimeout(t); t = setTimeout(fit, 120); });
 })();
+
+/* ---------- Кнопки: заливка расходится от точки входа курсора ----------
+   Запоминаем, где указатель вошёл в кнопку и где вышел, — css строит по этим точкам круг заливки. */
+(() => {
+  const mark = (e) => {
+    const pill = e.target instanceof Element ? e.target.closest(".pill") : null;
+    if (!pill || (e.relatedTarget instanceof Node && pill.contains(e.relatedTarget))) return;
+    const r = pill.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    // радиус до самого дальнего угла: круг заполняет кнопку ровно к концу анимации, откуда бы ни зашёл курсор
+    const far = Math.hypot(Math.max(x, r.width - x), Math.max(y, r.height - y));
+    pill.style.setProperty("--mx", x.toFixed(1) + "px");
+    pill.style.setProperty("--my", y.toFixed(1) + "px");
+    pill.style.setProperty("--mr", (far + 2).toFixed(1) + "px");
+  };
+  document.addEventListener("pointerover", mark, { passive: true });
+  document.addEventListener("pointerout", mark, { passive: true });
+})();
