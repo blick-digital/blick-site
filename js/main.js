@@ -51,12 +51,11 @@ if (/[?&]preview=1/.test(location.search)) {
     const boot = $("#boot");
     // Блок намеренно стоит первым и ни от чего не зависит: если ниже по файлу что-то
     // сломается, заставка всё равно снимется и сайт останется рабочим.
-    const video = $(".hero__video");
     if (!boot) { bootResolve(); return; }
     const MIN = 550;    // минимум на экране — чтобы заставка не мигала на быстром интернете
     const MAX = 7000;   // страховка: дольше не держим никогда, даже если что-то не догрузилось
     const t0 = performance.now();
-    let fonts = 0, loaded = 0, vFailed = 0, shown = 0, done = false;
+    let fonts = 0, loaded = 0, shown = 0, done = false;
 
     // document.fonts.ready в Safari разрешается очень поздно (замер на живом сайте: 4,7 с),
     // поэтому ждём поимённо только шрифты первого экрана и не дольше 1,5 с.
@@ -70,39 +69,15 @@ if (/[?&]preview=1/.test(location.search)) {
         new Promise((r) => setTimeout(r, 1500)),
       ]).then(markFonts);
     } else markFonts();
-    // Ждём только то, что нужно первому экрану: шрифты, ролик и постер под ним.
+    // Ждём только то, что нужно первому экрану: шрифты и постер (первый кадр).
     // Обложки кейсов лежат ниже и догрузятся сами, пока идёт вступление и прокрутка hero —
     // если ждать событие load, заставка висела бы лишние секунды из-за картинок, которых ещё не видно.
-    const poster = (video && video.getAttribute("poster")) || "";
-    if (poster) {
-      const im = new Image();
-      im.onload = im.onerror = () => { loaded = 1; mark.poster = Math.round(performance.now() - t0); };
-      im.src = poster;
-      if (im.complete) loaded = 1;
-    } else loaded = 1;
-    if (video) video.addEventListener("error", () => { vFailed = 1; }, { once: true });
-    // canplaythrough / readyState 4 = браузер сам считает, что доиграет без остановок.
-    // Это надёжнее, чем ждать полный буфер: Safari часто перестаёт качать, не дойдя до конца.
-    let canThrough = 0;
-    if (video) video.addEventListener("canplaythrough", () => { canThrough = 1; }, { once: true });
+    const poster = "assets/video/hero-poster.jpg";
+    const im = new Image();
+    im.onload = im.onerror = () => { loaded = 1; mark.poster = Math.round(performance.now() - t0); };
+    im.src = poster;
+    if (im.complete) loaded = 1;
     const mark = { fonts: 0, poster: 0, video: 0 };
-
-    // Доля загруженного ролика: для скраба нужен весь (перемотка прыгает куда угодно),
-    // для зацикленного видео на телефоне достаточно первых секунд
-    const videoPart = () => {
-      if (!video || vFailed) return 1;
-      if (canThrough || video.readyState >= 4) return 1;
-      if (!video.duration) return 0;
-      // половины ролика хватает, чтобы отпустить экран: остальное дойдёт, пока идёт
-      // вступление и прокрутка hero — до конца ролика пользователь доберётся не раньше
-      const need = scrubEnabled ? video.duration * 0.5 : Math.min(video.duration, 3);
-      let end = 0;
-      for (let i = 0; i < video.buffered.length; i++) {
-        if (video.buffered.start(i) <= 0.05) end = Math.max(end, video.buffered.end(i));
-      }
-      // хвост в доли секунды может не догрузиться никогда — считаем почти полное за полное
-      return end >= need - 0.2 ? 1 : Math.min(1, end / need);
-    };
 
     // Доля загруженных кадров (десктоп): половины достаточно, чтобы отпустить экран —
     // остальные дойдут, пока идёт вступление и прокрутка hero
@@ -128,7 +103,6 @@ if (/[?&]preview=1/.test(location.search)) {
         bootResolve();
         setTimeout(() => boot.remove(), 800);
         if (/[?&]debug=1/.test(location.search)) {
-          const v = video || {};
           const d = document.createElement("pre");
           d.style.cssText = "position:fixed;left:12px;top:12px;z-index:300;margin:0;padding:12px 14px;" +
             "background:rgba(10,10,11,.92);color:#ededea;font:12px/1.6 ui-monospace,monospace;" +
@@ -137,10 +111,7 @@ if (/[?&]preview=1/.test(location.search)) {
             "заставка висела: " + Math.round(performance.now() - t0) + " мс\n" +
             "шрифты готовы:   " + (mark.fonts || "—") + " мс\n" +
             "постер готов:    " + (mark.poster || "—") + " мс\n" +
-            "ролик готов:     " + (mark.video || "не успел") + " мс\n" +
-            "readyState:      " + (v.readyState != null ? v.readyState : "—") + " (4 = хватит на всё)\n" +
-            "в буфере:        " + (v.buffered && v.buffered.length ? v.buffered.end(0).toFixed(1) : 0) +
-              " из " + (v.duration ? v.duration.toFixed(1) : "?") + " с\n" +
+            "кадры готовы:    " + (mark.video || "не успели") + " мс\n" +
             "нажмите, чтобы убрать";
           d.onclick = () => d.remove();
           document.body.appendChild(d);
@@ -151,7 +122,7 @@ if (/[?&]preview=1/.test(location.search)) {
     const tick = () => {
       if (done) return;
       const el = performance.now() - t0;
-      const mediaPart = scrubEnabled ? framesPart() : videoPart();
+      const mediaPart = scrubEnabled ? framesPart() : 1;
       if (!mark.video && mediaPart >= 1) mark.video = Math.round(el);
       const p = 0.15 * fonts + 0.65 * mediaPart + 0.20 * loaded;
       paint(Math.min(0.99, p));
@@ -474,60 +445,15 @@ if (/[?&]preview=1/.test(location.search)) {
   /* ---------- Hero: фон (первый кадр виден сразу через CSS-постер) ---------- */
   const heroScrub = $(".hero-scrub");
   const hero = $(".hero");
-  const video = $(".hero__video");
   const canvas = $(".hero__canvas");
 
   if (scrubEnabled) {
-    // Десктоп: видео не используется вовсе — фон рисует canvas по кадрам (см. heroPinScrub)
-    if (video) video.remove();
+    // Десктоп: фон рисует canvas по кадрам (см. heroPinScrub)
     if (canvas) heroPinScrub(heroScrub, hero, canvas);
   } else {
+    // Мобильные / reduced-motion: видео нет вовсе, остаётся статичный постер
+    // (CSS-фон .hero__visual — тот же первый кадр, что и на десктопе)
     if (canvas) canvas.remove();
-    if (video) {
-      video.muted = true; // на iOS автозапуск возможен только у muted-видео
-      video.setAttribute("playsinline", "");
-      // Мобильные / reduced-motion — обычное фоновое видео в цикле.
-      // Проявляем его только когда оно реально пошло (событие playing): в режиме энергосбережения
-      // iOS блокирует автозапуск — тогда остаётся постер (первый кадр), а не пустой чёрный кадр.
-      video.loop = true;
-      video.addEventListener("playing", () => hero.classList.add("has-video"), { once: true });
-      const tryPlay = () => { const p = video.play(); if (p && p.catch) p.catch(() => {}); };
-
-      // Запасной вариант: если система запретила автозапуск (например, режим энергосбережения iOS),
-      // "проигрываем" видео вручную — сами двигаем время кадр за кадром, это не считается автозапуском
-      let manual = false;
-      const startManual = () => {
-        if (manual || !video.paused) return;
-        manual = true;
-        let vt = video.currentTime || 0, last = 0;
-        video.addEventListener("seeked", () => hero.classList.add("has-video"), { once: true });
-        const step = (ts) => {
-          if (!video.paused) { manual = false; return; } // настоящий play() заработал — отпускаем
-          if (!last) last = ts;
-          vt += (ts - last) / 1000; last = ts;
-          if (video.duration) {
-            if (vt >= video.duration) vt = 0;
-            if (!video.seeking) video.currentTime = vt;
-          }
-          requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-      };
-
-      // Через секунду после загрузки страницы — старт (эта секунда покрывает подгрузку файла)
-      setTimeout(() => {
-        tryPlay();
-        setTimeout(startManual, 600);
-      }, 1000);
-      // Если система разрешит позже — первое касание запускает настоящее воспроизведение
-      ["touchend", "pointerup", "click"].forEach((ev) =>
-        addEventListener(ev, () => { if (video.paused) tryPlay(); }, { once: true, passive: true })
-      );
-      document.addEventListener("visibilitychange", () => { if (!document.hidden && video.paused) tryPlay(); });
-      video.addEventListener("error", () => video.remove(), { once: true }); // останется постер
-      video.src = video.dataset.srcLight;
-      video.load();
-    }
   }
 
   // Оборачивает каждое слово внутри элемента в <span class="word">, не трогая теги внутри (например .accent)

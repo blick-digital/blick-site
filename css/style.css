@@ -256,13 +256,12 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   position: absolute; inset: 0; z-index: 0;
   background: #0a0a0b url("../assets/video/hero-poster.jpg") center / cover no-repeat;
 }
-.hero__video, .hero__canvas {
+.hero__canvas {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: cover; /* canvas игнорирует object-fit — картинку внутри вписываем сами в JS */
 }
-.hero__video, .hero__canvas { opacity: 0; transition: opacity 1.2s var(--ease); }
-.hero.has-video .hero__video, .hero.has-video .hero__canvas { opacity: 1; }
+.hero__canvas { opacity: 0; transition: opacity 1.2s var(--ease); }
+.hero.has-video .hero__canvas { opacity: 1; }
 .hero__vignette {
   position: absolute; inset: 0;
   pointer-events: none;
@@ -945,12 +944,6 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   background: linear-gradient(to bottom, var(--bg), #ededea);
   border-top: 1px solid var(--line);
   overflow: hidden;
-}
-.footer::before {
-  content: ""; position: absolute; left: 50%; bottom: -30%;
-  width: 90vw; height: 60vw; transform: translateX(-50%);
-  background: radial-gradient(ellipse, rgba(255,136,0,.14), transparent 65%);
-  pointer-events: none;
 }
 .footer__cta { position: relative; margin-bottom: clamp(48px, 7vw, 100px); }
 .footer__title {
