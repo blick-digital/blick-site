@@ -552,6 +552,8 @@ if (/[?&]preview=1/.test(location.search)) {
     const fade = $(".hero__fade", hero);
     const body = reveal ? $(".hero__reveal-body", reveal) : null;
     const words = reveal ? wrapWords(reveal) : [];
+    // строки с оранжевой плашкой «выделенного текста»: её ширина следует за проявлением слов
+    const plates = reveal ? $$(".hero__reveal-line, .hero__reveal-body-line", reveal).map((el) => ({ el, ws: [...$$(".word", el)] })) : [];
     let scrolling = false; // пока false — не мешаем вступительной анимации на загрузке
     const clamp01 = (n) => Math.min(1, Math.max(0, n));
 
@@ -692,6 +694,17 @@ if (/[?&]preview=1/.test(location.search)) {
             const wordStart = n > 1 ? (i / (n - 1)) * startSpan : 0;
             const t = clamp01((r - wordStart) / fadeSpan);
             w.style.opacity = String(t);
+            w._t = t;
+          });
+          plates.forEach(({ el, ws }) => {
+            let prev = 0, right = 0;
+            for (const w of ws) {
+              if (!w._t) break;
+              const end = w.offsetLeft + w.offsetWidth;
+              right = prev + (end - prev) * w._t;
+              prev = end;
+            }
+            el.style.setProperty("--plate", right.toFixed(1) + "px");
           });
         }
       }

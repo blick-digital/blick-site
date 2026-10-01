@@ -370,9 +370,9 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   pointer-events: none;
 }
 .hero__reveal-title {
-  display: flex; flex-direction: column; gap: 2px;
+  display: flex; flex-direction: column; gap: 0;
   margin: 0 0 22px;
-  font-family: var(--font-display); font-weight: 400;
+  font-family: var(--font-display); font-weight: 600;
   text-transform: uppercase;
   font-size: clamp(26px, 3.6vw, 54px);
   line-height: 1.08; letter-spacing: -.01em;
@@ -383,14 +383,14 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .hero__reveal-title { width: 15.2em; }
 .hero__reveal-line { display: block; white-space: nowrap; }
 .hero__reveal-line--1 { text-align: justify; text-align-last: justify; }
-.hero__reveal-line--2 { text-align: left; }
-.hero__reveal-line--3 { text-align: right; }
+.hero__reveal-line--2 { text-align: left; align-self: flex-start; }
+.hero__reveal-line--3 { text-align: right; align-self: flex-end; }
 .hero__reveal-title.is-measuring .hero__reveal-line--1 { text-align-last: left; }
 .hero__reveal-body {
   position: absolute; right: 0; bottom: 0; width: max-content;
   display: flex; flex-direction: column; gap: 0;
   margin: 0;
-  font-family: var(--font-display); font-weight: 400;
+  font-family: var(--font-display); font-weight: 600;
   font-size: clamp(26px, 2.8vw, 37px);
   line-height: 1.2; letter-spacing: 0;
   text-transform: uppercase; text-align: right;
@@ -398,7 +398,16 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 }
 .hero__reveal-body-line { display: block; white-space: nowrap; }
 /* Первая строка — по левому краю контейнера (ширина контейнера = самая длинная строка), остальные — по правому */
-.hero__reveal-body-line--first { text-align: left; }
+.hero__reveal-body-line--first { text-align: left; align-self: flex-start; }
+.hero__reveal-body-line:not(.hero__reveal-body-line--first) { align-self: flex-end; }
+
+/* Выделение, как будто текст выделили мышью: оранжевая плашка ровно по ширине строки.
+   Ширину (--plate) двигает скролл — плашка тянется слева направо вместе с проявлением слов */
+.hero__reveal-line, .hero__reveal-body-line {
+  position: relative;
+  background: linear-gradient(var(--accent), var(--accent)) 0 0 / var(--plate, 0px) 100% no-repeat;
+}
+.hero__reveal .accent { color: var(--text); } /* тире на оранжевой плашке иначе сливается */
 /* Затемнение под текстом второго экрана: начинается у верха «Вы получаете…» и доходит до сплошного фона блока «услуги» */
 .hero__fade {
   position: absolute; left: 0; right: 0; top: 100%; height: 0; z-index: 2;
@@ -1156,7 +1165,7 @@ html.has-cursor select, html.has-cursor iframe { cursor: auto !important; }
 }
 .cursor-dot.is-visible, .cursor-frame.is-visible { opacity: 1; }
 .cursor-dot {
-  width: 6px; height: 6px; margin: -3px 0 0 -3px;
+  width: 8px; height: 8px; margin: -4px 0 0 -4px;
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, .8); /* тонкое кольцо, чтобы точка не терялась на оранжевых фото */
@@ -1167,8 +1176,6 @@ html.has-cursor select, html.has-cursor iframe { cursor: auto !important; }
 .cursor-frame { mix-blend-mode: difference; }
 .cursor-frame i { position: absolute; width: 7px; height: 7px; border: 0 solid #fff; }
 .cursor-frame i:nth-child(1) { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
-.cursor-frame i:nth-child(2) { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; }
-.cursor-frame i:nth-child(3) { bottom: 0; left: 0; border-bottom-width: 1px; border-left-width: 1px; }
 .cursor-frame i:nth-child(4) { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; }
 
 @media (prefers-reduced-motion: reduce) {
