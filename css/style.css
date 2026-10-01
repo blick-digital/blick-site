@@ -195,10 +195,10 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 /* ---------- Кнопки-пилюли ---------- */
 .pill {
   --h: 44px;
-  position: relative; isolation: isolate; overflow: hidden;
+  position: relative; isolation: isolate;
   display: inline-flex; align-items: center; justify-content: center; gap: .6em;
   height: var(--h); padding: 0 28px;
-  border: 1px solid var(--line-2); border-radius: 999px;
+  border: 0; border-radius: 0;
   background: transparent;
   /* тот же шрифт, что у «Диджитал Ателье» в хиро — PP Neue Machina, не моно */
   font-family: var(--font-display); font-weight: 500; font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
@@ -208,18 +208,39 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .pill::before {
   content: ""; position: absolute; inset: 0; z-index: -1;
   background: var(--text);
-  border-radius: inherit;
-  transform: translateY(101%);
+  transform: scaleY(0); transform-origin: 50% 100%; /* заливка вырастает снизу вверх */
   transition: transform .55s var(--ease);
 }
 .pill:hover { color: var(--bg); border-color: var(--text); }
-.pill:hover::before { transform: translateY(0); }
+.pill:hover::before { transform: scaleY(1); }
 .pill:active { transform: scale(.97); }
 .pill .arr { transition: transform .45s var(--ease); }
 .pill:hover .arr { transform: translate(3px, -3px); }
 .pill--big { --h: 60px; padding: 0 40px; font-size: 13px; }
 .pill--accent { background: var(--accent); color: #1b1b1b; border-color: var(--accent); }
 .pill--accent::before { background: var(--text); }
+
+/* ---------- Кнопки в стиле курсора: четыре угловые скобки вместо овальной рамки ----------
+   Тонкие 1px-уголки по краям; при наведении расходятся чуть наружу и становятся оранжевыми */
+.pill, .menu-fab, .chip span, .filter { --corner: var(--text); --arm: 8px; }
+.pill::after, .menu-fab::after, .chip span::after, .filter::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    linear-gradient(var(--corner), var(--corner)) top left / var(--arm) 1px,
+    linear-gradient(var(--corner), var(--corner)) top left / 1px var(--arm),
+    linear-gradient(var(--corner), var(--corner)) top right / var(--arm) 1px,
+    linear-gradient(var(--corner), var(--corner)) top right / 1px var(--arm),
+    linear-gradient(var(--corner), var(--corner)) bottom left / var(--arm) 1px,
+    linear-gradient(var(--corner), var(--corner)) bottom left / 1px var(--arm),
+    linear-gradient(var(--corner), var(--corner)) bottom right / var(--arm) 1px,
+    linear-gradient(var(--corner), var(--corner)) bottom right / 1px var(--arm);
+  background-repeat: no-repeat;
+  transition: inset .35s var(--ease);
+}
+.pill:hover, .menu-fab:hover, .chip span:hover, .filter:hover { --corner: var(--accent); }
+.pill:hover::after, .menu-fab:hover::after, .chip span:hover::after, .filter:hover::after { inset: -3px; }
+/* включённые чипы и фильтры залиты тёмным — уголки на них оранжевые */
+.chip input:checked + span, .filter.is-on { --corner: var(--accent); }
 
 /* =========================================================
    HERO
@@ -414,7 +435,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   position: fixed; top: var(--pad); right: var(--pad); z-index: 60;
   display: inline-flex; align-items: center; gap: 10px;
   height: 42px; padding: 0 18px 0 14px;
-  border: 1px solid var(--line-2); border-radius: 999px;
+  border: 0; border-radius: 0;
   background: rgba(255, 255, 255, .65);
   -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%);
   font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
@@ -946,8 +967,9 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .chips legend { width: 100%; }
 .chip input { position: absolute; opacity: 0; pointer-events: none; }
 .chip span {
+  position: relative;
   display: inline-flex; align-items: center; height: 40px; padding: 0 18px;
-  border: 1px solid var(--line-2); border-radius: 999px;
+  border: 0; border-radius: 0;
   font-size: 14px; cursor: pointer; user-select: none;
   transition: background .3s, color .3s, border-color .3s;
 }
@@ -1018,8 +1040,9 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 
 .filters { display: flex; flex-wrap: wrap; gap: 8px; }
 .filter {
+  position: relative;
   height: 38px; padding: 0 16px;
-  border: 1px solid var(--line-2); border-radius: 999px; background: transparent;
+  border: 0; border-radius: 0; background: transparent;
   font-family: var(--font-mono); font-size: 12px; cursor: pointer;
   transition: background .3s, color .3s, border-color .3s;
 }
