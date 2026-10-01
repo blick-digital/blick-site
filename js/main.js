@@ -407,8 +407,8 @@ if (/[?&]preview=1/.test(location.search)) {
   }
 
   /* ---------- Форма ---------- */
-  // Адрес облачной функции Яндекса, которая шлёт письма на почту студии. Пока пусто — форма предлагает написать на почту
-  const FORM_ENDPOINT = "";
+  // Адрес облачной функции Яндекса, которая шлёт письма на почту студии. Если адрес пуст — форма предлагает написать на почту
+  const FORM_ENDPOINT = "https://functions.yandexcloud.net/d4e1eh3h1acb4geqdpod";
   const FORM_FALLBACK = "Не удалось отправить. Напишите нам на почту blickdesign@yandex.ru";
   const form = $(".form");
   if (form) {
