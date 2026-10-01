@@ -755,7 +755,6 @@ if (/[?&]preview=1/.test(location.search)) {
       native = !!(t && t.closest(NATIVE_SEL));
       target = !native && t ? t.closest(FRAME_SEL) : null;
       link = !native && !!(t && t.closest(LINK_SEL));
-      dot.classList.toggle("is-link", link && !target);
       if (!seen) { seen = true; cur.x = px - IDLE / 2; cur.y = py - IDLE / 2; }
       show(!native);
     }, { passive: true });

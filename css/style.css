@@ -1134,9 +1134,8 @@ html.has-cursor select, html.has-cursor iframe { cursor: auto !important; }
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, .8); /* тонкое кольцо, чтобы точка не терялась на оранжевых фото */
-  transition: opacity .25s var(--ease), scale .3s var(--ease);
+  transition: opacity .25s var(--ease);
 }
-.cursor-dot.is-link { scale: 1.8; }
 /* скобки белые + difference: на светлом фоне тёмные, на тёмном светлые */
 .cursor-frame { mix-blend-mode: difference; }
 .cursor-frame i { position: absolute; width: 7px; height: 7px; border: 0 solid #fff; }
