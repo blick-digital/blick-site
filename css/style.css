@@ -278,6 +278,9 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .logo { font-family: var(--font-display); font-size: clamp(20px, 2vw, 28px); font-weight: 500; letter-spacing: .02em; white-space: nowrap; }
 .hero__nav { display: flex; flex-direction: column; align-items: flex-end; }
 
+/* Только мобильные (см. медиа-запрос ниже): краткая версия заголовка в правом верхнем углу hero */
+.hero__mobile-id { display: none; }
+
 .hero__bottom {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -1084,11 +1087,25 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 @media (max-width: 860px) {
   .menu-fab { opacity: 1; transform: none; pointer-events: auto; }
   .hero { height: auto; min-height: 100vh; min-height: 100svh; }
-  .hero__top { margin-bottom: 42vh; grid-template-columns: 1fr; }
+  .hero__top { margin-bottom: 42vh; grid-template-columns: 1fr; position: relative; }
   .hero__nav, .hero__marquee { display: none; }
   .hero__bottom { grid-template-columns: 1fr; gap: 36px; }
   .hero__scroll { display: none; }
   .hero__aside { justify-self: stretch; width: 100%; }
+
+  .hero__mobile-id {
+    display: flex; flex-direction: column; align-items: flex-end;
+    position: absolute; top: 70px; right: 0; /* верх — вровень с "[ v.01b ]" слева */
+    max-width: 62%;
+    padding: 10px 14px 16px;
+  }
+  .hero__mobile-id-glow {
+    position: absolute; z-index: -1; inset: -10px -20px -24px;
+    background: radial-gradient(ellipse at 100% 0%, rgba(247, 247, 247, .9) 0%, rgba(247, 247, 247, .55) 55%, transparent 80%);
+  }
+  .hero__mobile-id-da { font-family: var(--font-mono); font-size: 11px; letter-spacing: .02em; color: var(--muted); white-space: nowrap; }
+  .hero__mobile-id-name { font-family: var(--font-display); font-weight: 500; font-size: clamp(22px, 7vw, 32px); letter-spacing: -.02em; line-height: 1.1; margin-top: 2px; }
+  .hero__mobile-id-sub { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); margin-top: 4px; }
 
   .svc__item { grid-template-columns: 44px 1fr 32px; }
   .svc__tags { grid-column: 2 / 3; grid-row: 2; text-align: left; margin-top: 8px; }
