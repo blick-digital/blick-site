@@ -410,9 +410,9 @@ if (/[?&]preview=1/.test(location.search)) {
 
   /* ---------- Форма ---------- */
   // Адрес облачной функции Яндекса, которая шлёт письма на почту студии.
-  // Пока он пуст, форма работает через почтовую программу клиента: открывается готовое письмо на FORM_EMAIL с заполненными полями.
-  // Когда функция заработает — вернуть сюда "https://functions.yandexcloud.net/d4e1eh3h1acb4geqdpod" (или новый адрес).
-  const FORM_ENDPOINT = "";
+  // Если он пуст (функция недоступна), форма работает через почтовую программу клиента:
+  // открывается готовое письмо на FORM_EMAIL с заполненными полями.
+  const FORM_ENDPOINT = "https://functions.yandexcloud.net/d4ebjh0nbqhor6pfm1rn";
   const FORM_EMAIL = "blickdesign@yandex.ru";
   const FORM_FALLBACK = "Не удалось отправить. Напишите нам на почту " + FORM_EMAIL;
   const form = $(".form");
