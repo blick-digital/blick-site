@@ -742,14 +742,12 @@ window.PROJECTS = [
     ],
     "blocks": [
       {
-        "type": "single",
-        "src": "assets/кейсы/Якутск Сити Холл (сайт)/Обложка.jpg",
-        "alt": "Сайт Якутск Сити Холл на ноутбуке"
-      },
-      {
         "type": "videos",
         "plain": true,
         "items": [
+          {
+            "src": "assets/кейсы/Якутск Сити Холл (сайт)/Обложка.jpg"
+          },
           {
             "src": "assets/кейсы/Якутск Сити Холл (сайт)/video-1.mp4",
             "title": "Десктоп"

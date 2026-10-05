@@ -1283,4 +1283,5 @@ html.has-cursor select, html.has-cursor iframe { cursor: auto !important; }
   background: rgba(10, 10, 11, .78); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
   border-radius: 4px; pointer-events: none;
 }
-.case__videos--plain .case__video::after { display: none; }
+.case__videos--plain .case__video::after, .case__video--img::after { display: none; }
+.case__video--img img { aspect-ratio: 16 / 9; object-fit: cover; } /* место под картинку резервируется до загрузки — сетка не прыгает */
