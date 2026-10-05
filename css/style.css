@@ -1275,7 +1275,7 @@ html.has-cursor select, html.has-cursor iframe { cursor: auto !important; }
   .case__row { flex-direction: column; }
   .case__row img { flex: none !important; width: 100%; }
 }
-/* заглушка вместо метки Veo в правом нижнем углу роликов */
+/* заглушка вместо метки Veo в правом нижнем углу роликов (plain: true в данных — без неё) */
 .case__video::after {
   content: "BLICK"; position: absolute; right: 0.5%; bottom: 1.5%; width: 9.5%; height: 6.5%;
   display: grid; place-items: center;
@@ -1283,3 +1283,4 @@ html.has-cursor select, html.has-cursor iframe { cursor: auto !important; }
   background: rgba(10, 10, 11, .78); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
   border-radius: 4px; pointer-events: none;
 }
+.case__videos--plain .case__video::after { display: none; }

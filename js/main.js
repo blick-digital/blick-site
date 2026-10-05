@@ -327,7 +327,7 @@ if (/[?&]preview=1/.test(location.search)) {
           </section>`;
         }
         if (b.type === "videos") {
-          return `<div class="case__grid case__videos">${b.items.map((v) => `<figure class="case__video"><video src="${esc(url(v.src))}#t=0.1" muted loop playsinline preload="metadata" aria-label="${esc(v.title || "")}"></video>${v.title ? `<figcaption class="mono">${esc(v.title)}</figcaption>` : ""}</figure>`).join("")}</div>`;
+          return `<div class="case__grid case__videos${b.plain ? " case__videos--plain" : ""}">${b.items.map((v) => `<figure class="case__video"><video src="${esc(url(v.src))}#t=0.1" muted loop playsinline preload="metadata" aria-label="${esc(v.title || "")}"></video>${v.title ? `<figcaption class="mono">${esc(v.title)}</figcaption>` : ""}</figure>`).join("")}</div>`;
         }
         if (b.type === "gallery") {
           return `<div class="case__gallery case__gallery--${b.images.length}">${b.images.map((src) => `<img src="${esc(url(src))}" alt="" loading="lazy">`).join("")}</div>`;
