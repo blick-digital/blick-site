@@ -409,9 +409,12 @@ if (/[?&]preview=1/.test(location.search)) {
   }
 
   /* ---------- Форма ---------- */
-  // Адрес облачной функции Яндекса, которая шлёт письма на почту студии. Если адрес пуст — форма предлагает написать на почту
-  const FORM_ENDPOINT = "https://functions.yandexcloud.net/d4e1eh3h1acb4geqdpod";
-  const FORM_FALLBACK = "Не удалось отправить. Напишите нам на почту blickdesign@yandex.ru";
+  // Адрес облачной функции Яндекса, которая шлёт письма на почту студии.
+  // Пока он пуст, форма работает через почтовую программу клиента: открывается готовое письмо на FORM_EMAIL с заполненными полями.
+  // Когда функция заработает — вернуть сюда "https://functions.yandexcloud.net/d4e1eh3h1acb4geqdpod" (или новый адрес).
+  const FORM_ENDPOINT = "";
+  const FORM_EMAIL = "blickdesign@yandex.ru";
+  const FORM_FALLBACK = "Не удалось отправить. Напишите нам на почту " + FORM_EMAIL;
   const form = $(".form");
   if (form) {
     const status = $(".form__status", form);
@@ -442,10 +445,33 @@ if (/[?&]preview=1/.test(location.search)) {
         types: $$("input[name=type]:checked", form).map((i) => i.value),
         consent: true,
       };
+      // Без облачной функции: открываем письмо в почтовой программе клиента — поля уже подставлены
+      if (!FORM_ENDPOINT) {
+        const labels = $$("input[name=type]:checked", form).map((i) => i.parentElement.textContent.trim());
+        const MAX = 1500; // у длинных mailto-ссылок есть предел в некоторых почтовых программах
+        const cut = data.message.length > MAX;
+        const body = [
+          "Здравствуйте! Заявка с сайта blickdesign.ru",
+          "",
+          "Имя: " + data.name,
+          "Контакт: " + data.contact,
+          "Что нужно: " + (labels.length ? labels.join(", ") : "не указано"),
+          "",
+          "Задача:",
+          ((cut ? data.message.slice(0, MAX) + "… [текст сокращён]" : data.message) || "—").replace(/\r?\n/g, "\r\n"),
+          "",
+          "Согласен(на) на обработку персональных данных (подтверждено на сайте).",
+        ].join("\r\n");
+        const href = "mailto:" + FORM_EMAIL + "?subject=" + encodeURIComponent("Заявка с сайта BLICK — " + data.name) + "&body=" + encodeURIComponent(body);
+        const a = document.createElement("a");
+        a.href = href; a.style.display = "none";
+        document.body.appendChild(a); a.click(); a.remove();
+        status.textContent = "Открываем письмо — осталось нажать «Отправить» в почте. Не открылось? Напишите на " + FORM_EMAIL;
+        return;
+      }
       // Заявка уходит на почту студии через облачную функцию (api/yandex-function/index.py, Яндекс Облако)
       const btn = $("button[type=submit]", form);
       if (btn.disabled) return;
-      if (!FORM_ENDPOINT) { status.textContent = FORM_FALLBACK; return; }
       btn.disabled = true;
       status.textContent = "Отправляем…";
       fetch(FORM_ENDPOINT, {
