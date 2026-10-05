@@ -329,7 +329,7 @@ if (/[?&]preview=1/.test(location.search)) {
         if (b.type === "videos") {
           return `<div class="case__grid case__videos${b.plain ? " case__videos--plain" : ""}">${b.items.map((v) => /\.(jpe?g|png|webp|avif)$/i.test(v.src)
             ? `<figure class="case__video case__video--img"><img src="${esc(url(v.src))}" alt="${esc(v.title || p.title)}" loading="lazy">${v.title ? `<figcaption class="mono">${esc(v.title)}</figcaption>` : ""}</figure>`
-            : `<figure class="case__video"><video src="${esc(url(v.src))}#t=0.1" muted loop playsinline preload="metadata" aria-label="${esc(v.title || "")}"></video>${v.title ? `<figcaption class="mono">${esc(v.title)}</figcaption>` : ""}</figure>`).join("")}</div>`;
+            : `<figure class="case__video"><video src="${esc(url(v.src))}${v.src.includes("#") ? "" : "#t=0.1"}" muted loop playsinline preload="metadata" aria-label="${esc(v.title || "")}"></video>${v.title ? `<figcaption class="mono">${esc(v.title)}</figcaption>` : ""}</figure>`).join("")}</div>`;
         }
         if (b.type === "gallery") {
           return `<div class="case__gallery case__gallery--${b.images.length}">${b.images.map((src) => `<img src="${esc(url(src))}" alt="" loading="lazy">`).join("")}</div>`;
