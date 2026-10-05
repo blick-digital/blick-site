@@ -541,11 +541,21 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 /* =========================================================
    Секции — общее
    ========================================================= */
-.section { padding: clamp(80px, 12vw, 180px) var(--pad); }
+/* Единый отступ между разделами: --sec-gap — от линии раздела до его содержимого
+   и от содержимого до линии следующего раздела (считаем до самой линии, она посередине строки заголовка) */
+.section {
+  --sec-gap: clamp(80px, 12vw, 180px);
+  --head-h: 18px;
+  padding: var(--sec-gap) var(--pad);
+}
+.section + .section { padding-top: 0; }
+.services, .works { padding-bottom: calc(var(--sec-gap) - var(--head-h) / 2); }
 .section__head {
   display: flex; align-items: center;
+  min-height: var(--head-h);
   margin-bottom: clamp(40px, 6vw, 90px);
 }
+.services .section__head, .process .section__head { margin-bottom: calc(var(--sec-gap) - var(--head-h) / 2); }
 .section__head .tag { color: var(--accent); flex: none; }
 .section__head .tag:last-child { position: relative; top: -1px; }
 /* Короткая линия между номером раздела и его названием — не на всю ширину,

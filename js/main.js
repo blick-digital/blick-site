@@ -1019,32 +1019,6 @@ if (/[?&]preview=1/.test(location.search)) {
 })();
 
 
-/* ---------- Раздел «Кейсы»: нижний отступ = верхнему ----------
-   Расстояние от последнего элемента раздела (кнопка «Больше кейсов») до линии следующего раздела
-   делаем равным расстоянию от линии «Кейсов» до карточек. Верхнее зависит от размера заголовка,
-   поэтому считаем по факту и подгоняем нижний padding раздела. */
-(() => {
-  const works = document.querySelector("#works");
-  const next = works && works.nextElementSibling;
-  if (!works || !next) return;
-  const q = (s, r) => r.querySelector(s);
-  const line = q(".section__head-line", works), row = q(".works__row", works), more = q(".works__more", works);
-  const nextLine = q(".section__head-line", next);
-  if (!line || !row || !more || !nextLine) return;
-  function fit() {
-    works.style.paddingBottom = "";
-    const want = row.getBoundingClientRect().top - line.getBoundingClientRect().top;      // линия → карточки
-    const have = nextLine.getBoundingClientRect().top - more.getBoundingClientRect().bottom; // кнопка → следующая линия
-    const pad = parseFloat(getComputedStyle(works).paddingBottom) || 0;
-    works.style.paddingBottom = Math.min(pad, Math.max(0, pad + want - have)).toFixed(1) + "px"; // только уменьшаем, не раздуваем
-  }
-  fit();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
-  addEventListener("load", fit);
-  let t;
-  addEventListener("resize", () => { clearTimeout(t); t = setTimeout(fit, 120); });
-})();
-
 /* ---------- Кнопки: заливка расходится от точки входа курсора ----------
    Запоминаем, где указатель вошёл в кнопку и где вышел, — css строит по этим точкам круг заливки. */
 (() => {
