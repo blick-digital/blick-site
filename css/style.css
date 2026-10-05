@@ -225,8 +225,8 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 
 /* ---------- Кнопки в стиле курсора: четыре угловые скобки вместо овальной рамки ----------
    Тонкие 1px-уголки по краям; при наведении расходятся чуть наружу и становятся оранжевыми */
-.pill, .menu-fab { --corner: var(--text); --arm: 8px; }
-.pill::after, .menu-fab::after {
+.pill { --corner: var(--text); --arm: 8px; }
+.pill::after {
   content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background:
     linear-gradient(var(--corner), var(--corner)) top left / var(--arm) 1px,
@@ -240,8 +240,8 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   background-repeat: no-repeat;
   transition: inset .35s var(--ease);
 }
-.pill:hover, .menu-fab:hover { --corner: var(--accent); }
-.pill:hover::after, .menu-fab:hover::after { inset: -3px; }
+.pill:hover { --corner: var(--accent); }
+.pill:hover::after { inset: -3px; }
 
 /* =========================================================
    HERO
@@ -435,26 +435,33 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 /* ---------- Плавающая кнопка меню + оверлей ---------- */
 .menu-fab {
   position: fixed; top: var(--pad); right: var(--pad); z-index: 60;
-  display: inline-flex; align-items: center; gap: 10px;
-  height: 42px; padding: 0 18px 0 14px;
-  border: 0; border-radius: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px; padding: 0;
+  border: 0; border-radius: 50%;
   background: rgba(255, 255, 255, .65);
+  box-shadow: inset 0 0 0 1px var(--line-2);
   -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%);
-  font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--text);
   cursor: pointer;
   opacity: 0; transform: translateY(-12px); pointer-events: none;
   visibility: hidden; /* скрытая кнопка не считает размытие фона, пока её не видно */
-  transition: opacity .5s var(--ease), transform .5s var(--ease), background .3s, visibility 0s .5s;
+  transition: opacity .5s var(--ease), transform .5s var(--ease), background .3s, color .3s, visibility 0s .5s;
 }
 .menu-fab.is-visible, .menu-open .menu-fab { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
-.menu-fab:hover { background: rgba(255, 255, 255, .88); }
-.menu-fab__dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 12px var(--accent);
-  transition: transform .4s var(--ease);
+.menu-fab:hover { background: rgba(255, 255, 255, .88); color: var(--accent); }
+/* Бургер: три линии, третья короче; при открытом меню складываются в крестик */
+.menu-fab__icon { position: relative; display: block; width: 18px; height: 12px; }
+.menu-fab__icon i {
+  position: absolute; left: 0; height: 1.5px; width: 100%;
+  background: currentColor; border-radius: 1px;
+  transition: transform .4s var(--ease), width .4s var(--ease), top .4s var(--ease), opacity .25s;
 }
-.menu-open .menu-fab__dot { transform: scale(1.6); }
+.menu-fab__icon i:nth-child(1) { top: 0; }
+.menu-fab__icon i:nth-child(2) { top: 5px; }
+.menu-fab__icon i:nth-child(3) { top: 10px; width: 12px; }
+.menu-open .menu-fab__icon i:nth-child(1) { top: 5px; transform: rotate(45deg); }
+.menu-open .menu-fab__icon i:nth-child(2) { opacity: 0; }
+.menu-open .menu-fab__icon i:nth-child(3) { top: 5px; width: 100%; transform: rotate(-45deg); }
 
 .overlay {
   position: fixed; inset: 0; z-index: 55;

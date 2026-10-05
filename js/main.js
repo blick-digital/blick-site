@@ -175,7 +175,7 @@ if (/[?&]preview=1/.test(location.search)) {
   const setMenu = (open) => {
     document.body.classList.toggle("menu-open", open);
     fab.setAttribute("aria-expanded", open);
-    $(".menu-fab__label").textContent = open ? "закрыть" : "меню";
+    fab.setAttribute("aria-label", open ? "Закрыть меню" : "Меню");
   };
   fab.addEventListener("click", () => setMenu(!document.body.classList.contains("menu-open")));
   $$(".overlay a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
