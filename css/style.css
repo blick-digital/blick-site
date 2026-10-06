@@ -289,6 +289,13 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   position: absolute; inset: 0;
   pointer-events: none;
 }
+/* Планшет вертикально (iPad Pro и т.п., ширина больше 860px): кадр растягивается по высоте, костюм уходит под нижний текст —
+   белый градиент снизу, чтобы надпись и кнопка читались */
+@media (min-width: 861px) and (orientation: portrait) {
+  .hero__vignette {
+    background: linear-gradient(to top, rgba(247, 247, 247, .96) 0%, rgba(247, 247, 247, .9) 14%, rgba(247, 247, 247, .55) 25%, rgba(247, 247, 247, 0) 40%);
+  }
+}
 
 .hero__top, .hero__bottom { position: relative; z-index: 2; }
 .hero__top {
