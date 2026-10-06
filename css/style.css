@@ -1104,6 +1104,10 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   .hero__bottom { grid-template-columns: 1fr; gap: 36px; }
   .hero__scroll { display: none; }
   .hero__aside { justify-self: stretch; width: 100%; }
+  /* Картинка/видео первого экрана на 30% меньше (70% прежнего размера), прижаты к низу — край кадра с костюмом остаётся под белым градиентом.
+     Фон за ними — цвет краёв кадра, чтобы освободившееся место сверху сливалось с картинкой */
+  .hero__visual { background-color: #f4f8f9; background-size: auto 70%; background-position: center bottom; }
+  .hero__video { transform: scale(.7); transform-origin: 50% 100%; }
 
   /* Сам заголовок (тот же hero__title, не копия) переносится наверх, в правый угол —
      top выставляется в JS (см. IIFE выравнивания), верх вровень с "[ v.01b ]" слева */
