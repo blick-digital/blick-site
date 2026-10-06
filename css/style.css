@@ -1105,18 +1105,17 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   .hero__scroll { display: none; }
   .hero__aside { justify-self: stretch; width: 100%; }
   /* Картинка/видео первого экрана: 70% размера, поднято над нижним текстом, нижний край уходит в прозрачность градиентом (обреза не видно).
-     Постер (раньше фон .hero__visual) вынесен в ::before с теми же размером, сдвигом и маской, что у видео — они совпадают кадр в кадр */
+     Постер (раньше фон .hero__visual) вынесен в ::before с теми же размером, сдвигом и маской, что у видео — они совпадают кадр в кадр.
+     Кадр шире экрана в 1/0.7 раза (142.86%), после уменьшения до 70% он ровно во всю ширину экрана — плечи уходят за край, а не обрезаются внутри */
   .hero__visual { background-image: none; background-color: #f4f8f9; }
   .hero__visual::before, .hero__video {
-    transform: translateY(-24svh) scale(.7); transform-origin: 50% 100%;
-    /* по бокам и сверху — короткая растушёвка, чтобы граница кадра не читалась на фоне; снизу — длинный градиент */
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 5%, #000 95%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 5%, #000 52%, transparent 96%);
-    -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(to right, transparent 0, #000 5%, #000 95%, transparent 100%), linear-gradient(to bottom, transparent 0, #000 5%, #000 52%, transparent 96%);
-    mask-composite: intersect;
+    position: absolute; top: 0; bottom: 0; left: -21.43%; right: auto; width: 142.86%; max-width: none; height: 100%;
+    transform: translateY(-19svh) scale(.7); transform-origin: 50% 100%;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 5%, #000 52%, transparent 96%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 5%, #000 52%, transparent 96%);
   }
   .hero__visual::before {
-    content: ""; position: absolute; inset: 0;
+    content: "";
     background: url("../assets/video/hero-poster.jpg") center / cover no-repeat;
   }
 
