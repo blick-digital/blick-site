@@ -75,7 +75,7 @@
   --faint: #b0b0aa;
   --line: rgba(27, 27, 27, .1);
   --line-2: rgba(27, 27, 27, .18);
-  --accent: #ff8800;
+  --accent: #ff6030;
   --accent-deep: #cc6d00;
 
   --font-display: "PP Neue Machina", "Unbounded", system-ui, sans-serif;
@@ -339,7 +339,7 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .hero__sub > span { white-space: nowrap; }
 .hero__da { text-align: right; font-size: clamp(11px, calc(1vw + 2px), 18px); line-height: 1; font-weight: 500; letter-spacing: .04em; }
 .hero__da > span { white-space: nowrap; }
-.hero__hint { cursor: default; outline: none; text-decoration: underline dotted rgba(255, 136, 0, .7); text-underline-offset: .28em; transition: color .25s var(--ease); }
+.hero__hint { cursor: default; outline: none; text-decoration: underline dotted rgba(255, 96, 48, .7); text-underline-offset: .28em; transition: color .25s var(--ease); }
 .hero__hint:hover, .hero__hint:focus-visible, .hero__hint.is-open { color: var(--accent); }
 .hero__title { position: relative; }
 .hero__tip {
@@ -349,10 +349,10 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   font-family: var(--font-mono); font-size: 10px; line-height: 1.5; letter-spacing: 0; text-transform: none; font-weight: 400;
   color: #7a3d00;
   /* светлая версия: тёплый полупрозрачный фон, тонкая янтарная рамка-свечение */
-  background: linear-gradient(135deg, rgba(255, 136, 0, .12), rgba(247, 247, 247, .75) 60%);
+  background: linear-gradient(135deg, rgba(255, 96, 48, .12), rgba(247, 247, 247, .75) 60%);
   border: 0; border-radius: 5px;
   -webkit-backdrop-filter: blur(8px) saturate(150%); backdrop-filter: blur(8px) saturate(150%);
-  box-shadow: 0 0 14px rgba(255, 136, 0, .16), inset 0 0 12px rgba(255, 136, 0, .05);
+  box-shadow: 0 0 14px rgba(255, 96, 48, .16), inset 0 0 12px rgba(255, 96, 48, .05);
   opacity: 0; transform: translateY(6px); pointer-events: none;
   transition: opacity .25s var(--ease), transform .25s var(--ease);
 }
@@ -616,7 +616,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 }
 .svc__item::before {
   content: ""; position: absolute; inset: 0 calc(var(--pad) * -1);
-  background: linear-gradient(90deg, rgba(255,136,0,.08), transparent 60%);
+  background: linear-gradient(90deg, rgba(255,96,48,.08), transparent 60%);
   opacity: 0; transition: opacity .5s var(--ease);
   pointer-events: none;
 }
