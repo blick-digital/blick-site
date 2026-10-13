@@ -455,7 +455,7 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   pointer-events: none;
 }
 .hero__reveal-title, .hero__reveal-body { position: absolute; margin: 0; }
-.hero__reveal-title { top: 0; left: 0; width: 34.7vw; }
+.hero__reveal-title { left: 0; bottom: 0; width: 26vw; } /* «МЫ — небольшая студия…» — в левом нижнем углу, под низом не мешает шапке */
 .hero__reveal-body { right: 0; bottom: 0; width: 35.4vw; }
 .hero__reveal .rv-o { fill: var(--accent); } /* оранжевый — всегда цвет сайта */
 .hero__reveal .rv-d { fill: #0f0f0f; }

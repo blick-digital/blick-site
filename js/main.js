@@ -186,10 +186,11 @@ if (/[?&]preview=1/.test(location.search)) {
   const topNav = $(".hero__nav") || $(".page-head nav");
   const scrubWrap = $(".hero-scrub");
   if (scrubWrap && !reduced && matchMedia("(min-width: 861px)").matches) {
-    // На главной hero закреплён и меню внутри него гаснет по скроллу — кнопка появляется, когда оно почти погасло
+    // На главной hero закреплён, верхнее меню видно на обоих экранах — кнопка появляется,
+    // когда закрепление отпустило и шапка уехала вверх вместе со вторым экраном
     const upd = () => {
       const range = Math.max(1, scrubWrap.offsetHeight - innerHeight);
-      fab.classList.toggle("is-visible", scrollY > scrubWrap.offsetTop + range * 0.3);
+      fab.classList.toggle("is-visible", scrollY > scrubWrap.offsetTop + range + 120); // шапка уже уехала за верх экрана
     };
     addEventListener("scroll", upd, { passive: true });
     addEventListener("resize", upd);
@@ -557,11 +558,16 @@ if (/[?&]preview=1/.test(location.search)) {
   // Оборачивает каждое слово внутри элемента в <span class="word">, не трогая теги внутри (например .accent)
   function heroPinScrub(wrap, hero, canvas) {
     wrap.classList.add("js-scrub");
-    const fadeEls = [...$$(".hero__top > *", hero), ...$$(".hero__bottom > *", hero), ...$$(".hero__grid, .hero__word", hero)];
+    // при переходе на второй экран уходит только низ первого экрана (BLICK, блок «( B )», иконка прокрутки);
+    // шапка, сетка и надпись digital atelier остаются на месте
+    const fadeEls = $$(".hero__bottom > *", hero);
+    const stayEls = $$(".hero__top, .hero__grid, .hero__word", hero);
     const reveal = $(".hero__reveal", hero);
     const main = $("main");
     const fade = $(".hero__fade", hero);
     const body = reveal ? $(".hero__reveal-body", reveal) : null;
+    const rtitle = reveal ? $(".hero__reveal-title", reveal) : null;
+    const textTop = () => Math.min(body.offsetTop, rtitle ? rtitle.offsetTop : Infinity); // обе надписи теперь внизу
     // строки обеих надписей (SVG): каждая проявляется «шторкой» слева направо через свой clipPath
     const units = reveal ? $$(".rv-unit", reveal).map((g) => {
       const rect = g.previousElementSibling.firstElementChild; // <clipPath><rect class="rv-clip"></clipPath>
@@ -635,12 +641,12 @@ if (/[?&]preview=1/.test(location.search)) {
     // Затемнение под текстом второго экрана: считаем его положение от верха нижнего текста
     function fitBody() {
       if (!reveal || !body) return;
-      if (fade) fade.style.top = (reveal.offsetTop + body.offsetTop).toFixed(1) + "px";
+      if (fade) fade.style.top = (reveal.offsetTop + textTop()).toFixed(1) + "px";
       // Длина градиента: от верха текста до низа экрана + отрезок --grad блока «услуги».
       // Слой продлён ещё на 300px сплошным цветом вниз — так при любой разнице высот экрана (vh / svh / innerHeight, тулбар Safari)
       // между затемнением и сплошным фоном блока «услуги» не остаётся щели, через которую видно видео
       const grad = Math.min(innerHeight * 0.24, 170);
-      const len = Math.max(0, hero.offsetHeight - reveal.offsetTop - body.offsetTop + grad);
+      const len = Math.max(0, hero.offsetHeight - reveal.offsetTop - textTop() + grad);
       if (fade) {
         fade.style.setProperty("--fade-solid", len.toFixed(1) + "px");
         fade.style.height = (len + 300).toFixed(1) + "px";
@@ -683,6 +689,8 @@ if (/[?&]preview=1/.test(location.search)) {
       // Текст второго экрана после конца видео уезжает вверх вместе со скроллом
       const lift = extra ? `translateY(${(-extra).toFixed(1)}px)` : "";
       if (reveal) reveal.style.transform = lift;
+      // шапка, сетка и надпись digital atelier остаются на втором экране и уезжают вверх вместе с его текстом
+      stayEls.forEach((el) => { el.style.transform = lift; });
       // затемнение поднимается вместе с текстом и плавно проявляется в первые 120px после конца видео
       const ramp = Math.min(1, extra / 120);
       if (fade) { fade.style.transform = lift; fade.style.opacity = String(ramp); }
