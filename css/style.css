@@ -455,7 +455,9 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
   pointer-events: none;
 }
 .hero__reveal-title, .hero__reveal-body { position: absolute; margin: 0; }
-.hero__reveal-title { left: 0; bottom: 0; width: 26vw; } /* «МЫ — небольшая студия…» — в левом нижнем углу, под низом не мешает шапке */
+/* «МЫ — небольшая студия…» — в левом нижнем углу. Высота букв и шаг строк — как у правой надписи:
+   ширина 21.73vw даёт ту же высоту заглавных, bottom .557vw ставит базовые линии строк слева и справа на одну высоту */
+.hero__reveal-title { left: 0; bottom: .557vw; width: 21.73vw; }
 .hero__reveal-body { right: 0; bottom: 0; width: 35.4vw; }
 .hero__reveal .rv-o { fill: var(--accent); } /* оранжевый — всегда цвет сайта */
 .hero__reveal .rv-d { fill: #0f0f0f; }
