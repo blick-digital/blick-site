@@ -84,7 +84,8 @@
 
   --pad: clamp(16px, 2.2vw, 36px);
   --hero-bg: #f4f8f9;   /* фон кадров с космонавтом */
-  --hero-line: #e7e7e7; /* линии сетки первого экрана — цвет надписи digital atelier */
+  --hero-line: #e7e7e7; /* линии сетки первого экрана */
+  --hero-cat-fs: clamp(14px, 1.1vw, 22px); /* подписи направлений и меню в шапке первого экрана */
   --ease: cubic-bezier(.2, .8, .2, 1);
   --ease-io: cubic-bezier(.65, 0, .35, 1);
   --radius: 14px;
@@ -422,11 +423,13 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
     align-self: baseline; justify-self: center; text-align: center;
     padding: 0 12px;
     font-family: var(--font-display); font-weight: 400;
-    font-size: clamp(14px, 1.1vw, 22px); line-height: 1.2;
-    color: var(--text);
+    font-size: var(--hero-cat-fs); line-height: 1.2;
+    color: var(--muted); /* серые, как «[ v.01b ]» */
   }
   .hero__brand { align-self: baseline; }
-  .hero__nav { grid-column: 5; align-self: start; }
+  /* меню справа — тем же шрифтом и кеглем, что подписи; по базовой линии с ними, поэтому верх букв на одной высоте */
+  .hero__nav { grid-column: 5; align-self: baseline; }
+  .hero__nav .navlink { font-family: var(--font-display); font-weight: 400; font-size: var(--hero-cat-fs); line-height: 1.5; }
 
   /* низ: заголовок — первая колонка, иконка прокрутки — третья, блок «( B )» — пятая */
   .hero__bottom { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; align-items: end; }
