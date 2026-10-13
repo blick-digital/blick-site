@@ -24,12 +24,13 @@ if (/[?&]preview=1/.test(location.search)) {
 
   const scrubEnabled = $(".hero-scrub") && !reduced && matchMedia("(min-width: 861px)").matches;
 
-  /* ---------- Hero-кадры (десктоп): последовательность JPG вместо видео ----------
+  /* ---------- Hero-кадры (десктоп): последовательность кадров вместо видео ----------
      Перемотка скроллом двигает индекс кадра и рисует его в canvas — быстрее и стабильнее,
      чем перемотка <video>, и не зависит от политик автозапуска/энергосбережения браузера. */
   const FRAME_COUNT = 120;
   const FRAME_RATE = 24; // кадров/сек в исходном ролике — только для тайминга вступления
-  const framePath = (i) => "assets/video/hero-frames/frame-" + String(i).padStart(4, "0") + ".jpg";
+  // космонавт вырезан из фона (WebP с прозрачностью) — фон, сетку и надпись digital atelier под ним рисует CSS
+  const framePath = (i) => "assets/video/hero-frames-cut/frame-" + String(i).padStart(4, "0") + ".webp";
   const frames = [];
   let framesLoadedCount = 0;
   if (scrubEnabled) {
@@ -556,7 +557,7 @@ if (/[?&]preview=1/.test(location.search)) {
   // Оборачивает каждое слово внутри элемента в <span class="word">, не трогая теги внутри (например .accent)
   function heroPinScrub(wrap, hero, canvas) {
     wrap.classList.add("js-scrub");
-    const fadeEls = [...$$(".hero__top > *", hero), ...$$(".hero__bottom > *", hero)];
+    const fadeEls = [...$$(".hero__top > *", hero), ...$$(".hero__bottom > *", hero), ...$$(".hero__grid, .hero__word", hero)];
     const reveal = $(".hero__reveal", hero);
     const main = $("main");
     const fade = $(".hero__fade", hero);
@@ -728,39 +729,6 @@ if (/[?&]preview=1/.test(location.search)) {
     update();
   }
 
-  /* ---------- Бегущая строка в шапке: "карусельное" сжатие у краёв ---------- */
-  const marquee = $(".hero__marquee");
-  if (marquee && !reduced) marqueeLoop(marquee);
-
-  function marqueeLoop(wrap) {
-    const track = $(".hero__marquee__track", wrap);
-    const items = () => $$("span, i", track);
-    let on = false, raf;
-
-    function tick() {
-      const rect = wrap.getBoundingClientRect();
-      if (rect.width) {
-        const cx = rect.left + rect.width / 2;
-        const half = rect.width / 2;
-        for (const el of items()) {
-          const r = el.getBoundingClientRect();
-          const dist = Math.abs(r.left + r.width / 2 - cx);
-          const t = Math.min(1, dist / half);
-          const scale = 1 - t * 0.4;
-          el.style.transform = `scale(${scale.toFixed(3)})`;
-          el.style.opacity = (1 - t * 0.75).toFixed(3);
-        }
-      }
-      if (on) raf = requestAnimationFrame(tick);
-    }
-
-    new IntersectionObserver(([e]) => {
-      const visible = e.isIntersecting && getComputedStyle(wrap).display !== "none";
-      if (visible && !on) { on = true; raf = requestAnimationFrame(tick); }
-      if (!visible && on) { on = false; cancelAnimationFrame(raf); }
-    }).observe(hero);
-  }
-
   /* ---------- Курсор: crop-маркер ----------
      Оранжевая точка точно под мышью + рамка из четырёх угловых скобок вокруг неё.
      Над изображением рамка плавно растягивается до границ картинки. */
@@ -816,9 +784,9 @@ if (/[?&]preview=1/.test(location.search)) {
 })();
 
 /* ---------- Нижний левый блок hero: выравнивание по сетке ----------
-   • "Диджитал Ателье" — по правому краю, по центру буквы "B" из "( B )"
-   • BLICK — верх заглавных вровень с верхом строки "Мы собираем…"
-   • "визуальное производство" — по ширине BLICK (левый и правый край)
+   • BLICK — по ширине первой колонки сетки (между линиями)
+   • "Диджитал Ателье" — 85% ширины колонки, по правому краю "K"
+   • "визуальное производство" — от "B" до "C", "для бизнеса" — по правому краю "K"
    • низ "для бизнеса" — вровень с низом кнопки "Обсудить проект" */
 (() => {
   const title = document.querySelector(".hero__title");
@@ -830,9 +798,7 @@ if (/[?&]preview=1/.test(location.search)) {
   const sub2 = title.querySelector(".hero__sub--2");
   const sub3 = title.querySelector(".hero__sub--3");
   const daText = da.firstElementChild, sub2Text = sub2.firstElementChild, sub3Text = sub3.firstElementChild;
-  const mark = aside.querySelector(".hero__mark");
   const scrollIcon = document.querySelector(".hero__scroll");
-  const lead = aside.querySelector(".hero__lead");
   const pill = aside.querySelector(".pill");
   const brandTag = document.querySelector(".hero__brand .tag"); // "[ v.01b ]" — ориентир для мобильного top ниже
   const ctx = document.createElement("canvas").getContext("2d");
@@ -871,6 +837,7 @@ if (/[?&]preview=1/.test(location.search)) {
 
   function layout() {
     [da, sub2, sub3].forEach((l) => { l.style.marginTop = ""; l.style.marginBottom = ""; l.style.left = ""; });
+    da.style.fontSize = ""; title.style.marginBottom = "";
     title.style.removeProperty("--sub-fs");
 
     name.style.fontSize = ""; nameLine.style.marginLeft = "";
@@ -899,6 +866,18 @@ if (/[?&]preview=1/.test(location.search)) {
     }
     title.style.top = ""; // на десктопе заголовок остаётся в обычном потоке
 
+    // Блок занимает первую колонку сетки (5 колонок между полями страницы, см. .hero__grid)
+    const heroEl = title.closest(".hero");
+    const hcs = getComputedStyle(heroEl);
+    const colL = heroEl.getBoundingClientRect().left + parseFloat(hcs.paddingLeft);
+    const colW = (heroEl.clientWidth - parseFloat(hcs.paddingLeft) - parseFloat(hcs.paddingRight)) / 5;
+
+    // BLICK — по ширине колонки: левый край "B" и правый край "K" почти у линий (небольшие поля, как в макете)
+    const wantL = colL + colW * 0.015, wantR = colL + colW * (1 - 0.009);
+    const nL0 = inkLeft(name, LSB.B), nR0 = inkRight(name, 4, RSB.K);
+    if (nR0 > nL0) name.style.fontSize = (fsOf(name) * (wantR - wantL) / (nR0 - nL0)).toFixed(2) + "px";
+    nameLine.style.marginLeft = (parseFloat(getComputedStyle(nameLine).marginLeft) + wantL - inkLeft(name, LSB.B)).toFixed(2) + "px";
+
     // Эталон — буквы BLICK: левый край "B", правый край "C" и правый край "K"
     const refL = inkLeft(name, LSB.B);
     const refC = inkRight(name, 3, RSB.C);
@@ -909,25 +888,29 @@ if (/[?&]preview=1/.test(location.search)) {
     const boxW = sub2Text.getBoundingClientRect().width;
     const inkEm = boxW / fs0 - LSB.В - RSB.О;
     if (inkEm > 0) title.style.setProperty("--sub-fs", ((refC - refL) / inkEm).toFixed(3) + "px");
+
+    // "( Диджитал Ателье )" — 85% ширины колонки, правая скобка вровень с правым краем "K"
+    const daW0 = inkRight(daText, -1, RSB[")"]) - charRect(daText, 0).left;
+    if (daW0 > 0) da.style.fontSize = (fsOf(daText) * colW * 0.85 / daW0).toFixed(2) + "px";
+
     sub2.style.position = sub3.style.position = da.style.position = "relative";
     sub2.style.left = (refL - inkLeft(sub2Text, LSB.В)).toFixed(2) + "px";
     sub3.style.left = (refR - inkRight(sub3Text, -1, RSB.А)).toFixed(2) + "px";
     da.style.left = (refR - inkRight(daText, -1, RSB[")"])).toFixed(2) + "px";
 
-    const markY = top(mark) + (() => { const m = metrics(mark, "B"); return m.base - m.cap / 2; })();
-    const leadY = top(lead) + (() => { const m = metrics(lead); return m.base - m.cap; })();
-    const pillBottom = top(pill) + pill.offsetHeight;
-
-    const dm = metrics(daText, "Д");
-    da.style.marginTop = (markY - (dm.base - dm.cap / 2)).toFixed(2) + "px";
-
+    // Вертикальные интервалы — в долях высоты заглавных BLICK, как в макете:
+    // от базовой линии "Диджитал Ателье" до верха BLICK ≈ 0.48, от базовой линии BLICK до верха "визуальное…" ≈ 0.46
     const nm = metrics(name);
-    const nameCap = top(name) + nm.base - nm.cap;
-    da.style.marginBottom = (leadY - nameCap).toFixed(2) + "px";
+    const dm = metrics(da, "Д");
+    const gap1 = (top(name) + nm.base - nm.cap) - (top(da) + dm.base);
+    da.style.marginBottom = (nm.cap * 0.476 - gap1).toFixed(2) + "px";
+    const sm = metrics(sub2, "В");
+    const gap2 = (top(sub2) + sm.base - sm.cap) - (top(name) + nm.base);
+    sub2.style.marginTop = (nm.cap * 0.46 - gap2).toFixed(2) + "px";
 
-    // строка набрана заглавными — низ букв это базовая линия (без выносных элементов)
-    // строка «для бизнеса» набрана заглавными — низ букв это базовая линия. Берём её из самой вёрстки:
-    // нулевой inline-элемент встаёт ровно на базовую линию в любом браузере (без расчётов по метрикам шрифта)
+    // Низ: базовая линия "для бизнеса" — вровень с низом кнопки "Обсудить проект".
+    // Ряд выровнен по низу (align-items: end), поэтому опускаем заголовок на расстояние от базовой линии до его низа.
+    // Базовую линию берём из самой вёрстки: нулевой inline-элемент встаёт ровно на неё в любом браузере
     let probe = sub3Text.querySelector(".baseline-probe");
     if (!probe) {
       probe = document.createElement("span");
@@ -935,10 +918,10 @@ if (/[?&]preview=1/.test(location.search)) {
       probe.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
       sub3Text.insertBefore(probe, sub3Text.firstChild);
     }
-    const inkBottom = top(probe);
-    // отступ считаем от нулевого (в начале layout margin сброшен): ровно столько, чтобы базовая линия легла на низ кнопки
-    sub2.style.marginTop = (pillBottom - inkBottom).toFixed(2) + "px";
-    // иконка прокрутки: низ — вровень с низом кнопки «Обсудить проект»; измеряем фактическое положение и доводим
+    title.style.marginBottom = (top(probe) - (top(title) + title.offsetHeight)).toFixed(2) + "px";
+
+    // иконка прокрутки: низ — вровень с низом кнопки «Обсудить проект»
+    const pillBottom = top(pill) + pill.offsetHeight;
     if (scrollIcon) {
       scrollIcon.style.marginBottom = "0px";
       const iconBottom = top(scrollIcon) + scrollIcon.offsetHeight;

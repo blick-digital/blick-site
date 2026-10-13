@@ -83,6 +83,8 @@
   --font-body: "Manrope", system-ui, sans-serif;
 
   --pad: clamp(16px, 2.2vw, 36px);
+  --hero-bg: #f4f8f9;   /* фон кадров с космонавтом */
+  --hero-line: #e7e7e7; /* линии сетки первого экрана — цвет надписи digital atelier */
   --ease: cubic-bezier(.2, .8, .2, 1);
   --ease-io: cubic-bezier(.65, 0, .35, 1);
   --radius: 14px;
@@ -308,6 +310,26 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .logo { font-family: var(--font-display); font-size: clamp(20px, 2vw, 28px); font-weight: 500; letter-spacing: .02em; white-space: nowrap; }
 .hero__nav { display: flex; flex-direction: column; align-items: flex-end; }
 
+/* ---------- Сетка первого экрана (десктоп): 5 колонок между полями страницы ----------
+   Линии 1px по границам колонок, надпись «digital atelier» на всю ширину — обе под вырезанным космонавтом.
+   Видны только в режиме перемотки кадрами (.js-scrub): там космонавт с прозрачным фоном, а не видео */
+.hero__grid, .hero__word { display: none; }
+.js-scrub .hero__visual { background: var(--hero-bg); } /* цвет фона кадров — космонавт вырезан, фон даёт CSS */
+.js-scrub .hero__grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  position: absolute; top: 0; bottom: 0; left: var(--pad); right: var(--pad);
+  pointer-events: none;
+}
+.js-scrub .hero__grid i { border-left: 1px solid var(--hero-line); }
+.js-scrub .hero__grid i:last-child { border-right: 1px solid var(--hero-line); }
+.js-scrub .hero__word {
+  display: block;
+  position: absolute; left: var(--pad); right: var(--pad); top: 19.6%;
+  width: calc(100% - var(--pad) * 2); height: auto;
+  pointer-events: none; user-select: none;
+}
+
+
 .hero__bottom {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -391,6 +413,36 @@ body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: 
 .hero__lead { font-size: 13px; line-height: 1.6; color: var(--muted); }
 .hero__aside .pill { align-self: flex-start; min-width: 200px; }
 .works__more .pill { min-width: 200px; } /* тот же размер, что у «Обсудить проект» */
+
+.hero__bar { display: none; } /* оранжевая полоса — только на десктопе */
+@media (min-width: 861px) {
+  /* верх: логотип | три направления по центру колонок 2–4 | меню — та же сетка из 5 колонок */
+  .hero__top { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; }
+  .hero__cat {
+    align-self: baseline; justify-self: center; text-align: center;
+    padding: 0 12px;
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(14px, 1.1vw, 22px); line-height: 1.2;
+    color: var(--text);
+  }
+  .hero__brand { align-self: baseline; }
+  .hero__nav { grid-column: 5; align-self: start; }
+
+  /* низ: заголовок — первая колонка, иконка прокрутки — третья, блок «( B )» — пятая */
+  .hero__bottom { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; align-items: end; }
+  .hero__title { grid-column: 1; max-width: none; }
+  .hero__scroll { grid-column: 3; }
+  .hero__aside { grid-column: 5; justify-self: stretch; width: auto; }
+  /* оранжевая полоса над блоком: от линии колонки до правого края экрана */
+  .hero__bar {
+    display: block;
+    width: calc(100% + var(--pad)); height: clamp(8px, .65vw, 14px);
+    margin-bottom: max(0px, calc(1.95vw - 22px));
+    background: var(--accent);
+  }
+}
+/* колонка уже самой длинной строки описания — принудительные переносы убираем, текст переносится по ширине колонки */
+@media (min-width: 861px) and (max-width: 1749px) { .hero__lead br { display: none; } }
 
 /* Две надписи второго экрана (SVG из assets/svg/) — проявляются после первого экрана,
    строка за строкой вместе со скроллом. Размер — доля ширины экрана, как в макете */
@@ -502,55 +554,6 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
 .overlay__list li:nth-child(5) a { transition-delay: .16s; }
 .overlay__foot { display: flex; flex-wrap: wrap; gap: 24px; font-size: 13px; color: var(--muted); }
 .overlay__foot a:hover { color: var(--text); }
-
-/* =========================================================
-   Бегущая строка в шапке — тот же шрифт и уровень, что у логотипа
-   ========================================================= */
-.hero__marquee {
-  position: relative;
-  overflow: hidden;
-  font-size: clamp(20px, 2vw, 28px);
-  height: 1.4em;
-  margin-top: 4px;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
-}
-.hero__marquee__track {
-  display: flex; align-items: center; gap: 28px;
-  width: max-content; height: 100%;
-  animation: marquee 46s linear infinite;
-  font-family: var(--font-display); font-weight: 500;
-  font-size: 1em; line-height: 1.4;
-  letter-spacing: -.01em; text-transform: uppercase; white-space: nowrap;
-  color: var(--muted);
-  will-change: transform;
-}
-.hero__marquee__track span, .hero__marquee__track i {
-  display: inline-block;
-  transition: opacity .2s linear;
-}
-.hero__marquee__track i { font-style: normal; color: var(--accent); font-size: .55em; }
-
-/* Глитч: редкие короткие сдвиги строки и расхождение цветных каналов (цвет строки обычный, как в шапке) */
-.hero__marquee { animation: holo-glitch 6s steps(1, end) infinite; }
-.hero__marquee .hero__marquee__track { animation: marquee 46s linear infinite, holo-split 6s steps(1, end) infinite; }
-/* transform и opacity у строки принадлежат скроллу (исчезание hero) — глитч двигает только translate и filter */
-@keyframes holo-glitch {
-  0%, 100% { translate: 0 0; filter: none; }
-  40% { translate: -1px 0; filter: brightness(.92); }
-  41% { translate: 1px 0; filter: none; }
-  42% { translate: 0 0; }
-  78% { translate: 1px 0; filter: brightness(.9); }
-  79% { translate: -1px 0; filter: none; }
-  80% { translate: 0 0; }
-}
-@keyframes holo-split {
-  0%, 39%, 43%, 77%, 81%, 100% { text-shadow: none; }
-  40%, 41%, 42% { text-shadow: -1.5px 0 rgba(0, 229, 255, .3), 1.5px 0 rgba(255, 60, 110, .25); }
-  78%, 79%, 80% { text-shadow: 1.5px 0 rgba(0, 229, 255, .3), -1.5px 0 rgba(255, 60, 110, .25); }
-}
-@media (prefers-reduced-motion: reduce) { .hero__marquee, .hero__marquee .hero__marquee__track { animation: none; } }
-@keyframes marquee { to { transform: translateX(-50%); } }
 
 /* =========================================================
    Секции — общее
@@ -1107,7 +1110,7 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   .menu-fab { opacity: 1; transform: none; pointer-events: auto; }
   .hero { height: auto; min-height: 100vh; min-height: 100svh; }
   .hero__top { margin-bottom: 42vh; grid-template-columns: 1fr; position: relative; }
-  .hero__nav, .hero__marquee { display: none; }
+  .hero__nav, .hero__cat { display: none; }
   .hero__bottom { grid-template-columns: 1fr; gap: 36px; }
   .hero__scroll { display: none; }
   .hero__aside { justify-self: stretch; width: 100%; }

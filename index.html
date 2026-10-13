@@ -68,8 +68,11 @@
   <div class="hero-scrub" id="top">
     <header class="hero">
       <div class="hero__visual" aria-hidden="true">
-        <!-- Десктоп: последовательность кадров assets/video/hero-frames/ — canvas перематывается скроллом.
+        <!-- Десктоп: последовательность кадров assets/video/hero-frames-cut/ (космонавт вырезан, фон прозрачный) — canvas перематывается скроллом.
+             Под ним — сетка из 5 колонок и надпись digital atelier: они видны «за» космонавтом.
              Мобильные/reduced-motion: обычное фоновое видео в цикле, assets/video/hero-mobile-v2.mp4. -->
+        <div class="hero__grid"><i></i><i></i><i></i><i></i><i></i></div>
+        <img class="hero__word" src="assets/svg/digital-atelier.svg" alt="" width="331" height="42">
         <canvas class="hero__canvas"></canvas>
         <video class="hero__video" muted playsinline preload="auto" poster="assets/video/hero-poster.jpg" data-src-light="assets/video/hero-mobile-v2.mp4"></video>
         <div class="hero__vignette"></div>
@@ -81,13 +84,10 @@
         <span class="mono tag">[ v.01b ]</span>
       </div>
 
-      <!-- Бегущая строка: тот же шрифт и уровень, что у логотипа слева -->
-      <div class="hero__marquee" aria-hidden="true">
-        <div class="hero__marquee__track">
-          <span>Графический дизайн</span><i>✦</i><span>Веб-сайты</span><i>✦</i><span>Мобильные приложения</span><i>✦</i><span>AI-видео</span><i>✦</i><span>Моушн</span><i>✦</i>
-          <span>Графический дизайн</span><i>✦</i><span>Веб-сайты</span><i>✦</i><span>Мобильные приложения</span><i>✦</i><span>AI-видео</span><i>✦</i><span>Моушн</span><i>✦</i>
-        </div>
-      </div>
+      <!-- Подписи направлений: по центру колонок 2–4, на одной линии с логотипом -->
+      <span class="hero__cat">графический дизайн</span>
+      <span class="hero__cat">web сайты</span>
+      <span class="hero__cat">мобильные приложения</span>
 
       <nav class="hero__nav" aria-label="Основное меню">
         <a href="#top" class="navlink">главная <span class="arr">↗</span></a>
@@ -117,12 +117,13 @@
       </a>
 
       <div class="hero__aside">
+        <span class="hero__bar" aria-hidden="true"></span>
         <div class="hero__aside-head">
           <span class="mono hero__mark">( B )</span>
           <span class="mono tag">[ 001 / 004 ]</span>
         </div>
         <p class="hero__lead">
-          Создаём цельные визуальные системы для бизнеса:<br>айдентика, графический дизайн, web, ai.<br>Помогаем бренду выглядеть цельно и узнаваемо
+          Создаём цельные визуальные системы для бизнеса:<br> айдентика, графический дизайн, web, ai.<br> Помогаем бренду выглядеть цельно и узнаваемо
         </p>
         <a href="#contact" class="pill">Обсудить проект</a>
       </div>
