@@ -273,7 +273,7 @@
 
       <div class="grid2">
         <label class="fld"><span>Название</span><input data-k="title" value="${esc(p.title)}"></label>
-        <label class="fld"><span>Адрес страницы (slug)</span><input data-k="slug" value="${esc(p.slug)}"><small class="hint">получится: case.html?p=${esc(p.slug || "…")}</small></label>
+        <label class="fld"><span>Адрес страницы (slug)</span><input data-k="slug" value="${esc(p.slug)}"><small class="hint">получится: cases/${esc(p.slug || "…")}/</small></label>
       </div>
       <div class="grid3">
         <label class="fld"><span>Направление</span><select data-k="category">${Object.entries(window.CATEGORIES).map(([k, v]) => `<option value="${k}" ${p.category === k ? "selected" : ""}>${esc(v)}</option>`).join("")}</select></label>
@@ -408,7 +408,7 @@
       o.blocks = (o.blocks || []).filter((b) => (["banner", "single", "pdf"].includes(b.type) ? b.src : b.type === "text" ? (b.title || (b.body || []).length) : b.type === "videos" ? (b.items || []).length : (b.images || []).length || b.art));
       if (!o.blocks.length) delete o.blocks;
       if (!o.featured) delete o.featured;
-      if (!o.slug) o.slug = slugify(o.title) || "case";
+      o.slug = slugify(o.slug || o.title) || "case";
       return o;
     });
   }
@@ -434,7 +434,7 @@
     try {
       const text = buildDataJs(await fetchLocalDataJs(), cleanProjects());
       const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: "text/javascript" })); a.download = "data.js"; a.click();
-      status("data.js скачан: положите его в папку js/ проекта. Новые картинки положите в assets/works/ вручную.", "ok");
+      status("data.js скачан: положите его в папку js/ проекта, картинки — в assets/works/. Перед публикацией запустите python3 build_seo.py.", "ok");
     } catch (e) { status("Ошибка: " + e.message, "err"); }
   });
   $("#resetBtn").addEventListener("click", () => {
@@ -492,7 +492,7 @@
       state.projects = projects; state.base = clone(projects); base = clone(projects); state.images = {};
       if (remote) { try { localStorage.setItem(PENDING, JSON.stringify({ hash: hash(projects), until: Date.now() + 4 * 60 * 1000 })); } catch (er) {} }
       save(); render();
-      status(remote ? `Сохранено (${j.count} кейсов). Изменения уже на сайте.` : `Сохранено в js/data.js (${j.count} кейсов). Сообщите Claude — он проверит и обновит сайт.`, "ok");
+      status(remote ? `Сохранено (${j.count} кейсов). Для обновления статических страниц запустите сборку перед публикацией.` : `Сохранено в js/data.js (${j.count} кейсов). Перед публикацией проверьте сборку: python3 build_seo.py.`, "ok");
     } catch (e) { status("Ошибка сохранения: " + e.message, "err"); }
   });
   detectMode();

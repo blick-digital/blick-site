@@ -10,7 +10,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Кейс — BLICK</title>
   <meta name="description" content="Кейс студии BLICK.">
+  <meta name="robots" content="noindex">
+  <!-- seo:start --><!-- seo:end -->
   <meta name="theme-color" content="#F7F7F7">
+  <link rel="icon" href="assets/svg/favicon.svg" type="image/svg+xml" sizes="any">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -24,10 +27,10 @@
     <div class="overlay__inner">
       <span class="mono overlay__tag">[ навигация ]</span>
       <ul class="overlay__list">
-        <li><a href="index.html"><span class="mono">01</span>Главная</a></li>
-        <li><a href="index.html#services"><span class="mono">02</span>Услуги</a></li>
+        <li><a href="./"><span class="mono">01</span>Главная</a></li>
+        <li><a href="./#services"><span class="mono">02</span>Услуги</a></li>
         <li><a href="works.html"><span class="mono">03</span>Кейсы</a></li>
-        <li><a href="index.html#contact"><span class="mono">04</span>Контакты</a></li>
+        <li><a href="./#contact"><span class="mono">04</span>Контакты</a></li>
       </ul>
       <div class="overlay__foot mono">
         <a href="mailto:blickdesign@yandex.ru">blickdesign@yandex.ru</a>
@@ -38,19 +41,20 @@
 
   <header class="page-head" id="top">
     <div class="hero__brand">
-      <a href="index.html" class="logo">(BLICK)</a>
+      <a href="./" class="logo">(BLICK)</a>
       <span class="mono tag">[ v.01b ]</span>
     </div>
     <nav class="hero__nav" aria-label="Основное меню">
-      <a href="index.html" class="navlink">главная <span class="arr">↗</span></a>
-      <a href="index.html#services" class="navlink">услуги <span class="arr">↗</span></a>
+      <a href="./" class="navlink">главная <span class="arr">↗</span></a>
+      <a href="./#services" class="navlink">услуги <span class="arr">↗</span></a>
       <a href="works.html" class="navlink" aria-current="page">кейсы <span class="arr">↗</span></a>
-      <a href="index.html#contact" class="navlink">контакты <span class="arr">↗</span></a>
+      <a href="./#contact" class="navlink">контакты <span class="arr">↗</span></a>
     </nav>
   </header>
 
-  <main class="case" data-case>
+  <main class="case" data-case data-case-preview>
     <p class="case__loading mono">Загрузка…</p>
+    <noscript><p class="case__loading"><a href="works.html">Открыть список кейсов BLICK</a></p></noscript>
   </main>
 
   <footer class="footer" id="contact">

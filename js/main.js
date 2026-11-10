@@ -3,7 +3,7 @@ if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 if (!location.hash) window.scrollTo(0, 0);
 
 // Просмотр черновика из админки: ?preview=1 подменяет данные кейсов тем, что сохранено в браузере
-if (/[?&]preview=1/.test(location.search)) {
+if (document.querySelector("[data-case-preview]") && new URLSearchParams(location.search).get("preview") === "1") {
   try {
     const d = JSON.parse(localStorage.getItem("blick-draft"));
     if (d && d.projects) {
@@ -120,7 +120,7 @@ if (/[?&]preview=1/.test(location.search)) {
       setTimeout(() => {                      // даём блику дойти до конца слова
         boot.classList.add("is-done");
         document.body.classList.remove("is-booting");
-        scrollTo(0, 0);
+        if (!location.hash) scrollTo(0, 0);
         bootResolve();
         setTimeout(() => boot.remove(), 800);
         if (/[?&]debug=1/.test(location.search)) {
@@ -199,35 +199,12 @@ if (/[?&]preview=1/.test(location.search)) {
     new IntersectionObserver(([e]) => fab.classList.toggle("is-visible", !e.isIntersecting)).observe(topNav);
   } else fab.classList.add("is-visible");
 
-  /* ---------- Карточка проекта ---------- */
-  const caption = (p) => (p.format || CATEGORIES[p.category]) + (p.year ? ` · ${p.year}` : "");
-  const url = (path) => encodeURI(path); // пути с пробелами, скобками и кириллицей
-  const plate = (p) => `
-    <div class="wcard__plate">
-      <h3>${esc(p.title)}</h3>
-      <p>${esc(p.desc)}</p>
-      <div class="wcard__tags">${p.tags.map((t) => `<span>${esc(t)}</span>`).join("")}</div>
-      <a class="wcard__more mono" href="case.html?p=${esc(p.slug)}">Смотреть кейс <span class="arr">↗</span></a>
-    </div>`;
-  const caseUrl = (card) => { const a = card.querySelector(".wcard__more"); return a ? a.getAttribute("href") : null; };
+  /* ---------- Взаимодействие с готовыми карточками ---------- */
+  const url = (path) => encodeURI(path); // для предпросмотра черновика
+  const caseUrl = (card) => card.querySelector(".wcard__more")?.getAttribute("href");
 
-  /* ---------- Главная: 5 избранных карточек ---------- */
   const row = $("[data-featured]");
-  if (row && window.PROJECTS) {
-    const list = PROJECTS.filter((p) => p.featured).slice(0, 5);
-    row.innerHTML = list.map((p, i) => `
-      <article class="wcard" tabindex="0" aria-label="${esc(p.title)}">
-        <div class="wcard__media">
-          ${projectVisual(p)}
-          <span class="wcard__num">${pad(i + 1)}</span>
-          ${plate(p)}
-        </div>
-        <div class="wcard__caption">
-          <strong>${esc(p.title)}</strong>
-          <span>${esc(caption(p))}</span>
-        </div>
-      </article>`).join("");
-
+  if (row) {
     const cards = $$(".wcard", row);
     const setActive = (card) => {
       cards.forEach((c) => c.classList.toggle("is-active", c === card));
@@ -247,34 +224,13 @@ if (/[?&]preview=1/.test(location.search)) {
 
   /* ---------- Страница «Кейсы» ---------- */
   const grid = $("[data-grid]");
-  if (grid && window.PROJECTS) {
-    grid.innerHTML = PROJECTS.map((p, i) => `
-      <article class="gcard" tabindex="0" data-cat="${p.category}">
-        <div class="wcard__media">
-          ${projectVisual(p)}
-          <span class="wcard__num">${pad(i + 1)}</span>
-          ${plate(p)}
-        </div>
-        <div class="gcard__caption">
-          <strong>${esc(p.title)}</strong>
-          <span>${esc(caption(p))}</span>
-        </div>
-      </article>`).join("");
-
+  if (grid) {
     // клик по карточке открывает кейс (на телефоне — по ссылке «Смотреть кейс» в раскрытой плашке)
     $$(".gcard", grid).forEach((card) => card.addEventListener("click", (e) => {
       if (canHover && !e.target.closest("a")) { const u = caseUrl(card); if (u) location.href = u; }
     }));
 
-    const count = $("[data-count-all]");
-    if (count) count.textContent = `[ ${pad(PROJECTS.length)} ]`;
-
     const filters = $("[data-filters]");
-    const cats = [["all", "Все"], ...Object.entries({ design: "Дизайн", web: "Сайты", app: "Приложения", video: "Видео / AI" })];
-    filters.innerHTML = cats.filter(([k]) => k === "all" || PROJECTS.some((p) => p.category === k)).map(([k, label]) => {
-      const n = k === "all" ? PROJECTS.length : PROJECTS.filter((p) => p.category === k).length;
-      return `<button class="filter${k === "all" ? " is-on" : ""}" type="button" data-f="${k}" aria-pressed="${k === "all"}">${label}<sup>${n}</sup></button>`;
-    }).join("");
     filters.addEventListener("click", (e) => {
       const btn = e.target.closest(".filter");
       if (!btn) return;
@@ -286,12 +242,15 @@ if (/[?&]preview=1/.test(location.search)) {
 
   /* ---------- Страница кейса: case.html?p=<slug> ---------- */
   const caseRoot = $("[data-case]");
-  if (caseRoot && window.PROJECTS) {
-    const slug = new URLSearchParams(location.search).get("p");
+  if (caseRoot?.hasAttribute("data-case-preview") && window.PROJECTS) {
+    const params = new URLSearchParams(location.search);
+    const slug = params.get("p");
     const idx = PROJECTS.findIndex((p) => p.slug === slug);
     const p = PROJECTS[idx];
     if (!p) {
       caseRoot.innerHTML = `<a href="works.html" class="back mono">← все кейсы</a><h1 class="display">КЕЙС НЕ НАЙДЕН</h1>`;
+    } else if (params.get("preview") !== "1" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      location.replace(`cases/${slug}/${location.protocol === "file:" ? "index.html" : ""}${location.hash}`);
     } else {
       document.title = `${p.title} — BLICK`;
       const blocks = p.blocks && p.blocks.length ? p.blocks : [
@@ -354,21 +313,23 @@ if (/[?&]preview=1/.test(location.search)) {
         </header>
         <p class="case__lead">${esc(p.desc)}</p>
         ${blocks.map(renderBlock).join("")}
-        <a class="case__next" href="case.html?p=${esc(next.slug)}">
+        <a class="case__next" href="case.html?p=${encodeURIComponent(next.slug)}&amp;preview=1">
           <span class="mono">следующий кейс</span>
           <strong class="display">${esc(next.title)} <span class="arr">↗</span></strong>
         </a>`;
-      // пропорции фото в рядах уточняем по реальному размеру файла (если в данных их нет или они неточные)
-      $$(".case__row img", caseRoot).forEach((img) => {
-        const fix = () => { if (!img.naturalWidth) return; const ar = img.naturalWidth / img.naturalHeight; if (Math.abs(ar - parseFloat(img.dataset.ar)) > 0.01) { img.dataset.ar = ar; img.style.flexGrow = ar; img.style.aspectRatio = ar; } };
-        if (img.complete) fix(); else img.addEventListener("load", fix, { once: true });
-      });
-      // ролики играют, пока видны на экране
-      const vids = $$("video", caseRoot);
-      if (vids.length && "IntersectionObserver" in window) {
-        const vio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { const pr = e.target.play(); if (pr && pr.catch) pr.catch(() => {}); } else e.target.pause(); }), { threshold: 0.35 });
-        vids.forEach((v) => vio.observe(v));
-      }
+    }
+  }
+  if (caseRoot) {
+    // пропорции фото в рядах уточняем по реальному размеру файла (если в данных их нет или они неточные)
+    $$(".case__row img", caseRoot).forEach((img) => {
+      const fix = () => { if (!img.naturalWidth) return; const ar = img.naturalWidth / img.naturalHeight; if (Math.abs(ar - parseFloat(img.dataset.ar)) > 0.01) { img.dataset.ar = ar; img.style.flexGrow = ar; img.style.aspectRatio = ar; } };
+      if (img.complete) fix(); else img.addEventListener("load", fix, { once: true });
+    });
+    // ролики играют, пока видны на экране
+    const vids = $$("video", caseRoot);
+    if (vids.length && "IntersectionObserver" in window) {
+      const vio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { const pr = e.target.play(); if (pr && pr.catch) pr.catch(() => {}); } else e.target.pause(); }), { threshold: 0.35 });
+      vids.forEach((v) => vio.observe(v));
     }
   }
 
@@ -388,6 +349,7 @@ if (/[?&]preview=1/.test(location.search)) {
       });
     }, { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
     revealEls.forEach((el) => io.observe(el));
+    document.documentElement.classList.add("reveal-ready");
   }
 
   /* ---------- Счётчики ---------- */

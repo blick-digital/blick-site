@@ -155,7 +155,7 @@ html.js .boot {
   -webkit-text-fill-color: transparent;
 }
 .boot.is-done { opacity: 0; pointer-events: none; }
-body.is-booting { overflow: hidden; }
+html.js body.is-booting { overflow: hidden; }
 /* пока висит заставка, первый экран не дёргается анимацией появления */
 body.is-booting .hero__top > *, body.is-booting .hero__bottom > * { transition: none; }
 
@@ -589,13 +589,13 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   background: var(--line-2);
 }
 
-/* Появление по скроллу */
-[data-reveal] {
+/* :where сохраняет приоритет переходов отдельных блоков, например раскрытия услуг. */
+:where(.reveal-ready) [data-reveal] {
   opacity: 0; transform: translateY(28px);
   transition: opacity 1s var(--ease), transform 1s var(--ease);
   transition-delay: var(--d, 0s);
 }
-[data-reveal].in { opacity: 1; transform: none; }
+:where(.reveal-ready) [data-reveal].in { opacity: 1; transform: none; }
 
 /* =========================================================
    УСЛУГИ
@@ -636,6 +636,8 @@ body:not(.is-loaded) .hero__scroll { opacity: 0; }
   transition: transform .6s var(--ease), color .4s;
 }
 .svc__tags { font-size: 12px; color: var(--muted); text-align: right; }
+.services .section__head h2 { font-weight: inherit; }
+.svc__title a:focus-visible { outline-offset: 5px; }
 .svc__arr { font-size: 28px; text-align: right; transition: transform .6s var(--ease), color .4s; }
 .svc__body { grid-column: 2 / 4; align-self: stretch; overflow: hidden; min-height: 0; }
 .svc__body p { max-width: 58ch; padding-top: 18px; color: var(--muted); font-size: 16px; }
@@ -1214,7 +1216,7 @@ html.has-cursor select, html.has-cursor iframe { cursor: auto !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
   html { scroll-behavior: auto; }
-  [data-reveal] { opacity: 1; transform: none; }
+  :where(.reveal-ready) [data-reveal] { opacity: 1; transform: none; }
 }
 
 /* =========================================================
@@ -1269,6 +1271,12 @@ html.has-cursor select, html.has-cursor iframe { cursor: auto !important; }
 .case__next strong { font-size: clamp(28px, 5vw, 72px); font-weight: 500; transition: color .3s; }
 .case__next:hover strong { color: var(--accent); }
 .case__loading { padding: 0 var(--pad); color: var(--muted); }
+.case__service { margin: 0 var(--pad) clamp(28px, 4vw, 56px); }
+.service__head h1 { font-size: clamp(36px, 6vw, 96px); overflow-wrap: anywhere; }
+.service__examples { list-style: none; }
+.service__examples li { margin-bottom: 18px; }
+.service__examples a { text-decoration: underline; text-underline-offset: .2em; }
+.service__examples p { margin: 4px 0 0; }
 @media (max-width: 860px) {
   .case__text { grid-template-columns: 1fr; }
   .case__grid { grid-template-columns: 1fr; }
