@@ -85,7 +85,10 @@ def case_block(b, p, prefix):
         if not b.get("src"):
             return f'<figure class="case__banner case__banner--art">{visual({**p, "image": ""}, "")}</figure>'
         scroll = " case__single--scroll" if kind == "single" and b.get("scroll") else ""
-        return f'<figure class="case__{kind}{scroll}"><img src="{src(b["src"])}" alt="{e(b.get("alt") or title)}" loading="lazy" decoding="async"></figure>'
+        dimensions = ""
+        if b.get("width") and b.get("height"):
+            dimensions = f' width="{int(b["width"])}" height="{int(b["height"])}"'
+        return f'<figure class="case__{kind}{scroll}"><img src="{src(b["src"])}" alt="{e(b.get("alt") or title)}"{dimensions} loading="lazy" decoding="async"></figure>'
     if kind == "grid":
         images = b.get("images") or []
         if b.get("art") or not images:

@@ -68,8 +68,8 @@ window.PROJECTS = [
         "type": "grid",
         "images": [
           "assets/кейсы/Fujifilm X100VI (сайт)/macbook.jpg",
-          "assets/кейсы/Fujifilm X100VI (сайт)/page.jpg",
-          "assets/кейсы/Fujifilm X100VI (сайт)/phone.jpg"
+          "assets/кейсы/Fujifilm X100VI (сайт)/page.webp",
+          "assets/кейсы/Fujifilm X100VI (сайт)/phone.webp"
         ],
         "ratios": [
           0.75,
@@ -124,16 +124,16 @@ window.PROJECTS = [
         "plain": true,
         "items": [
           {
-            "src": "assets/кейсы/Osteria Mercede (сайт)/1.jpg"
+            "src": "assets/кейсы/Osteria Mercede (сайт)/1.webp"
           },
           {
             "src": "assets/кейсы/Osteria Mercede (сайт)/video.mp4"
           },
           {
-            "src": "assets/кейсы/Osteria Mercede (сайт)/2.jpg"
+            "src": "assets/кейсы/Osteria Mercede (сайт)/2.webp"
           },
           {
-            "src": "assets/кейсы/Osteria Mercede (сайт)/3.jpg"
+            "src": "assets/кейсы/Osteria Mercede (сайт)/3.webp"
           }
         ]
       },
@@ -175,10 +175,10 @@ window.PROJECTS = [
       {
         "type": "grid",
         "images": [
-          "assets/кейсы/Hookah place (меню)/1-2.jpg",
-          "assets/кейсы/Hookah place (меню)/2-Free-A4-Brochure-Catalog-Magazine-Mockup.jpg",
-          "assets/кейсы/Hookah place (меню)/Trifold_Leaflet_Mockup_4.jpg",
-          "assets/кейсы/Hookah place (меню)/restaurant-cover-menu-mockup-on-tray-top-view.jpg"
+          "assets/кейсы/Hookah place (меню)/1-2.webp",
+          "assets/кейсы/Hookah place (меню)/2-Free-A4-Brochure-Catalog-Magazine-Mockup.webp",
+          "assets/кейсы/Hookah place (меню)/Trifold_Leaflet_Mockup_4.webp",
+          "assets/кейсы/Hookah place (меню)/restaurant-cover-menu-mockup-on-tray-top-view.webp"
         ],
         "ratios": [
           1.3999,
@@ -211,7 +211,7 @@ window.PROJECTS = [
     ],
     "art": "blob",
     "hue": "ember",
-    "image": "assets/works/covers/sakuga.jpg",
+    "image": "assets/works/covers/sakuga-special-menu.webp",
     "facts": [
       [
         "Клиент",
@@ -224,11 +224,18 @@ window.PROJECTS = [
     ],
     "blocks": [
       {
+        "type": "banner",
+        "src": "assets/кейсы/Sakuga (меню и упаковка)/special-menu.webp",
+        "alt": "Специальное меню Sakuga: обложка и разворот с блюдами",
+        "width": 3000,
+        "height": 2250
+      },
+      {
         "type": "grid",
         "images": [
           "assets/кейсы/Sakuga (меню и упаковка)/меню.jpg",
-          "assets/кейсы/Sakuga (меню и упаковка)/упаковка1.png",
-          "assets/кейсы/Sakuga (меню и упаковка)/упаковка2.png"
+          "assets/кейсы/Sakuga (меню и упаковка)/упаковка1.webp",
+          "assets/кейсы/Sakuga (меню и упаковка)/упаковка2.webp"
         ],
         "ratios": [
           1.3333,
@@ -314,13 +321,13 @@ window.PROJECTS = [
       {
         "type": "grid",
         "images": [
-          "assets/кейсы/Баристо (меню и айдентика)/breakfast-cafe-mockup-008.jpg",
-          "assets/кейсы/Баристо (меню и айдентика)/menu.jpg",
-          "assets/кейсы/Баристо (меню и айдентика)/menu2.jpg",
-          "assets/кейсы/Баристо (меню и айдентика)/menu3.jpg",
-          "assets/кейсы/Баристо (меню и айдентика)/Стакан1.jpg",
-          "assets/кейсы/Баристо (меню и айдентика)/Стакан2.jpg",
-          "assets/кейсы/Баристо (меню и айдентика)/Стакан3.jpg",
+          "assets/кейсы/Баристо (меню и айдентика)/breakfast-cafe-mockup-008.webp",
+          "assets/кейсы/Баристо (меню и айдентика)/menu.webp",
+          "assets/кейсы/Баристо (меню и айдентика)/menu2.webp",
+          "assets/кейсы/Баристо (меню и айдентика)/menu3.webp",
+          "assets/кейсы/Баристо (меню и айдентика)/Стакан1.webp",
+          "assets/кейсы/Баристо (меню и айдентика)/Стакан2.webp",
+          "assets/кейсы/Баристо (меню и айдентика)/Стакан3.webp",
           "assets/кейсы/Баристо (меню и айдентика)/Стакан4.jpeg",
           "assets/кейсы/Баристо (меню и айдентика)/Стакан5.jpeg"
         ],
@@ -419,7 +426,7 @@ window.PROJECTS = [
         "plain": true,
         "items": [
           {
-            "src": "assets/кейсы/Якутск Сити Холл (сайт)/Обложка.jpg"
+            "src": "assets/кейсы/Якутск Сити Холл (сайт)/Обложка.webp"
           },
           {
             "src": "assets/кейсы/Якутск Сити Холл (сайт)/video-1.mp4",
@@ -480,13 +487,13 @@ window.PROJECTS = [
             "src": "assets/кейсы/YES (моушн-дизайн)/video.mp4#t=5"
           },
           {
-            "src": "assets/кейсы/YES (моушн-дизайн)/1.jpg"
+            "src": "assets/кейсы/YES (моушн-дизайн)/1.webp"
           },
           {
             "src": "assets/кейсы/YES (моушн-дизайн)/2.jpg"
           },
           {
-            "src": "assets/кейсы/YES (моушн-дизайн)/3.jpg"
+            "src": "assets/кейсы/YES (моушн-дизайн)/3.webp"
           }
         ]
       },
@@ -530,9 +537,9 @@ window.PROJECTS = [
       {
         "type": "grid",
         "images": [
-          "assets/кейсы/NuaHule (меню)/1.jpg",
-          "assets/кейсы/NuaHule (меню)/2.jpg",
-          "assets/кейсы/NuaHule (меню)/3.jpg"
+          "assets/кейсы/NuaHule (меню)/1.webp",
+          "assets/кейсы/NuaHule (меню)/2.webp",
+          "assets/кейсы/NuaHule (меню)/3.webp"
         ],
         "ratios": [
           0.912,
@@ -577,7 +584,7 @@ window.PROJECTS = [
     "blocks": [
       {
         "type": "single",
-        "src": "assets/кейсы/Season (лого и айдентика)/concept.jpg",
+        "src": "assets/кейсы/Season (лого и айдентика)/concept.webp",
         "alt": "Season — логотип и айдентика"
       },
       {
@@ -617,10 +624,10 @@ window.PROJECTS = [
       {
         "type": "grid",
         "images": [
-          "assets/кейсы/Крыша (афиши)/флаер1.jpg",
-          "assets/кейсы/Крыша (афиши)/флаер2.png",
+          "assets/кейсы/Крыша (афиши)/флаер1.webp",
+          "assets/кейсы/Крыша (афиши)/флаер2.webp",
           "assets/кейсы/Крыша (афиши)/флаер3.jpg",
-          "assets/кейсы/Крыша (афиши)/флаер4.jpg"
+          "assets/кейсы/Крыша (афиши)/флаер4.webp"
         ],
         "ratios": [
           1.4993,
@@ -704,8 +711,8 @@ window.PROJECTS = [
       {
         "type": "grid",
         "images": [
-          "assets/кейсы/Мармерад кофейня (лого)/лого.jpg",
-          "assets/кейсы/Мармерад кофейня (лого)/лого2.jpg"
+          "assets/кейсы/Мармерад кофейня (лого)/лого.webp",
+          "assets/кейсы/Мармерад кофейня (лого)/лого2.webp"
         ],
         "ratios": [
           1.5158,
@@ -750,13 +757,13 @@ window.PROJECTS = [
       {
         "type": "grid",
         "images": [
-          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 1.jpg",
-          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 2.jpg",
-          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 3.jpg",
-          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 4.jpg",
-          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 5.jpg",
-          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 6.jpg",
-          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 7.jpg"
+          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 1.webp",
+          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 2.webp",
+          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 3.webp",
+          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 4.webp",
+          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 5.webp",
+          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 6.webp",
+          "assets/кейсы/алмазный марафон (лого и адентика)/лого и айдентика — стр 7.webp"
         ],
         "ratios": [
           1.4158,
@@ -771,10 +778,10 @@ window.PROJECTS = [
       {
         "type": "grid",
         "images": [
-          "assets/кейсы/алмазный марафон (лого и адентика)/концепт-лого.jpg",
-          "assets/кейсы/алмазный марафон (лого и адентика)/футболка финишера 1.png",
-          "assets/кейсы/алмазный марафон (лого и адентика)/футболка финишера 2.png",
-          "assets/кейсы/алмазный марафон (лого и адентика)/футболка финишера 3.png"
+          "assets/кейсы/алмазный марафон (лого и адентика)/концепт-лого.webp",
+          "assets/кейсы/алмазный марафон (лого и адентика)/футболка финишера 1.webp",
+          "assets/кейсы/алмазный марафон (лого и адентика)/футболка финишера 2.webp",
+          "assets/кейсы/алмазный марафон (лого и адентика)/футболка финишера 3.webp"
         ],
         "ratios": [
           1,
@@ -825,9 +832,9 @@ window.PROJECTS = [
       {
         "type": "grid",
         "images": [
-          "assets/кейсы/Gunter  баскетбол/Наружная-реклама.jpg",
-          "assets/кейсы/Gunter  баскетбол/Наружная-реклама2.jpg",
-          "assets/кейсы/Gunter  баскетбол/лого.jpg"
+          "assets/кейсы/Gunter  баскетбол/Наружная-реклама.webp",
+          "assets/кейсы/Gunter  баскетбол/Наружная-реклама2.webp",
+          "assets/кейсы/Gunter  баскетбол/лого.webp"
         ],
         "ratios": [
           1.3333,
@@ -933,12 +940,12 @@ window.PROJECTS = [
     "blocks": [
       {
         "type": "single",
-        "src": "assets/кейсы/yktrun (сайт)/Обложка.jpg",
+        "src": "assets/кейсы/yktrun (сайт)/Обложка.webp",
         "alt": "yktrun — сайт на экране"
       },
       {
         "type": "single",
-        "src": "assets/кейсы/yktrun (сайт)/1.jpg",
+        "src": "assets/кейсы/yktrun (сайт)/1.webp",
         "alt": "yktrun — страницы сайта",
         "scroll": true
       },
