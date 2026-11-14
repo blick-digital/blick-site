@@ -1312,6 +1312,12 @@ html.has-cursor select, html.has-cursor iframe { cursor: auto !important; }
   .case__row { flex-direction: column; }
   .case__row img { flex: none !important; width: 100%; }
 }
+.case__rows--two .case__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.case__rows--two .case__row img {
+  width: 100%;
+  aspect-ratio: 7 / 5;
+  object-fit: cover;
+}
 /* заглушка вместо метки Veo в правом нижнем углу роликов (plain: true в данных — без неё) */
 .case__video::after {
   content: "BLICK"; position: absolute; right: 0.5%; bottom: 1.5%; width: 9.5%; height: 6.5%;

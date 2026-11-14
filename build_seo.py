@@ -94,19 +94,22 @@ def case_block(b, p, prefix):
         if b.get("art") or not images:
             tile = f'<figure class="case__tile">{visual({**p, "image": ""}, "")}</figure>'
             return f'<div class="case__grid">{tile * 2}</div>'
+        two_columns = b.get("columns") == 2
         ratios, rows, start = b.get("ratios") or [], [], 0
         alts = b.get("alts") or []
         while start < len(images):
             left = len(images) - start
-            end = start + (2 if left == 4 else min(3, left))
+            end = start + min(2 if two_columns or left == 4 else 3, left)
             items = []
             for i in range(start, end):
                 ratio = float(ratios[i] or 1.5) if i < len(ratios) else 1.5
                 alt = alts[i] if i < len(alts) else f"{title}, изображение {i + 1}"
-                items.append(f'<img src="{src(images[i])}" alt="{e(alt)}" loading="lazy" data-ar="{ratio}" style="flex-grow:{ratio};aspect-ratio:{ratio}">')
+                sizing = "" if two_columns else f' data-ar="{ratio}" style="flex-grow:{ratio};aspect-ratio:{ratio}"'
+                items.append(f'<img src="{src(images[i])}" alt="{e(alt)}" loading="lazy"{sizing}>')
             rows.append('<div class="case__row">' + "".join(items) + "</div>")
             start = end
-        return '<div class="case__rows">' + "".join(rows) + "</div>"
+        layout = " case__rows--two" if two_columns else ""
+        return f'<div class="case__rows{layout}">' + "".join(rows) + "</div>"
     if kind == "pdf":
         ratio = float(b.get("ratio") or 842 / 595)
         css = "case__pdf case__pdf--portrait" if ratio < 1 else "case__pdf"

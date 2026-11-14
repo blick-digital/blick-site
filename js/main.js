@@ -269,11 +269,13 @@ if (document.querySelector("[data-case-preview]") && new URLSearchParams(locatio
           }
           // фото рядами по 3 (хвост — по 2), в каждом ряду одинаковая высота: ширина каждого фото пропорциональна его формату
           const n = b.images.length, sizes = [];
-          for (let k = n; k > 0;) { if (k === 4) { sizes.push(2, 2); break; } const t = Math.min(3, k); sizes.push(t); k -= t; }
+          const twoColumns = b.columns === 2;
+          for (let k = n; k > 0;) { if (k === 4) { sizes.push(2, 2); break; } const t = Math.min(twoColumns ? 2 : 3, k); sizes.push(t); k -= t; }
           let i = 0;
-          return `<div class="case__rows">${sizes.map((t) => `<div class="case__row">${b.images.slice(i, (i += t)).map((src, j) => {
+          return `<div class="case__rows${twoColumns ? " case__rows--two" : ""}">${sizes.map((t) => `<div class="case__row">${b.images.slice(i, (i += t)).map((src, j) => {
             const idx = i - t + j, ar = (b.ratios && b.ratios[idx]) || 1.5;
-            return `<img src="${esc(url(src))}" alt="${esc(p.title)}" loading="lazy" data-ar="${ar}" style="flex-grow:${ar};aspect-ratio:${ar}">`;
+            const sizing = twoColumns ? "" : ` data-ar="${ar}" style="flex-grow:${ar};aspect-ratio:${ar}"`;
+            return `<img src="${esc(url(src))}" alt="${esc(b.alts?.[idx] || p.title)}" loading="lazy"${sizing}>`;
           }).join("")}</div>`).join("")}</div>`;
         }
         if (b.type === "single") {
@@ -321,7 +323,7 @@ if (document.querySelector("[data-case-preview]") && new URLSearchParams(locatio
   }
   if (caseRoot) {
     // пропорции фото в рядах уточняем по реальному размеру файла (если в данных их нет или они неточные)
-    $$(".case__row img", caseRoot).forEach((img) => {
+    $$(".case__row img[data-ar]", caseRoot).forEach((img) => {
       const fix = () => { if (!img.naturalWidth) return; const ar = img.naturalWidth / img.naturalHeight; if (Math.abs(ar - parseFloat(img.dataset.ar)) > 0.01) { img.dataset.ar = ar; img.style.flexGrow = ar; img.style.aspectRatio = ar; } };
       if (img.complete) fix(); else img.addEventListener("load", fix, { once: true });
     });

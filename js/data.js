@@ -224,20 +224,22 @@ window.PROJECTS = [
     ],
     "blocks": [
       {
-        "type": "banner",
-        "src": "assets/кейсы/Sakuga (меню и упаковка)/special-menu.webp",
-        "alt": "Специальное меню Sakuga: обложка и разворот с блюдами",
-        "width": 3000,
-        "height": 2250
-      },
-      {
         "type": "grid",
+        "columns": 2,
         "images": [
+          "assets/кейсы/Sakuga (меню и упаковка)/special-menu.webp",
           "assets/кейсы/Sakuga (меню и упаковка)/меню.jpg",
           "assets/кейсы/Sakuga (меню и упаковка)/упаковка1.webp",
           "assets/кейсы/Sakuga (меню и упаковка)/упаковка2.webp"
         ],
+        "alts": [
+          "Специальное меню Sakuga: обложка и разворот с блюдами",
+          "Меню Sakuga",
+          "Упаковка Sakuga, первый вариант",
+          "Упаковка Sakuga, второй вариант"
+        ],
         "ratios": [
+          1.3333,
           1.3333,
           1.5029,
           1.4002
